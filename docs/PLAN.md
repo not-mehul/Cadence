@@ -1,6 +1,6 @@
 # Cadence — Product & Implementation Plan
 
-Cadence is a simple, private period-tracking companion app. This document covers:
+Cadence is a simple, private period-tracking companion app **for Android only**. This document covers:
 
 1. [Product principles](#1-product-principles)
 2. [Feature inventory](#2-feature-inventory): what a good period tracker offers, and which ones Cadence will build
@@ -102,7 +102,9 @@ Priority key: **P0** = MVP, must have · **P1** = core, expected by users · **P
 | Delete all data | P0 | |
 | No third-party analytics or ads | P0 | |
 | Plain-language privacy screen | P1 | Explains exactly what is stored and where. |
-| Discreet app icon and name option | P3 | |
+| Block screenshots and the recents preview (`FLAG_SECURE`) | P1 | |
+| Keep data out of Android cloud backup | P0 | The app turns Android Auto Backup off. The encryption key can't be restored on another device anyway, so a cloud copy would be useless and would also be a leak. |
+| Discreet app icon and name option | P3 | Done with launcher `activity-alias` entries. |
 
 ### 2.8 Data portability
 | Feature | Priority | Notes |
@@ -128,12 +130,12 @@ Priority key: **P0** = MVP, must have · **P1** = core, expected by users · **P
 | Feature | Priority | Notes |
 |---|---|---|
 | Onboarding (last period, typical lengths, goal) | P0 | Every question is skippable, with sensible defaults. |
-| Light and dark theme | P1 | |
-| Accessibility: screen-reader labels, dynamic type, 44pt touch targets, WCAG AA contrast | P1 | |
+| Light and dark theme (Material 3), with an optional Material You dynamic colour | P1 | |
+| Accessibility: TalkBack labels, font scaling up to 200%, 48dp touch targets, WCAG AA contrast | P1 | |
 | Educational cards per phase | P2 | Short, factual, sourced. |
 | Localization (dates, first day of week, translations) | P2 | |
-| Home-screen widget (cycle day / next period) | P3 | |
-| Apple Health / Android Health Connect sync | P3 | |
+| Home-screen widget (cycle day / next period) | P3 | Built with Jetpack Glance. |
+| Health Connect sync (menstruation, cervical mucus, BBT, ovulation tests) | P3 | Health Connect has native record types for all of these. |
 | Partner sharing (read-only) | P3 | Needs a backend, so it is deferred. |
 
 ### 2.11 Explicit non-goals
@@ -145,39 +147,50 @@ Priority key: **P0** = MVP, must have · **P1** = core, expected by users · **P
 
 ## 3. Recommended architecture
 
-**Recommendation: React Native with Expo (TypeScript), local-first, no backend.**
+**Recommendation: a native Android app in Kotlin with Jetpack Compose, local-first, no backend.**
+
+Since the app only targets Android, a cross-platform framework adds nothing and costs us direct access to the platform. Going native gives first-class access to the Android Keystore, BiometricPrompt, notification scheduling, Glance widgets and Health Connect, all without bridging layers.
 
 | Concern | Choice | Why |
 |---|---|---|
-| App framework | Expo (managed workflow, Expo Router) | One TypeScript codebase for iOS and Android, with a web build for quick demos. |
-| Storage | `expo-sqlite` with SQLCipher enabled | Relational queries for stats, encrypted at rest. |
-| ORM / migrations | Drizzle ORM (`drizzle-orm/expo-sqlite`) | Typed schema and versioned migrations from day one. |
-| Encryption key | Random 256-bit key in `expo-secure-store` (Keychain / Keystore) | The key never leaves secure hardware-backed storage. |
-| State | Zustand for UI state; queries read from SQLite | Small and simple. |
-| Notifications | `expo-notifications`, local scheduled notifications only | No push server, so nothing leaves the device. |
-| App lock | `expo-local-authentication` plus a PIN fallback | |
-| Charts | `victory-native` or `react-native-svg` hand-rolled bars | |
-| Dates | `date-fns`; days stored as `YYYY-MM-DD` local strings | Avoids timezone and DST bugs. A "day" is a calendar date, not an instant. |
-| Testing | Jest for the domain logic, React Native Testing Library for components, Maestro for E2E flows | |
-| CI | GitHub Actions: typecheck, lint, unit tests | |
+| Language / UI | Kotlin, Jetpack Compose, Material 3 | The current standard Android toolkit. |
+| SDK levels | `minSdk 26` (Android 8.0), `targetSdk` = latest that Google Play requires | API 26 covers about 97% of active devices and gives `java.time` without desugaring. |
+| App structure | Single activity, Navigation Compose, MVVM (`ViewModel` + `StateFlow`) | Simple, idiomatic, and easy to test. |
+| Dependency injection | Hilt | |
+| Async | Kotlin Coroutines + Flow | Room queries come back as `Flow`, so the UI updates live. |
+| Storage | Room on SQLCipher (`net.zetetic:sqlcipher-android` through `SupportOpenHelperFactory`) | Typed queries, versioned migrations, encrypted at rest. |
+| Encryption key | A random 256-bit database passphrase, wrapped by an AES-GCM key held in the **Android Keystore** and stored in DataStore | The Keystore key never leaves secure hardware. `EncryptedSharedPreferences` is deprecated, so we don't use it. |
+| Settings | Jetpack DataStore (Proto or Preferences) | |
+| Notifications | `AlarmManager` (`setAndAllowWhileIdle`) for timed reminders, plus `WorkManager` for the daily rescheduling pass | Everything is local, with no push server. The app re-arms alarms on boot, on time or timezone changes, and after app updates. |
+| App lock | `androidx.biometric` (`BiometricPrompt`, with device credential as the fallback) plus an optional app PIN | |
+| Calendar UI | `com.kizitonwose.calendar:compose`, or a custom `LazyVerticalGrid` | |
+| Charts | Vico (Compose charts) or a hand-drawn Compose `Canvas` | |
+| PDF report | `android.graphics.pdf.PdfDocument`, shared through the share sheet | No third-party library needed. |
+| Export / import | Storage Access Framework (`CreateDocument` / `OpenDocument`) | The user picks the location, so no storage permission is needed. |
+| Dates | `java.time.LocalDate`, stored in Room as `epochDay: Long` | Avoids timezone and DST bugs. A "day" is a calendar date, not an instant. |
+| Testing | JUnit 5 + kotlin.test for the domain module; Turbine for Flows; in-memory Room tests; Compose UI tests; Robolectric | |
+| Quality | ktlint, detekt, Android Lint | |
+| CI | GitHub Actions: `./gradlew lint detekt test assembleDebug` | |
 
-**Alternative considered: an installable PWA (React + IndexedDB).** It is simpler to ship, but it can't reliably schedule *local* notifications (period reminders would need a push server, which breaks the no-server rule), and it gets no hardware-backed key storage or biometrics. If phone-native features matter, Expo is the better fit.
-
-### Code layout
+### Module layout
 ```
-app/                 # Expo Router screens (today, calendar, insights, settings, onboarding)
-src/
-  domain/            # PURE TypeScript, no React/Expo imports — fully unit-tested
-    cycles.ts        #   derive periods & cycles from day logs
-    predict.ts       #   next period, ovulation, fertile window, confidence
-    flags.ts         #   health-pattern flags
-    phases.ts        #   cycle-day → phase
-  data/              # Drizzle schema, migrations, repositories
-  features/          # UI feature modules (logging, calendar, insights, reminders, lock)
-  ui/                # design system: tokens, buttons, chips, sheets
-  lib/               # date utils, notifications, secure-store wrapper
+:app                  # Android application: Activity, navigation, Hilt setup, theme
+:core:domain          # PURE Kotlin/JVM module (no Android dependency) — fully unit-tested
+    cycles/           #   derive periods & cycles from day logs
+    predict/          #   next period, ovulation, fertile window, confidence
+    flags/            #   health-pattern flags
+    phases/           #   cycle-day → phase
+:core:data            # Room entities, DAOs, migrations, SQLCipher, Keystore, DataStore, repositories
+:core:ui              # design system: theme, tokens, shared composables
+:feature:onboarding
+:feature:today
+:feature:calendar
+:feature:log          # the daily log bottom sheet
+:feature:insights
+:feature:settings     # incl. export/import, lock, reminders config
+:feature:reminders    # alarm scheduling, receivers, notification channels
 ```
-The key rule: **all cycle math lives in `src/domain` as pure functions.** That keeps it easy to test exhaustively and independent of the UI and storage.
+The key rule: **all cycle maths lives in `:core:domain`, a plain Kotlin JVM module.** Gradle itself stops it from importing Android code, so the logic stays pure, fast to test, and independent of the UI and storage.
 
 ---
 
@@ -185,73 +198,83 @@ The key rule: **all cycle math lives in `src/domain` as pure functions.** That k
 
 The **source of truth is the per-day log.** Periods and cycles are *derived*, not stored, so editing any day keeps everything consistent automatically.
 
-```ts
-// A calendar date in the user's local timezone, e.g. "2026-11-08"
-type LocalDate = string;
+```kotlin
+// Domain types (in :core:domain). Days are java.time.LocalDate; Room stores them as epochDay.
 
-type Flow = 'spotting' | 'light' | 'medium' | 'heavy';
+enum class Flow { SPOTTING, LIGHT, MEDIUM, HEAVY }
+enum class Mucus { DRY, STICKY, CREAMY, WATERY, EGG_WHITE }
+enum class SexActivity { NONE, PROTECTED, UNPROTECTED }
+enum class TestResult { NEGATIVE, POSITIVE }
 
-interface DayLog {
-  date: LocalDate;              // primary key
-  flow?: Flow;                  // presence of light/medium/heavy = period day
-  painLevel?: number;           // 0–10
-  energy?: 1 | 2 | 3 | 4 | 5;
-  sleep?: 1 | 2 | 3 | 4 | 5;
-  stress?: 1 | 2 | 3 | 4 | 5;
-  mucus?: 'dry' | 'sticky' | 'creamy' | 'watery' | 'eggwhite';
-  sex?: 'none' | 'protected' | 'unprotected';
-  bbtCelsius?: number;
-  weightKg?: number;
-  lhTest?: 'negative' | 'positive';
-  pregnancyTest?: 'negative' | 'positive';
-  note?: string;
-  updatedAt: string;            // ISO timestamp, for future sync/merge
-}
+data class DayLog(
+    val date: LocalDate,                // primary key
+    val flow: Flow? = null,             // LIGHT/MEDIUM/HEAVY = period day
+    val painLevel: Int? = null,         // 0–10
+    val energy: Int? = null,            // 1–5
+    val sleep: Int? = null,             // 1–5
+    val stress: Int? = null,            // 1–5
+    val mucus: Mucus? = null,
+    val sex: SexActivity? = null,
+    val bbtCelsius: Double? = null,
+    val weightKg: Double? = null,
+    val lhTest: TestResult? = null,
+    val pregnancyTest: TestResult? = null,
+    val note: String? = null,
+    val updatedAt: Instant,             // for future sync/merge
+)
 
-interface TagDefinition {        // symptoms, moods, custom tags
-  id: string;
-  kind: 'symptom' | 'mood' | 'custom';
-  label: string;
-  builtIn: boolean;
-  hidden: boolean;
-}
+enum class TagKind { SYMPTOM, MOOD, CUSTOM }
 
-interface DayTag {               // many-to-many: which tags on which day
-  date: LocalDate;
-  tagId: string;
-  severity?: 1 | 2 | 3;          // mild / moderate / severe
-}
+data class TagDefinition(               // symptoms, moods, custom tags
+    val id: String,
+    val kind: TagKind,
+    val label: String,                  // string-resource key for built-ins (localizable)
+    val builtIn: Boolean,
+    val hidden: Boolean,
+)
 
-interface Medication {
-  id: string;
-  name: string;
-  kind: 'pill' | 'patch' | 'ring' | 'other';
-  schedule: { type: 'daily' | 'weekly' | 'monthly'; time: string /* "21:00" */ };
-  active: boolean;
-}
+data class DayTag(                      // many-to-many: which tags on which day
+    val date: LocalDate,
+    val tagId: String,
+    val severity: Int? = null,          // 1 mild, 2 moderate, 3 severe
+)
 
-interface MedicationDose { medicationId: string; date: LocalDate; taken: boolean; }
+enum class MedKind { PILL, PATCH, RING, OTHER }
+enum class Recurrence { DAILY, WEEKLY, MONTHLY }
 
-interface Settings {
-  goal: 'track' | 'birth_control' | 'ttc' | 'pregnant' | 'perimenopause';
-  defaultCycleLength: number;   // 28 if unknown
-  defaultPeriodLength: number;  // 5 if unknown
-  lutealPhaseLength: number;    // 14 default; user-adjustable (or learned from BBT)
-  firstDayOfWeek: 0 | 1;
-  hiddenCategories: string[];
-  reminders: ReminderSettings;
-  lock: { enabled: boolean; biometrics: boolean };
-  theme: 'system' | 'light' | 'dark';
-  onboardingComplete: boolean;
-  schemaVersion: number;
-}
+data class Medication(
+    val id: String,
+    val name: String,
+    val kind: MedKind,
+    val recurrence: Recurrence,
+    val time: LocalTime,                // e.g. 21:00
+    val active: Boolean,
+)
 
-// Optional: user marks a cycle as unusual (illness, travel, postpartum…) so
-// it's excluded from predictions.
-interface CycleAnnotation { startDate: LocalDate; excludeFromPredictions: boolean; reason?: string; }
+data class MedicationDose(val medicationId: String, val date: LocalDate, val taken: Boolean)
+
+enum class Goal { TRACK, BIRTH_CONTROL, TTC, PREGNANT, PERIMENOPAUSE }
+
+data class Settings(                    // stored in DataStore, not Room
+    val goal: Goal = Goal.TRACK,
+    val defaultCycleLength: Int = 28,
+    val defaultPeriodLength: Int = 5,
+    val lutealPhaseLength: Int = 14,    // user-adjustable, or learned from BBT/LH
+    val firstDayOfWeek: DayOfWeek = DayOfWeek.MONDAY, // default from locale
+    val hiddenCategories: Set<String> = emptySet(),
+    val reminders: ReminderSettings = ReminderSettings(),
+    val lockEnabled: Boolean = false,
+    val theme: ThemeMode = ThemeMode.SYSTEM,
+    val dynamicColor: Boolean = false,
+    val onboardingComplete: Boolean = false,
+)
+
+// Optional: the user marks a cycle as unusual (illness, travel, postpartum…)
+// so it's left out of predictions.
+data class CycleAnnotation(val startDate: LocalDate, val excludeFromPredictions: Boolean, val reason: String?)
 ```
 
-**Deriving periods:** consecutive days with flow `light | medium | heavy` form a period. A gap of ≤ 1 day without flow is bridged. Spotting alone never *starts* a period.
+**Deriving periods:** consecutive days with flow `LIGHT | MEDIUM | HEAVY` form a period. A gap of ≤ 1 day without flow is bridged. Spotting alone never *starts* a period.
 **Deriving cycles:** a cycle runs from one period's start to the day before the next period's start. The current cycle is open-ended.
 
 ---
@@ -298,21 +321,23 @@ If today is past `nextStart + rangeHigh` with no flow logged, the state becomes 
 - Pain level ≥ 7 on multiple period days across 3+ cycles
 
 ### 5.7 Testing strategy
-Table-driven unit tests with fixture histories: perfectly regular 28-day cycles, irregular cycles, a single cycle, no data, outliers, an excluded cycle, DST boundaries, leap years, a late period, an ongoing period, and spotting-only days. Target **100% branch coverage of `src/domain`**.
+Table-driven unit tests with fixture histories: perfectly regular 28-day cycles, irregular cycles, a single cycle, no data, outliers, an excluded cycle, DST boundaries, leap years, a late period, an ongoing period, and spotting-only days. These run as plain JVM tests (no emulator) in milliseconds. Target **100% branch coverage of `:core:domain`**, measured with Kover.
 
 ---
 
 ## 6. Screens & UX
 
 ```
-┌─ Tab bar ───────────────────────────────────────────┐
+┌─ Material 3 NavigationBar ──────────────────────────┐
 │  Today   │   Calendar   │   Insights   │   Settings │
 └─────────────────────────────────────────────────────┘
 ```
 
+The app supports edge-to-edge display and predictive back, and adapts to tablets and foldables with a `NavigationRail` on wide screens.
+
 1. **Onboarding**: welcome and privacy promise → last period start → typical cycle and period length ("I don't know" allowed) → goal → optional app lock → done.
 2. **Today**: a large cycle ring showing cycle day N of ~M with the current phase highlighted; the headline ("Period in 4 days", "Day 2 of period", "3 days late"); a primary action button that changes with context ("Period started" / "Period ended" / "Log today"); chips for what's already logged today; and a short phase card.
-3. **Log sheet** (bottom sheet, opened from Today or any calendar day): sections for Flow, Symptoms, Mood, Body (pain, energy, sleep, stress), Sex, Discharge, Tests, Meds, and Notes. Sections are collapsible, the user can hide them, and changes save automatically.
+3. **Log sheet** (Material 3 `ModalBottomSheet`, opened from Today or any calendar day): sections for Flow, Symptoms, Mood, Body (pain, energy, sleep, stress), Sex, Discharge, Tests, Meds, and Notes. Sections are collapsible, the user can hide them, and changes save automatically.
 4. **Calendar**: month grid, swipe between months. Legend:
    - Solid fill = logged period
    - Dashed outline = predicted period
@@ -334,14 +359,16 @@ Each phase ends with a **working, shippable app**. Phases are sized for one deve
 
 ### Phase 0: Foundation
 **Goal:** the skeleton everything else builds on.
-- Expo + TypeScript + Expo Router project; ESLint, Prettier and strict `tsconfig`.
-- Design tokens (colours, spacing, type scale, light and dark), plus base components: Button, Chip, Card, BottomSheet, SegmentedControl.
-- Encrypted SQLite (SQLCipher) with a key in SecureStore; Drizzle schema and migration runner.
-- `src/domain` scaffold with Jest; date utilities using `LocalDate`.
-- GitHub Actions CI: typecheck, lint, test.
-- Tab navigation with placeholder screens.
+- Gradle multi-module project (Kotlin DSL, version catalog `libs.versions.toml`) with the modules from §3; Hilt, Compose and Navigation wired up.
+- ktlint, detekt and Android Lint configured; Kover for coverage.
+- Material 3 theme in `:core:ui`: colour scheme (light and dark), type scale, spacing tokens, plus base composables (primary button, chip, card, section header).
+- Room on SQLCipher; passphrase generated on first launch and wrapped by an Android Keystore key; schema export on, with a migration test harness.
+- `android:allowBackup="false"` and data-extraction rules that exclude the database and preferences.
+- `:core:domain` scaffold with JUnit 5.
+- GitHub Actions CI: `lint detekt test assembleDebug`, uploading the debug APK as an artifact.
+- Bottom navigation with placeholder screens.
 
-**Done when:** the app launches on iOS and Android simulators, CI is green, the DB opens encrypted, and a migration test passes.
+**Done when:** the debug APK installs and runs on an API 26 emulator and a current API emulator, CI is green, the database file is unreadable without the key, and a migration test passes.
 
 ### Phase 1: MVP (log periods, see predictions)
 **Goal:** the smallest app that is actually useful.
@@ -376,20 +403,26 @@ Each phase ends with a **working, shippable app**. Phases are sized for one deve
 - Local notifications for upcoming period, late period, and a daily log reminder at a chosen time.
 - Discreet notification text on by default.
 - Notifications rescheduled automatically whenever predictions change.
-- Permission prompt in context (asked when the user turns on the first reminder, not at launch).
+- Notification channels (Period, Daily check-in, Medication) so users can tune each one in system settings.
+- `POST_NOTIFICATIONS` runtime permission (Android 13+), asked in context when the user turns on the first reminder, not at launch.
+- Inexact alarms (`setAndAllowWhileIdle`) by default, so the restricted `SCHEDULE_EXACT_ALARM` permission isn't needed. A reminder arriving a few minutes late is fine.
+- Alarms re-armed on `BOOT_COMPLETED`, `TIMEZONE_CHANGED`, `TIME_SET` and `MY_PACKAGE_REPLACED`.
+- Notification visibility set to `VISIBILITY_PRIVATE`, with a neutral public version for the lock screen.
+- An in-app hint for OEMs with aggressive battery management (Xiaomi, Samsung, etc.), linking to the battery-optimisation setting.
 
-**Done when:** reminders fire correctly across app restarts, timezone changes and edits to period history, and no sensitive words appear by default.
+**Done when:** reminders fire correctly after a reboot, a timezone change, an app update, Doze, and edits to period history, and no sensitive words appear on the lock screen by default.
 
 ### Phase 5: Privacy hardening & data portability
 **Goal:** the user fully controls and can move their data.
-- App lock: PIN plus biometrics, auto-lock after N minutes in the background, and the app-switcher snapshot blurred.
-- JSON export and import (versioned format, validated on import, merge or replace).
+- App lock: `BiometricPrompt` (with device-credential fallback) or an app PIN; auto-lock after N minutes in the background, handled with a `ProcessLifecycleOwner` observer.
+- `FLAG_SECURE` on the activity, so there are no screenshots, screen recordings or recents previews (on by default, can be turned off).
+- JSON export and import through the Storage Access Framework (versioned format, validated on import, merge or replace).
 - CSV export.
-- Clinician PDF report (`expo-print`): date range, cycle table, averages, top symptoms, flags.
+- Clinician PDF report (`PdfDocument`): date range, cycle table, averages, top symptoms, flags; shared through the share sheet.
 - Optional password-encrypted backup file.
 - Privacy explainer screen.
 
-**Done when:** an export → delete all → import round trip restores identical data, the lock can't be bypassed via deep links or the app switcher, and the PDF renders correctly.
+**Done when:** an export → delete all → import round trip restores identical data, the lock can't be bypassed via deep links, notifications or the recents screen, and the PDF renders correctly.
 
 ### Phase 6: Goals, fertility signals & medications
 **Goal:** support different life stages.
@@ -403,12 +436,14 @@ Each phase ends with a **working, shippable app**. Phases are sized for one deve
 
 ### Phase 7: Polish & ecosystem
 **Goal:** release quality and nice-to-haves.
-- Accessibility audit (VoiceOver / TalkBack, dynamic type, contrast) and fixes.
-- Localization framework plus first translations; first-day-of-week and unit preferences.
+- Accessibility audit (TalkBack, Switch Access, font scaling up to 200%, contrast, Accessibility Scanner) and fixes.
+- Localization: string resources for everything, per-app language (Android 13+), RTL layout check, locale-based first day of week and units.
 - Educational phase cards.
-- Home-screen widget.
-- Apple Health / Health Connect read and write (opt-in).
-- Store readiness: icons, screenshots, privacy nutrition labels, app review notes.
+- Home-screen widget built with Jetpack Glance, discreet by default.
+- Health Connect read and write, opt-in (`MenstruationPeriodRecord`, `MenstruationFlowRecord`, `CervicalMucusRecord`, `BasalBodyTemperatureRecord`, `OvulationTestRecord`).
+- Optional discreet launcher icon (`activity-alias`).
+- Baseline Profiles for fast startup; R8 minification and shrinking.
+- Google Play readiness: release signing with Play App Signing, an Android App Bundle, store listing and screenshots, a **Data safety form** (no data collected or shared), the **Health apps declaration**, and a privacy policy URL. Roll out through internal → closed → production tracks.
 - *(Stretch, needs a backend)*: E2E-encrypted sync, partner sharing.
 
 ### Phase summary
@@ -422,7 +457,7 @@ Each phase ends with a **working, shippable app**. Phases are sized for one deve
 | 4 | Reminders | Discreet local notifications |
 | 5 | Privacy & portability | App lock, export/import, clinician PDF |
 | 6 | Modes | TTC, birth control, pregnancy, perimenopause |
-| 7 | Polish | a11y, i18n, widgets, health integrations, store release |
+| 7 | Polish | a11y, i18n, Glance widget, Health Connect, Play Store release |
 
 ---
 
@@ -431,12 +466,14 @@ Each phase ends with a **working, shippable app**. Phases are sized for one deve
 | Risk | Mitigation |
 |---|---|
 | Users rely on fertile window predictions as contraception | A persistent disclaimer on the fertile window UI, no "safe days" wording, and no contraception mode. |
-| Sensitive data exposure (legal requests, a lost device, a shoulder-surfer) | Local-only storage, SQLCipher, app lock, discreet notifications, a blurred app-switcher snapshot, and no server to subpoena. |
-| Data loss because nothing is in the cloud | Prominent backup and export (Phase 5), plus a periodic "back up your data" nudge. |
-| Timezone or DST bugs shifting days | `LocalDate` strings everywhere, no `Date` math on stored days, and dedicated tests. |
+| Sensitive data exposure (legal requests, a lost device, a shoulder-surfer) | Local-only storage, SQLCipher, app lock, discreet notifications, `FLAG_SECURE`, Auto Backup off, and no server to subpoena. |
+| Data loss because nothing is in the cloud (Auto Backup is off on purpose) | Prominent backup and export (Phase 5), plus a periodic "back up your data" nudge. |
+| Reminders delayed or killed by OEM battery managers | Inexact alarms plus re-arming in WorkManager, and an in-app guide to battery-optimisation exemptions. |
+| Keystore key lost (for example after some device resets), leaving the DB unreadable | Detect it on launch, explain it plainly, and offer to restore from an export file. This is another reason to nudge users to back up. |
+| Timezone or DST bugs shifting days | `java.time.LocalDate` (stored as `epochDay`) everywhere, no `Instant` maths on stored days, and dedicated tests. |
 | Poor predictions for irregular cycles | Confidence ranges, a Low-confidence label, the exclude-cycle feature, and never presenting a single date as certain. |
 | Medical inaccuracy in flags or education | Base thresholds on FIGO/ACOG guidance, cite sources in-app, and use informational wording only. |
-| Regulations (GDPR special-category data, FTC Health Breach Notification Rule) | Collect nothing server-side and keep a clear privacy policy. Revisit if sync or a backend is ever added. |
+| Regulations and store policy (GDPR special-category data, FTC Health Breach Notification Rule, Google Play health-app policy) | Collect nothing server-side, keep a clear privacy policy, and fill in the Data safety form and Health apps declaration accurately. Revisit if sync or a backend is ever added. |
 
 ---
 
@@ -444,7 +481,10 @@ Each phase ends with a **working, shippable app**. Phases are sized for one deve
 
 These choices affect the plan. Defaults are in **bold**.
 
-1. **Platforms:** **iOS + Android via Expo**, or web/PWA only?
-2. **Sync:** **local-only for now**, or plan a backend for E2E-encrypted sync earlier?
-3. **Initial modes:** **track + birth control in MVP**, or also TTC?
-4. **Visual identity:** **warm terracotta / teal palette**, or something else?
+Decided: **Android only**, as a native Kotlin + Jetpack Compose app.
+
+1. **Distribution:** **Google Play**, or sideloaded APK / F-Droid only? An F-Droid build would also need us to avoid proprietary dependencies.
+2. **Minimum Android version:** **API 26 (Android 8.0)**, or higher to simplify things?
+3. **Sync:** **local-only for now**, or plan a backend for E2E-encrypted sync earlier?
+4. **Initial modes:** **track + birth control in MVP**, or also TTC?
+5. **Visual identity:** **warm terracotta / teal brand palette**, or Material You dynamic colour as the default?

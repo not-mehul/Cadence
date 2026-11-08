@@ -22,7 +22,7 @@ import org.robolectric.annotation.Config
 /**
  * The Phase 1 journey through the real app (view models, repositories, Room), with an
  * in-memory database and today pinned to 20 March 2026: onboard, log a period, undo,
- * see it on the calendar, then erase everything.
+ * log symptoms and mood, see it all on the calendar, then erase everything.
  */
 @HiltAndroidTest
 @RunWith(RobolectricTestRunner::class)
@@ -70,10 +70,19 @@ class CadenceEndToEndTest {
         tap("Period started")
         waitFor("Day 1 of your period")
 
+        // Daily log: today's flow is already summarised; open the log and add a symptom and mood.
+        waitFor("Medium flow")
+        tap("Edit")
+        tap("Cramps")
+        tap("Calm")
+        tap("Done")
+        waitFor("Cramps (mild)")
+        waitFor("Calm")
+
         // Calendar shows today as a logged period day.
         tab("Calendar")
         val todayCell =
-            hasContentDescription("March 20, 2026, today") and
+            hasContentDescription("March 20, 2026, today, has a log") and
                 SemanticsMatcher.expectValue(SemanticsProperties.StateDescription, "Period day")
         compose.waitUntil(TIMEOUT_MS) { compose.onAllNodes(todayCell).fetchSemanticsNodes().isNotEmpty() }
 

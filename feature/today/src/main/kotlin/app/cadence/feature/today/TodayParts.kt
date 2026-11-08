@@ -3,11 +3,15 @@ package app.cadence.feature.today
 import androidx.annotation.StringRes
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -15,15 +19,20 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.heading
+import androidx.compose.ui.semantics.semantics
 import app.cadence.core.domain.cycles.CyclePrediction
 import app.cadence.core.domain.cycles.CycleSnapshot
 import app.cadence.core.domain.cycles.CycleStatus
 import app.cadence.core.domain.cycles.CycleTimeline
 import app.cadence.core.domain.cycles.PredictionBasis
+import app.cadence.core.domain.log.DayEntry
 import app.cadence.core.domain.model.CyclePhase
 import app.cadence.core.domain.model.Goal
+import app.cadence.core.ui.components.CadenceCard
 import app.cadence.core.ui.components.CycleRing
 import app.cadence.core.ui.components.RingSegment
+import app.cadence.core.ui.log.LogLabels
 import app.cadence.core.ui.theme.CadenceTheme
 import app.cadence.core.ui.theme.CycleColors
 
@@ -204,4 +213,53 @@ internal fun EndPeriodDialog(
         confirmButton = {},
         dismissButton = { TextButton(onClick = onDismiss) { Text(stringResource(R.string.today_cancel)) } },
     )
+}
+
+/** Summary of today's log as chips; tapping opens the log sheet. */
+@OptIn(ExperimentalLayoutApi::class)
+@Composable
+internal fun TodayLogCard(
+    entry: DayEntry,
+    onOpen: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    val items = LogLabels.summary(entry)
+    CadenceCard(modifier) {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Text(
+                stringResource(R.string.today_log_title),
+                style = MaterialTheme.typography.titleMedium,
+                modifier = Modifier.weight(1f).semantics { heading() },
+            )
+            TextButton(onClick = onOpen) {
+                Text(stringResource(if (items.isEmpty()) R.string.today_log_add else R.string.today_log_edit))
+            }
+        }
+        if (items.isEmpty()) {
+            Text(stringResource(R.string.today_log_empty), style = MaterialTheme.typography.bodyMedium)
+        } else {
+            FlowRow(
+                horizontalArrangement = Arrangement.spacedBy(CadenceTheme.spacing.sm),
+                verticalArrangement = Arrangement.spacedBy(CadenceTheme.spacing.xs),
+            ) {
+                items.forEach { label ->
+                    Surface(
+                        shape = MaterialTheme.shapes.small,
+                        color = MaterialTheme.colorScheme.secondaryContainer,
+                        contentColor = MaterialTheme.colorScheme.onSecondaryContainer,
+                    ) {
+                        Text(
+                            label,
+                            style = MaterialTheme.typography.labelLarge,
+                            modifier =
+                                Modifier.padding(
+                                    horizontal = CadenceTheme.spacing.md,
+                                    vertical = CadenceTheme.spacing.xs,
+                                ),
+                        )
+                    }
+                }
+            }
+        }
+    }
 }

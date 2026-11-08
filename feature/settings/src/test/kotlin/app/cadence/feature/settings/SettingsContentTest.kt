@@ -4,6 +4,7 @@ import androidx.compose.ui.test.junit4.v2.createComposeRule
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
+import app.cadence.core.domain.log.LogCategory
 import app.cadence.core.domain.model.Goal
 import app.cadence.core.domain.model.ThemePreference
 import app.cadence.core.domain.model.UserSettings
@@ -23,6 +24,7 @@ class SettingsContentTest {
     private var goal: Goal? = null
     private var theme: ThemePreference? = null
     private var cycleLength: Int? = null
+    private var hidden: Set<LogCategory>? = null
 
     private fun show() {
         compose.setContent {
@@ -35,6 +37,7 @@ class SettingsContentTest {
                             onPeriodLength = {},
                             onGoal = { goal = it },
                             onTheme = { theme = it },
+                            onHiddenCategories = { hidden = it },
                             onDeleteAll = { deleted++ },
                         ),
                 )
@@ -81,5 +84,17 @@ class SettingsContentTest {
         compose.onNodeWithText("Theme").performScrollTo().performClick()
         compose.onNodeWithText("Dark").performClick()
         assertEquals(ThemePreference.DARK, theme)
+    }
+
+    @Test
+    fun `categories can be hidden`() {
+        show()
+
+        compose.onNodeWithText("What to track").performScrollTo().performClick()
+        compose.onNodeWithText("Sex").performScrollTo().performClick()
+        compose.onNodeWithText("Stress").performScrollTo().performClick()
+        compose.onNodeWithText("Save").performClick()
+
+        assertEquals(setOf(LogCategory.SEX, LogCategory.STRESS), hidden)
     }
 }

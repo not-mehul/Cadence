@@ -2,6 +2,7 @@ package app.cadence.feature.calendar
 
 import app.cadence.core.domain.model.MenstrualFlow
 import app.cadence.core.testing.FakeDateSource
+import app.cadence.core.testing.FakeDayEntryRepository
 import app.cadence.core.testing.FakePeriodRepository
 import app.cadence.core.testing.FakeSettingsRepository
 import app.cadence.core.testing.MainDispatcherRule
@@ -21,7 +22,8 @@ class CalendarViewModelTest {
 
     private val today = LocalDate.of(2026, 3, 20)
     private val periods = FakePeriodRepository()
-    private val vm by lazy { CalendarViewModel(periods, FakeSettingsRepository(), FakeDateSource(today)) }
+    private val entries = FakeDayEntryRepository(periods)
+    private val vm by lazy { CalendarViewModel(periods, FakeSettingsRepository(), entries, FakeDateSource(today)) }
 
     private fun kotlinx.coroutines.test.TestScope.start() {
         backgroundScope.launch { vm.uiState.collect {} }
@@ -82,5 +84,23 @@ class CalendarViewModelTest {
 
             val state = assertIs<CalendarUiState.Ready>(vm.uiState.value)
             assertEquals(LocalDate.of(2026, 3, 29), state.prediction?.nextStart)
+        }
+
+    @Test
+    fun `days with details are marked, flow-only days are not`() =
+        runTest {
+            entries.save(
+                app.cadence.core.domain.log
+                    .DayEntry(LocalDate.of(2026, 3, 3), moods = setOf("calm")),
+            )
+            entries.save(
+                app.cadence.core.domain.log
+                    .DayEntry(LocalDate.of(2026, 3, 4), flow = MenstrualFlow.LIGHT),
+            )
+            start()
+
+            val state = assertIs<CalendarUiState.Ready>(vm.uiState.value)
+            assertEquals(setOf(LocalDate.of(2026, 3, 3)), state.detailDates)
+            assertEquals(false, state.canOpenLog(today.plusDays(1)))
         }
 }

@@ -6,4 +6,69 @@
         <item quantity="one">%d day</item>
         <item quantity="other">%d days</item>
     </plurals>
+    <!-- Flow -->
+    <string name="flow_none">None</string>
+    <string name="flow_spotting">Spotting</string>
+    <string name="flow_light">Light</string>
+    <string name="flow_medium">Medium</string>
+    <string name="flow_heavy">Heavy</string>
+    <string name="flow_summary">%1$s flow</string>
+
+    <!-- Severity -->
+    <string name="severity_mild">mild</string>
+    <string name="severity_moderate">moderate</string>
+    <string name="severity_severe">severe</string>
+    <string name="symptom_with_severity">%1$s (%2$s)</string>
+
+    <!-- Symptoms -->
+    <string name="symptom_cramps">Cramps</string>
+    <string name="symptom_headache">Headache</string>
+    <string name="symptom_bloating">Bloating</string>
+    <string name="symptom_breast_tenderness">Tender breasts</string>
+    <string name="symptom_back_pain">Back pain</string>
+    <string name="symptom_acne">Acne</string>
+    <string name="symptom_fatigue">Fatigue</string>
+    <string name="symptom_nausea">Nausea</string>
+    <string name="symptom_cravings">Cravings</string>
+    <string name="symptom_insomnia">Insomnia</string>
+    <string name="symptom_dizziness">Dizziness</string>
+    <string name="symptom_diarrhea">Diarrhea</string>
+    <string name="symptom_constipation">Constipation</string>
+    <string name="symptom_hot_flashes">Hot flashes</string>
+
+    <!-- Moods -->
+    <string name="mood_happy">Happy</string>
+    <string name="mood_calm">Calm</string>
+    <string name="mood_energetic">Energetic</string>
+    <string name="mood_sensitive">Sensitive</string>
+    <string name="mood_irritable">Irritable</string>
+    <string name="mood_anxious">Anxious</string>
+    <string name="mood_sad">Sad</string>
+    <string name="mood_mood_swings">Mood swings</string>
+
+    <!-- Sex -->
+    <string name="sex_none">No sex</string>
+    <string name="sex_protected">Protected</string>
+    <string name="sex_unprotected">Unprotected</string>
+    <string name="sex_summary_protected">Protected sex</string>
+    <string name="sex_summary_unprotected">Unprotected sex</string>
+
+    <!-- Categories -->
+    <string name="category_flow">Flow</string>
+    <string name="category_symptoms">Symptoms</string>
+    <string name="category_mood">Mood</string>
+    <string name="category_pain">Pain</string>
+    <string name="category_energy">Energy</string>
+    <string name="category_sleep">Sleep quality</string>
+    <string name="category_stress">Stress</string>
+    <string name="category_sex">Sex</string>
+    <string name="category_notes">Notes</string>
+
+    <!-- Summaries -->
+    <string name="summary_pain">Pain %1$d/10</string>
+    <string name="summary_rating">%1$s %2$d/5</string>
+    <string name="summary_note">Note</string>
+
+    <!-- Scale -->
+    <string name="scale_value">%1$s, %2$d of %3$d</string>
 </resources>

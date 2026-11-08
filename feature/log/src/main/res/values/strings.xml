@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="log_today">Today</string>
+    <string name="log_autosave">Changes save automatically</string>
+    <string name="log_done">Done</string>
+    <string name="log_symptoms_hint">Tap again to set how bad it is.</string>
+    <string name="log_pain_low">No pain</string>
+    <string name="log_pain_high">Worst</string>
+    <string name="log_rating_low">Low</string>
+    <string name="log_rating_high">High</string>
+    <string name="log_sleep_low">Poor</string>
+    <string name="log_sleep_high">Great</string>
+    <string name="log_note_placeholder">Anything else worth remembering?</string>
+    <string name="log_note_count">%1$d / %2$d</string>
+    <string name="log_symptom_state_off">Not logged</string>
+</resources>

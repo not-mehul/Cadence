@@ -7,6 +7,8 @@ import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
 import app.cadence.core.domain.cycles.CycleSnapshot
+import app.cadence.core.domain.log.DayEntry
+import app.cadence.core.domain.log.Severity
 import app.cadence.core.domain.model.CycleDefaults
 import app.cadence.core.domain.model.Goal
 import app.cadence.core.domain.model.MenstrualFlow
@@ -33,11 +35,21 @@ class TodayContentTest {
         goal: Goal = Goal.TRACK,
         onStart: () -> Unit = {},
         onEnd: (LocalDate) -> Unit = {},
+        entry: DayEntry? = null,
+        onOpenLog: () -> Unit = {},
     ) {
         val settings = UserSettings(goal = goal, cycleDefaults = CycleDefaults(28, 5), onboardingComplete = true)
-        val state = TodayUiState.Ready(CycleSnapshot.compute(days, settings, today), goal, 5)
+        val state = TodayUiState.Ready(CycleSnapshot.compute(days, settings, today), goal, 5, entry ?: DayEntry(today))
         compose.setContent {
-            CadenceTheme { TodayContent(state, onStartPeriod = onStart, onEndPeriod = onEnd, onLogToday = {}) }
+            CadenceTheme {
+                TodayContent(
+                    state,
+                    onStartPeriod = onStart,
+                    onEndPeriod = onEnd,
+                    onLogToday = {},
+                    onOpenLog = onOpenLog,
+                )
+            }
         }
     }
 
@@ -88,5 +100,34 @@ class TodayContentTest {
 
         compose.onNodeWithText("Hormonal birth control").assertExists()
         compose.onNode(hasContentDescription("Cycle day 20 of about 28.")).assertExists()
+    }
+
+    @Test
+    fun `today's log card summarises the entry and opens the log`() {
+        var opened = false
+        val today = LocalDate.of(2026, 3, 20)
+        val entry =
+            DayEntry(
+                today,
+                symptoms = mapOf("cramps" to Severity.MODERATE),
+                moods = setOf("calm"),
+                painLevel = 6,
+                note = "x",
+            )
+        show(today = today, entry = entry, onOpenLog = { opened = true })
+
+        compose.onNodeWithText("Cramps (moderate)").performScrollTo().assertExists()
+        compose.onNodeWithText("Calm").assertExists()
+        compose.onNodeWithText("Pain 6/10").assertExists()
+        compose.onNodeWithText("Note").assertExists()
+        compose.onNodeWithText("Edit").performScrollTo().performClick()
+
+        assertEquals(true, opened)
+    }
+
+    @Test
+    fun `empty log invites logging today`() {
+        show(today = LocalDate.of(2026, 3, 20))
+        compose.onNodeWithText("Log today").performScrollTo().assertExists()
     }
 }

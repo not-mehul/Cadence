@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import app.cadence.core.data.repository.DataEraser
 import app.cadence.core.data.repository.SettingsRepository
+import app.cadence.core.domain.log.LogCategory
 import app.cadence.core.domain.model.CycleDefaults
 import app.cadence.core.domain.model.Goal
 import app.cadence.core.domain.model.ThemePreference
@@ -33,6 +34,11 @@ class SettingsViewModel
         fun setGoal(goal: Goal) = update { it.copy(goal = goal) }
 
         fun setTheme(theme: ThemePreference) = update { it.copy(theme = theme) }
+
+        fun setHiddenCategories(hidden: Set<LogCategory>) =
+            update {
+                it.copy(hiddenCategories = hidden.filter { c -> c.canBeHidden }.toSet())
+            }
 
         /** Erases everything; the app then returns to onboarding. */
         fun deleteAllData() {

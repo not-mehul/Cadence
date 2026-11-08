@@ -14,6 +14,14 @@
     <string name="settings_mode_birth_control">Using hormonal birth control</string>
     <string name="settings_mode_birth_control_detail">Hides ovulation estimates and phases, which don\'t apply.</string>
 
+    <string name="settings_section_log">Daily log</string>
+    <string name="settings_log_categories">What to track</string>
+    <plurals name="settings_log_categories_value">
+        <item quantity="one">%1$d of %2$d category shown</item>
+        <item quantity="other">%1$d of %2$d categories shown</item>
+    </plurals>
+    <string name="settings_log_categories_note">Hidden categories don\'t appear in the daily log. Anything you already logged is kept.</string>
+
     <string name="settings_section_appearance">Appearance</string>
     <string name="settings_theme">Theme</string>
     <string name="settings_theme_system">Match system</string>

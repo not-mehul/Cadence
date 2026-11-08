@@ -1,5 +1,6 @@
 package app.cadence.feature.settings
 
+import app.cadence.core.domain.log.LogCategory
 import app.cadence.core.domain.model.CycleDefaults
 import app.cadence.core.domain.model.Goal
 import app.cadence.core.domain.model.MenstrualFlow
@@ -40,6 +41,12 @@ class SettingsViewModelTest {
             ),
             settings.settings.value,
         )
+    }
+
+    @Test
+    fun `flow can never be hidden`() {
+        vm.setHiddenCategories(setOf(LogCategory.FLOW, LogCategory.MOOD))
+        assertEquals(setOf(LogCategory.MOOD), settings.settings.value.hiddenCategories)
     }
 
     @Test

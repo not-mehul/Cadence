@@ -2,6 +2,7 @@ package app.cadence.core.data.repository
 
 import app.cadence.core.data.asLazy
 import app.cadence.core.data.inMemoryDatabase
+import app.cadence.core.domain.log.LogCategory
 import app.cadence.core.domain.model.CycleDefaults
 import app.cadence.core.domain.model.Goal
 import app.cadence.core.domain.model.ThemePreference
@@ -38,6 +39,7 @@ class RoomSettingsRepositoryTest {
                     lutealPhaseLength = 13,
                     theme = ThemePreference.DARK,
                     onboardingComplete = true,
+                    hiddenCategories = setOf(LogCategory.SEX, LogCategory.STRESS),
                 )
             repo.update { wanted }
 

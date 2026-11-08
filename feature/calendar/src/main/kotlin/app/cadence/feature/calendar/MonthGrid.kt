@@ -1,9 +1,12 @@
 package app.cadence.feature.calendar
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
@@ -47,9 +50,10 @@ internal fun MonthGrid(
     month: YearMonth,
     marks: Map<LocalDate, DayMark>,
     today: LocalDate,
-    isLogged: (LocalDate) -> Boolean,
-    canToggle: (LocalDate) -> Boolean,
+    state: CalendarUiState.Ready,
+    editPeriods: Boolean,
     onToggle: (LocalDate) -> Unit,
+    onOpenLog: (LocalDate) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val locale = currentLocale()
@@ -71,9 +75,12 @@ internal fun MonthGrid(
                                 date = date,
                                 mark = marks[date] ?: DayMark.NONE,
                                 isToday = date == today,
-                                logged = isLogged(date),
-                                enabled = canToggle(date),
+                                logged = state.isLogged(date),
+                                hasDetails = date in state.detailDates,
+                                editPeriods = editPeriods,
+                                enabled = if (editPeriods) state.canToggle(date) else state.canOpenLog(date),
                                 onToggle = { onToggle(date) },
+                                onOpenLog = { onOpenLog(date) },
                             )
                         }
                     }
@@ -105,8 +112,11 @@ private fun DayCell(
     mark: DayMark,
     isToday: Boolean,
     logged: Boolean,
+    hasDetails: Boolean,
+    editPeriods: Boolean,
     enabled: Boolean,
     onToggle: () -> Unit,
+    onOpenLog: () -> Unit,
 ) {
     val colors = CadenceTheme.cycleColors
     val onSurface = MaterialTheme.colorScheme.onSurface
@@ -121,19 +131,29 @@ private fun DayCell(
             add(rememberDateFormatter(DateSkeletons.DAY_MONTH_YEAR).format(date))
             if (mark == DayMark.PREDICTED_PERIOD) add(stringResource(R.string.calendar_desc_predicted))
             if (isToday) add(stringResource(R.string.calendar_desc_today))
+            if (hasDetails) add(stringResource(R.string.calendar_desc_has_log))
         }.joinToString(", ")
     val state = stringResource(if (logged) R.string.calendar_state_period else R.string.calendar_state_not_period)
+    val openLabel = stringResource(R.string.calendar_open_log)
+    val markerColor = if (mark == DayMark.LOGGED_PERIOD) colors.onPeriod else onSurface
 
+    val interaction =
+        if (editPeriods) {
+            Modifier.toggleable(value = logged, enabled = enabled, role = Role.Checkbox, onValueChange = { onToggle() })
+        } else {
+            Modifier.clickable(enabled = enabled, onClickLabel = openLabel, role = Role.Button, onClick = onOpenLog)
+        }
     Box(
         modifier =
             Modifier
                 .fillMaxSize()
                 .padding(3.dp)
-                .toggleable(value = logged, enabled = enabled, role = Role.Checkbox, onValueChange = { onToggle() })
+                .then(interaction)
                 .semantics {
                     contentDescription = description
                     stateDescription = state
-                }.dayMarkBackground(mark, colors.period, colors.predictedPeriod),
+                }.dayMarkBackground(mark, colors.period, colors.predictedPeriod)
+                .then(if (isToday) Modifier.todayRing(markerColor) else Modifier),
         contentAlignment = Alignment.Center,
     ) {
         Text(
@@ -142,17 +162,24 @@ private fun DayCell(
             fontWeight = if (isToday) FontWeight.Bold else null,
             color = textColor,
         )
-        if (isToday) {
+        if (hasDetails) {
             Box(
                 Modifier
                     .align(Alignment.BottomCenter)
-                    .padding(bottom = 5.dp)
+                    .padding(bottom = 6.dp)
                     .size(5.dp)
-                    .background(if (mark == DayMark.LOGGED_PERIOD) colors.onPeriod else onSurface, CircleShape),
+                    .background(markerColor, CircleShape),
             )
         }
     }
 }
+
+/** A thin solid ring inside the cell; sits inside the dashed predicted ring when both apply. */
+private fun Modifier.todayRing(color: Color): Modifier =
+    drawBehind {
+        val stroke = 1.5.dp.toPx()
+        drawCircle(color = color, radius = size.minDimension / 2 - 5.dp.toPx(), style = Stroke(width = stroke))
+    }
 
 private fun Modifier.dayMarkBackground(
     mark: DayMark,
@@ -184,13 +211,15 @@ private fun Modifier.dayMarkBackground(
         }
     }
 
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 internal fun Legend(modifier: Modifier = Modifier) {
     val colors = CadenceTheme.cycleColors
-    Row(
+    FlowRow(
         modifier = modifier,
         horizontalArrangement = Arrangement.spacedBy(CadenceTheme.spacing.lg, Alignment.CenterHorizontally),
-        verticalAlignment = Alignment.CenterVertically,
+        verticalArrangement = Arrangement.spacedBy(CadenceTheme.spacing.xs),
+        itemVerticalAlignment = Alignment.CenterVertically,
     ) {
         LegendItem(stringResource(R.string.calendar_legend_period)) {
             Box(Modifier.size(16.dp).background(colors.period, CircleShape))
@@ -199,6 +228,9 @@ internal fun Legend(modifier: Modifier = Modifier) {
             Box(Modifier.size(16.dp).dayMarkBackground(DayMark.PREDICTED_PERIOD, colors.period, colors.predictedPeriod))
         }
         LegendItem(stringResource(R.string.calendar_legend_today)) {
+            Box(Modifier.size(16.dp).todayRing(MaterialTheme.colorScheme.onSurface))
+        }
+        LegendItem(stringResource(R.string.calendar_legend_logged)) {
             Box(Modifier.size(16.dp), contentAlignment = Alignment.Center) {
                 Box(Modifier.size(5.dp).background(MaterialTheme.colorScheme.onSurface, CircleShape))
             }

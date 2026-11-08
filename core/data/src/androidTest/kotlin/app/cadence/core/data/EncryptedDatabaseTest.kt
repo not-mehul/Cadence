@@ -49,7 +49,7 @@ class EncryptedDatabaseTest {
     @Test
     fun databaseIsUnreadableWithoutTheKeyAndReadableWithIt() {
         val day = LocalDate.of(2026, 11, 8)
-        val entity = DayLogEntity(day, MenstrualFlow.MEDIUM, "test", Instant.ofEpochMilli(1_000))
+        val entity = DayLogEntity(day, MenstrualFlow.MEDIUM, "test", updatedAt = Instant.ofEpochMilli(1_000))
 
         CadenceDatabaseFactory.create(context, passphrase(), dbName).run {
             runBlocking { dayLogDao().upsert(entity) }

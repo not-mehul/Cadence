@@ -3,6 +3,7 @@ package app.cadence.core.data.db
 import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.PrimaryKey
+import app.cadence.core.domain.log.LogCategory
 import app.cadence.core.domain.model.CycleDefaults
 import app.cadence.core.domain.model.Goal
 import app.cadence.core.domain.model.ThemePreference
@@ -29,6 +30,9 @@ data class SettingsEntity(
     val theme: ThemePreference,
     @ColumnInfo(name = "onboarding_complete")
     val onboardingComplete: Boolean,
+    /** Comma-separated [LogCategory] names. Added in schema v3. */
+    @ColumnInfo(name = "hidden_categories", defaultValue = "")
+    val hiddenCategories: String = "",
 ) {
     fun toModel(): UserSettings =
         UserSettings(
@@ -37,6 +41,7 @@ data class SettingsEntity(
             lutealPhaseLength = lutealPhaseLength,
             theme = theme,
             onboardingComplete = onboardingComplete,
+            hiddenCategories = LogCategory.parseSet(hiddenCategories),
         )
 
     companion object {
@@ -50,6 +55,7 @@ data class SettingsEntity(
                 lutealPhaseLength = settings.lutealPhaseLength,
                 theme = settings.theme,
                 onboardingComplete = settings.onboardingComplete,
+                hiddenCategories = LogCategory.formatSet(settings.hiddenCategories),
             )
     }
 }

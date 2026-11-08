@@ -56,7 +56,7 @@ class RoomPeriodRepositoryTest {
 
             assertEquals(listOf(day(4)), repo.logPeriodDays(listOf(day(4))))
             assertEquals(
-                DayLogEntity(day(4), MenstrualFlow.MEDIUM, "note", Instant.now(clock)),
+                DayLogEntity(day(4), MenstrualFlow.MEDIUM, "note", updatedAt = Instant.now(clock)),
                 db.dayLogDao().get(day(4)),
             )
         }
@@ -70,7 +70,7 @@ class RoomPeriodRepositoryTest {
             repo.clearPeriodDays(listOf(day(1), day(2)))
 
             assertNull(db.dayLogDao().get(day(1)), "an empty day leaves no row behind")
-            assertEquals(DayLogEntity(day(2), null, "note", Instant.now(clock)), db.dayLogDao().get(day(2)))
+            assertEquals(DayLogEntity(day(2), null, "note", updatedAt = Instant.now(clock)), db.dayLogDao().get(day(2)))
             assertEquals(emptyMap(), repo.flowByDay.first())
         }
 

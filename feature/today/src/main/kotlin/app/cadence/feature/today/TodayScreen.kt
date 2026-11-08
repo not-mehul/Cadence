@@ -47,6 +47,7 @@ import java.time.LocalDate
 
 @Composable
 fun TodayScreen(
+    onOpenLog: (LocalDate) -> Unit,
     modifier: Modifier = Modifier,
     viewModel: TodayViewModel = hiltViewModel(),
 ) {
@@ -88,6 +89,7 @@ fun TodayScreen(
                     onStartPeriod = viewModel::startPeriod,
                     onEndPeriod = viewModel::endPeriod,
                     onLogToday = viewModel::logToday,
+                    onOpenLog = { onOpenLog(s.snapshot.today) },
                     modifier = Modifier.padding(padding),
                 )
             }
@@ -102,6 +104,7 @@ fun TodayContent(
     onStartPeriod: () -> Unit,
     onEndPeriod: (lastDay: LocalDate) -> Unit,
     onLogToday: () -> Unit,
+    onOpenLog: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val snapshot = state.snapshot
@@ -148,6 +151,7 @@ fun TodayContent(
         }
 
         Spacer(Modifier.height(spacing.xs))
+        TodayLogCard(entry = state.todayEntry, onOpen = onOpenLog)
         PhaseCard(snapshot = snapshot, goal = state.goal)
     }
 

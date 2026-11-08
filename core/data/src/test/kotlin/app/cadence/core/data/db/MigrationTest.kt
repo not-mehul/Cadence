@@ -54,6 +54,36 @@ class MigrationTest {
     }
 
     @Test
+    fun `v2 to v3 keeps settings and logs and adds the daily log fields`() {
+        helper.createDatabase(TEST_DB, 2).use { db ->
+            db.execSQL("INSERT INTO day_log (date, flow, note, updated_at) VALUES (20500, 'LIGHT', NULL, 1000)")
+            db.execSQL(
+                "INSERT INTO settings (id, goal, cycle_length, period_length, luteal_phase_length, theme, " +
+                    "onboarding_complete) " +
+                    "VALUES (0, 'BIRTH_CONTROL', 30, 4, 14, 'DARK', 1)",
+            )
+        }
+
+        helper.runMigrationsAndValidate(TEST_DB, 3, true, *ALL_MIGRATIONS).use { db ->
+            db.query("SELECT flow, pain_level, sex FROM day_log").use { c ->
+                c.moveToFirst()
+                assertEquals("LIGHT", c.getString(0))
+                assertEquals(true, c.isNull(1))
+                assertEquals(true, c.isNull(2))
+            }
+            db.query("SELECT goal, hidden_categories FROM settings").use { c ->
+                c.moveToFirst()
+                assertEquals("BIRTH_CONTROL", c.getString(0))
+                assertEquals("", c.getString(1))
+            }
+            db.query("SELECT count(*) FROM day_tag").use { c ->
+                c.moveToFirst()
+                assertEquals(0, c.getInt(0))
+            }
+        }
+    }
+
+    @Test
     fun `room opens a database created from the oldest schema`() {
         helper.createDatabase(TEST_DB, 1).close()
 

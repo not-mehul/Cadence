@@ -1,5 +1,7 @@
 package app.cadence.core.domain.model
 
+import app.cadence.core.domain.log.LogCategory
+
 enum class ThemePreference { SYSTEM, LIGHT, DARK }
 
 /** Everything the user configures. Stored in the encrypted database. */
@@ -9,6 +11,8 @@ data class UserSettings(
     val lutealPhaseLength: Int = DEFAULT_LUTEAL_PHASE_LENGTH,
     val theme: ThemePreference = ThemePreference.SYSTEM,
     val onboardingComplete: Boolean = false,
+    /** Log sections the user chose not to see. Flow can't be hidden. */
+    val hiddenCategories: Set<LogCategory> = emptySet(),
 ) {
     companion object {
         /** Days from ovulation to the next period. Fairly constant between people, unlike cycle length. */

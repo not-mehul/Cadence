@@ -41,7 +41,7 @@ class DayLogDaoTest {
             dao.upsert(DayLogEntity(day, MenstrualFlow.MEDIUM, updatedAt = now))
             dao.upsert(DayLogEntity(day, MenstrualFlow.HEAVY, note = "cramps", updatedAt = now))
 
-            assertEquals(DayLogEntity(day, MenstrualFlow.HEAVY, "cramps", now), dao.get(day))
+            assertEquals(DayLogEntity(day, MenstrualFlow.HEAVY, "cramps", updatedAt = now), dao.get(day))
             assertEquals(1, dao.observeAll().first().size)
         }
 

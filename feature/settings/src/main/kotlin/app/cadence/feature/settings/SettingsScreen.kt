@@ -11,8 +11,10 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.selection.selectableGroup
+import androidx.compose.foundation.selection.toggleable
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Checkbox
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.ListItemDefaults
@@ -35,11 +37,13 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import app.cadence.core.domain.log.LogCategory
 import app.cadence.core.domain.model.Goal
 import app.cadence.core.domain.model.ThemePreference
 import app.cadence.core.domain.model.UserSettings
 import app.cadence.core.ui.components.DayCountStepper
 import app.cadence.core.ui.components.SectionHeader
+import app.cadence.core.ui.log.LogLabels
 import app.cadence.core.ui.theme.CadenceTheme
 import app.cadence.core.ui.R as UiR
 
@@ -62,6 +66,7 @@ fun SettingsScreen(
                 onPeriodLength = viewModel::setPeriodLength,
                 onGoal = viewModel::setGoal,
                 onTheme = viewModel::setTheme,
+                onHiddenCategories = viewModel::setHiddenCategories,
                 onDeleteAll = viewModel::deleteAllData,
             ),
         modifier = modifier,
@@ -73,10 +78,11 @@ class SettingsActions(
     val onPeriodLength: (Int) -> Unit,
     val onGoal: (Goal) -> Unit,
     val onTheme: (ThemePreference) -> Unit,
+    val onHiddenCategories: (Set<LogCategory>) -> Unit,
     val onDeleteAll: () -> Unit,
 )
 
-private enum class SettingsDialog { NONE, CYCLE_LENGTH, PERIOD_LENGTH, MODE, THEME, DELETE }
+private enum class SettingsDialog { NONE, CYCLE_LENGTH, PERIOD_LENGTH, MODE, THEME, CATEGORIES, DELETE }
 
 @Composable
 fun SettingsContent(
@@ -105,6 +111,16 @@ fun SettingsContent(
             title = stringResource(R.string.settings_mode),
             value = stringResource(goalLabel(settings.goal)),
             onClick = { dialog = SettingsDialog.MODE },
+        )
+
+        Divider()
+        SectionHeader(stringResource(R.string.settings_section_log), Modifier.padding(horizontal = gutter))
+        val hideable = LogCategory.entries.filter { it.canBeHidden }
+        val shown = hideable.count { it !in settings.hiddenCategories }
+        SettingRow(
+            title = stringResource(R.string.settings_log_categories),
+            value = pluralStringResource(R.plurals.settings_log_categories_value, hideable.size, shown, hideable.size),
+            onClick = { dialog = SettingsDialog.CATEGORIES },
         )
 
         Divider()
@@ -187,6 +203,17 @@ fun SettingsContent(
                 detail = { null },
                 onSelect = {
                     actions.onTheme(it)
+                    close()
+                },
+                onDismiss = close,
+            )
+        }
+
+        SettingsDialog.CATEGORIES -> {
+            CategoriesDialog(
+                hidden = settings.hiddenCategories,
+                onSave = {
+                    actions.onHiddenCategories(it)
                     close()
                 },
                 onDismiss = close,
@@ -343,6 +370,55 @@ private fun <T> ChoiceDialog(
             }
         },
         confirmButton = {},
+        dismissButton = { TextButton(onClick = onDismiss) { Text(stringResource(R.string.settings_cancel)) } },
+    )
+}
+
+@Composable
+private fun CategoriesDialog(
+    hidden: Set<LogCategory>,
+    onSave: (Set<LogCategory>) -> Unit,
+    onDismiss: () -> Unit,
+) {
+    var hiddenNow by rememberSaveable { mutableStateOf(hidden.map { it.name }.toSet()) }
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text(stringResource(R.string.settings_log_categories)) },
+        text = {
+            // Scrolls on short screens, where eight rows and the note don't fit.
+            Column(Modifier.verticalScroll(rememberScrollState())) {
+                Text(
+                    stringResource(R.string.settings_log_categories_note),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+                LogCategory.entries.filter { it.canBeHidden }.forEach { category ->
+                    val checked = category.name !in hiddenNow
+                    Row(
+                        modifier =
+                            Modifier
+                                .fillMaxWidth()
+                                .toggleable(
+                                    value = checked,
+                                    role = Role.Checkbox,
+                                    onValueChange = { show ->
+                                        hiddenNow = if (show) hiddenNow - category.name else hiddenNow + category.name
+                                    },
+                                ).padding(vertical = CadenceTheme.spacing.xs),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(CadenceTheme.spacing.md),
+                    ) {
+                        Checkbox(checked = checked, onCheckedChange = null)
+                        Text(stringResource(LogLabels.category(category)), style = MaterialTheme.typography.bodyLarge)
+                    }
+                }
+            }
+        },
+        confirmButton = {
+            TextButton(onClick = { onSave(LogCategory.entries.filter { it.name in hiddenNow }.toSet()) }) {
+                Text(stringResource(R.string.settings_save))
+            }
+        },
         dismissButton = { TextButton(onClick = onDismiss) { Text(stringResource(R.string.settings_cancel)) } },
     )
 }

@@ -48,7 +48,10 @@ interface DayLogDao {
     )
 
     /** Removes rows that no longer hold anything, so cleared days leave no trace. */
-    @Query("DELETE FROM day_log WHERE date IN (:dates) AND flow IS NULL AND note IS NULL")
+    @Query(
+        "DELETE FROM day_log WHERE date IN (:dates) AND flow IS NULL AND note IS NULL AND pain_level IS NULL " +
+            "AND energy IS NULL AND sleep IS NULL AND stress IS NULL AND sex IS NULL",
+    )
     suspend fun deleteEmpty(dates: List<LocalDate>)
 
     @Query("DELETE FROM day_log WHERE date = :date")

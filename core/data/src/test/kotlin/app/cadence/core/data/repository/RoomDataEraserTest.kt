@@ -2,6 +2,7 @@ package app.cadence.core.data.repository
 
 import app.cadence.core.data.asLazy
 import app.cadence.core.data.inMemoryDatabase
+import app.cadence.core.domain.log.DayEntry
 import app.cadence.core.domain.model.UserSettings
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.runTest
@@ -26,11 +27,14 @@ class RoomDataEraserTest {
             val periods = RoomPeriodRepository(db.asLazy(), Clock.systemUTC())
             val settings = RoomSettingsRepository(db.asLazy())
             periods.logPeriodDays(listOf(LocalDate.of(2026, 3, 1)))
+            val entries = RoomDayEntryRepository(db.asLazy(), Clock.systemUTC())
+            entries.save(DayEntry(LocalDate.of(2026, 3, 2), moods = setOf("calm")))
             settings.update { it.copy(onboardingComplete = true) }
 
             RoomDataEraser(db.asLazy()).eraseAll()
 
             assertEquals(emptyMap(), periods.flowByDay.first())
             assertEquals(UserSettings(), settings.settings.first(), "back to onboarding")
+            assertEquals(DayEntry(LocalDate.of(2026, 3, 2)), entries.observe(LocalDate.of(2026, 3, 2)).first())
         }
 }

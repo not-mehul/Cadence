@@ -2,18 +2,22 @@ package app.cadence.feature.today
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import app.cadence.core.data.repository.DayEntryRepository
 import app.cadence.core.data.repository.PeriodRepository
 import app.cadence.core.data.repository.SettingsRepository
 import app.cadence.core.data.time.DateSource
 import app.cadence.core.domain.cycles.CycleSnapshot
 import app.cadence.core.domain.cycles.PeriodEditor
+import app.cadence.core.domain.log.DayEntry
 import app.cadence.core.domain.model.Goal
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
@@ -28,6 +32,8 @@ sealed interface TodayUiState {
         val goal: Goal,
         /** Used for "Period started" before there is any prediction. */
         val typicalPeriodLength: Int,
+        /** Everything logged today, for the summary card. */
+        val todayEntry: DayEntry = DayEntry(snapshot.today),
     ) : TodayUiState
 }
 
@@ -44,12 +50,22 @@ class TodayViewModel
     constructor(
         private val periods: PeriodRepository,
         settings: SettingsRepository,
+        entries: DayEntryRepository,
         dates: DateSource,
     ) : ViewModel() {
+        @OptIn(ExperimentalCoroutinesApi::class)
         val uiState: StateFlow<TodayUiState> =
-            combine(periods.flowByDay, settings.settings, dates.today) { flowByDay, s, today ->
-                TodayUiState.Ready(CycleSnapshot.compute(flowByDay, s, today), s.goal, s.cycleDefaults.periodLength)
-            }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(STOP_TIMEOUT_MS), TodayUiState.Loading)
+            dates.today
+                .flatMapLatest { today ->
+                    combine(periods.flowByDay, settings.settings, entries.observe(today)) { flowByDay, s, entry ->
+                        TodayUiState.Ready(
+                            snapshot = CycleSnapshot.compute(flowByDay, s, today),
+                            goal = s.goal,
+                            typicalPeriodLength = s.cycleDefaults.periodLength,
+                            todayEntry = entry,
+                        )
+                    }
+                }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(STOP_TIMEOUT_MS), TodayUiState.Loading)
 
         private val eventChannel = Channel<TodayEvent>(Channel.BUFFERED)
         val events: Flow<TodayEvent> = eventChannel.receiveAsFlow()

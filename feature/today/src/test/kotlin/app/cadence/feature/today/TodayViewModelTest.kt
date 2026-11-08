@@ -5,6 +5,7 @@ import app.cadence.core.domain.model.CycleDefaults
 import app.cadence.core.domain.model.MenstrualFlow
 import app.cadence.core.domain.model.UserSettings
 import app.cadence.core.testing.FakeDateSource
+import app.cadence.core.testing.FakeDayEntryRepository
 import app.cadence.core.testing.FakePeriodRepository
 import app.cadence.core.testing.FakeSettingsRepository
 import app.cadence.core.testing.MainDispatcherRule
@@ -27,7 +28,7 @@ class TodayViewModelTest {
     private val periods = FakePeriodRepository()
     private val settings =
         FakeSettingsRepository(UserSettings(cycleDefaults = CycleDefaults(28, 4), onboardingComplete = true))
-    private val vm by lazy { TodayViewModel(periods, settings, FakeDateSource(today)) }
+    private val vm by lazy { TodayViewModel(periods, settings, FakeDayEntryRepository(periods), FakeDateSource(today)) }
 
     private fun days(
         from: Int,

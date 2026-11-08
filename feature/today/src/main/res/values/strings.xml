@@ -42,6 +42,12 @@
     <string name="today_end_yesterday">Yesterday</string>
     <string name="today_cancel">Cancel</string>
 
+    <!-- Today's log -->
+    <string name="today_log_title">Today\'s log</string>
+    <string name="today_log_empty">How are you feeling? Log symptoms, mood, energy and more.</string>
+    <string name="today_log_add">Log today</string>
+    <string name="today_log_edit">Edit</string>
+
     <!-- Phase cards -->
     <string name="phase_menstrual">Menstrual phase</string>
     <string name="phase_menstrual_body">Hormone levels are at their lowest and energy may dip. Rest, warmth and gentle movement can help with cramps.</string>

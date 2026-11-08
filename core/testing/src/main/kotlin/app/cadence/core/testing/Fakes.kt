@@ -1,12 +1,17 @@
 package app.cadence.core.testing
 
 import app.cadence.core.data.repository.DataEraser
+import app.cadence.core.data.repository.DayEntryRepository
 import app.cadence.core.data.repository.PeriodRepository
 import app.cadence.core.data.repository.SettingsRepository
 import app.cadence.core.data.time.DateSource
+import app.cadence.core.domain.log.DayEntry
 import app.cadence.core.domain.model.MenstrualFlow
 import app.cadence.core.domain.model.UserSettings
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.update
 import java.time.LocalDate
 
@@ -55,4 +60,35 @@ class FakeDataEraser(
         settings.settings.value = UserSettings()
         erased = true
     }
+}
+
+/** Stores entries in memory; flow changes are mirrored into [periods] like the real shared table. */
+class FakeDayEntryRepository(
+    private val periods: FakePeriodRepository = FakePeriodRepository(),
+) : DayEntryRepository {
+    val entries = MutableStateFlow<Map<LocalDate, DayEntry>>(emptyMap())
+
+    override fun observe(date: LocalDate): Flow<DayEntry> =
+        combine(entries, periods.flowByDay) { all, flows ->
+            (all[date] ?: DayEntry(date)).copy(flow = flows[date])
+        }
+
+    override suspend fun save(entry: DayEntry) {
+        entries.update { if (entry.isEmpty) it - entry.date else it + (entry.date to entry) }
+        periods.flowByDay.update { flows ->
+            val flow = entry.flow
+            if (flow == null) flows - entry.date else flows + (entry.date to flow)
+        }
+    }
+
+    override fun observeDatesWithDetails(
+        from: LocalDate,
+        to: LocalDate,
+    ): Flow<Set<LocalDate>> =
+        entries.map { all ->
+            all.values
+                .filter { it.hasDetails && it.date in from..to }
+                .map { it.date }
+                .toSet()
+        }
 }

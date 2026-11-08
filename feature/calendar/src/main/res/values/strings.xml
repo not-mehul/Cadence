@@ -5,6 +5,11 @@
     <string name="calendar_next_month">Next month</string>
     <string name="calendar_jump_today">Today</string>
     <string name="calendar_hint">Tap a day to add or remove a period day.</string>
+    <string name="calendar_hint_log">Tap a day to see or change what you logged.</string>
+    <string name="calendar_edit_periods">Edit period days</string>
+    <string name="calendar_legend_logged">Logged</string>
+    <string name="calendar_desc_has_log">has a log</string>
+    <string name="calendar_open_log">Open log</string>
     <string name="calendar_legend_period">Period</string>
     <string name="calendar_legend_predicted">Predicted period</string>
     <string name="calendar_legend_today">Today</string>

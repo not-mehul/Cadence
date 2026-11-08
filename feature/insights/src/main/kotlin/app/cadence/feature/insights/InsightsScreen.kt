@@ -32,9 +32,12 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import app.cadence.core.domain.cycles.Confidence
 import app.cadence.core.domain.cycles.HealthFlag
 import app.cadence.core.domain.cycles.PredictionBasis
+import app.cadence.core.domain.patterns.PatternTiming
+import app.cadence.core.domain.patterns.SymptomPattern
 import app.cadence.core.ui.components.CadenceCard
 import app.cadence.core.ui.format.DateSkeletons
 import app.cadence.core.ui.format.rememberDateFormatter
+import app.cadence.core.ui.log.LogLabels
 import app.cadence.core.ui.theme.CadenceTheme
 import java.time.LocalDate
 import kotlin.math.roundToInt
@@ -79,6 +82,7 @@ fun InsightsContent(
             ChartCard(state.chartCycles)
         }
         if (state.flags.isNotEmpty()) FlagsCard(state.flags)
+        if (state.currentCycle != null) PatternsCard(state.patterns, state.tagLabels)
         if (state.currentCycle != null) HistoryCard(state, onIncludeChange)
     }
 }
@@ -328,5 +332,56 @@ private fun CycleHistoryRow(
             )
         }
         Switch(checked = included, onCheckedChange = null)
+    }
+}
+
+/** Symptom patterns by cycle timing (docs/PLAN.md §2.5). */
+@Composable
+private fun PatternsCard(
+    patterns: List<SymptomPattern>,
+    tagLabels: Map<Long, String>,
+) {
+    CadenceCard {
+        CardTitle(stringResource(R.string.insights_patterns_title))
+        if (patterns.isEmpty()) {
+            Text(stringResource(R.string.insights_patterns_empty), style = MaterialTheme.typography.bodyMedium)
+            return@CadenceCard
+        }
+        Column(verticalArrangement = Arrangement.spacedBy(CadenceTheme.spacing.sm)) {
+            patterns.forEach { pattern ->
+                Column {
+                    Text(LogLabels.item(pattern.itemId, tagLabels), style = MaterialTheme.typography.titleSmall)
+                    Text(
+                        stringResource(
+                            R.string.insights_pattern_line,
+                            patternTiming(pattern),
+                            pluralStringResource(
+                                R.plurals.insights_pattern_cycles,
+                                pattern.outOf,
+                                pattern.cycles,
+                                pattern.outOf,
+                            ),
+                        ),
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
+            }
+            Text(
+                stringResource(R.string.insights_patterns_note),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+        }
+    }
+}
+
+@Composable
+private fun patternTiming(pattern: SymptomPattern): String {
+    val day = pattern.day ?: 0
+    return when (pattern.timing) {
+        PatternTiming.DURING_PERIOD -> stringResource(R.string.insights_pattern_during)
+        PatternTiming.BEFORE_PERIOD -> pluralStringResource(R.plurals.insights_pattern_before, day, day)
+        PatternTiming.AROUND_CYCLE_DAY -> stringResource(R.string.insights_pattern_cycle_day, day)
     }
 }

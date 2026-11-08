@@ -73,4 +73,36 @@
     <string name="phase_late_body">Cycles vary for many reasons, including stress, illness, travel and changes in weight or exercise. If you might be pregnant, a test can tell you for sure.</string>
     <string name="phase_welcome">How Cadence works</string>
     <string name="phase_welcome_body">Each time you log a period, Cadence learns your rhythm. After two cycles, predictions are based on your own history.</string>
+
+    <!-- Phase 6: birth control and medications -->
+    <plurals name="today_headline_break_in">
+        <item quantity="one">Break starts tomorrow</item>
+        <item quantity="other">Break in %d days</item>
+    </plurals>
+    <string name="today_headline_pack_day">Day %1$d of your pack</string>
+    <string name="today_headline_break_day">Break, day %1$d of %2$d</string>
+    <string name="today_pack_ring_description">Day %1$d of a %2$d-day pack</string>
+    <string name="today_pack_of">of %1$d</string>
+    <string name="today_pack_break_label">Break</string>
+    <string name="today_pack_continuous">No break on continuous use, so Cadence doesn\'t predict bleeding. Log any bleeding as usual.</string>
+    <string name="today_pack_in_break">A withdrawal bleed usually comes during the break. It can be light, or not come at all.</string>
+    <string name="today_pack_next_break">Next break %1$s to %2$s, when a bleed is likely</string>
+    <string name="today_dose_title">Birth control</string>
+    <string name="today_dose_nothing">Nothing to do today.</string>
+    <string name="today_dose_done">✓ %1$s</string>
+    <string name="today_dose_mark_done">Done</string>
+    <string name="today_dose_next">Next: %1$s, %2$s</string>
+    <plurals name="today_missed_title">
+        <item quantity="one">%d dose not checked off</item>
+        <item quantity="other">%d doses not checked off</item>
+    </plurals>
+    <string name="today_missed_item">%1$s · %2$s</string>
+    <string name="today_missed_taken">I did</string>
+    <string name="today_missed_missed">I missed it</string>
+    <string name="today_missed_advice">If you missed one, check your pack\'s leaflet or ask a pharmacist what to do. You may need extra protection.</string>
+    <string name="today_medications_title">Medications</string>
+    <string name="today_medications_as_needed">When needed</string>
+    <string name="today_bc_setup_title">Using a pill, patch or ring?</string>
+    <string name="today_bc_setup_body">Add it in Settings to check off doses, get reminders, and see when your break-week bleed is likely.</string>
+    <string name="today_bc_setup_action">Set up in Settings</string>
 </resources>

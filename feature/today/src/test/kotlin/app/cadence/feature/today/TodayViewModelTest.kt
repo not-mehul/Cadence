@@ -1,12 +1,23 @@
 package app.cadence.feature.today
 
+import app.cadence.core.domain.contraception.ContraceptiveMethod
+import app.cadence.core.domain.contraception.ContraceptiveSchedule
+import app.cadence.core.domain.contraception.DoseAction
+import app.cadence.core.domain.contraception.DoseStatus
+import app.cadence.core.domain.contraception.PendingDose
 import app.cadence.core.domain.cycles.CycleStatus
+import app.cadence.core.domain.medication.Medication
+import app.cadence.core.domain.medication.MedicationUse
 import app.cadence.core.domain.model.CycleDefaults
+import app.cadence.core.domain.model.Goal
 import app.cadence.core.domain.model.MenstrualFlow
 import app.cadence.core.domain.model.UserSettings
+import app.cadence.core.testing.FakeContraceptionRepository
+import app.cadence.core.testing.FakeCustomTagRepository
 import app.cadence.core.testing.FakeCycleAnnotationRepository
 import app.cadence.core.testing.FakeDateSource
 import app.cadence.core.testing.FakeDayEntryRepository
+import app.cadence.core.testing.FakeMedicationRepository
 import app.cadence.core.testing.FakePeriodRepository
 import app.cadence.core.testing.FakeSettingsRepository
 import app.cadence.core.testing.MainDispatcherRule
@@ -36,8 +47,14 @@ class TodayViewModelTest {
             FakeDayEntryRepository(periods),
             FakeCycleAnnotationRepository(),
             FakeDateSource(today),
+            contraception,
+            medications,
+            tags,
         )
     }
+    private val contraception = FakeContraceptionRepository()
+    private val medications = FakeMedicationRepository()
+    private val tags = FakeCustomTagRepository()
 
     private fun days(
         from: Int,
@@ -116,5 +133,70 @@ class TodayViewModelTest {
             runCurrent()
 
             assertEquals(CycleStatus.OnPeriod(6), (vm.uiState.value as TodayUiState.Ready).snapshot.status)
+        }
+
+    @Test
+    fun `on a pill schedule, today's dose, missed doses and the next one`() =
+        runTest {
+            // Pack from 2 March: 20 March is pill day 19.
+            val pill =
+                ContraceptiveSchedule
+                    .typical(
+                        ContraceptiveMethod.PILL,
+                        LocalDate.of(2026, 3, 2),
+                    ).copy(since = LocalDate.of(2026, 3, 16))
+            settings.update { it.copy(goal = Goal.BIRTH_CONTROL, contraception = pill) }
+            contraception.record(LocalDate.of(2026, 3, 16), DoseStatus.TAKEN)
+            contraception.record(LocalDate.of(2026, 3, 18), DoseStatus.MISSED)
+            contraception.record(LocalDate.of(2026, 3, 19), DoseStatus.TAKEN)
+
+            val bc = ready().birthControl!!
+            assertEquals(null, bc.todayStatus)
+            assertEquals(listOf(PendingDose(LocalDate.of(2026, 3, 17), DoseAction.ACTIVE_PILL)), bc.missed)
+            assertEquals(PendingDose(LocalDate.of(2026, 3, 21), DoseAction.ACTIVE_PILL), bc.next)
+            assertEquals(CycleStatus.PackActive(19, 3), ready().snapshot.status)
+
+            vm.recordDose(today, DoseStatus.TAKEN)
+            vm.recordDose(LocalDate.of(2026, 3, 17), DoseStatus.TAKEN)
+            runCurrent()
+            assertEquals(DoseStatus.TAKEN, ready().birthControl!!.todayStatus)
+            assertEquals(emptyList(), ready().birthControl!!.missed)
+
+            vm.recordDose(today, null)
+            runCurrent()
+            assertEquals(null, ready().birthControl!!.todayStatus)
+        }
+
+    @Test
+    fun `no schedule in tracking mode, even if one is saved`() =
+        runTest {
+            settings.update { it.copy(contraception = ContraceptiveSchedule.typical(ContraceptiveMethod.RING, today)) }
+            assertEquals(null, ready().birthControl)
+        }
+
+    @Test
+    fun `the next ring change comes from the schedule`() {
+        val ring = ContraceptiveSchedule.typical(ContraceptiveMethod.RING, LocalDate.of(2026, 3, 2))
+        assertEquals(
+            PendingDose(LocalDate.of(2026, 3, 23), DoseAction.REMOVE_RING),
+            TodayViewModel.birthControlToday(ring, emptyMap(), today).next,
+        )
+    }
+
+    @Test
+    fun `active medications are ticked off for today`() =
+        runTest {
+            val iron = medications.save(Medication(0, "Iron", MedicationUse.DAILY))
+            medications.save(Medication(0, "Old", MedicationUse.DAILY, active = false))
+            tags.create("Travel")
+
+            assertEquals(
+                listOf(MedicationToday(Medication(iron, "Iron", MedicationUse.DAILY), false)),
+                ready().medications,
+            )
+            vm.setMedicationTaken(iron, true)
+            runCurrent()
+            assertEquals(true, ready().medications.single().taken)
+            assertEquals(mapOf(1L to "Travel"), ready().tagLabels)
         }
 }

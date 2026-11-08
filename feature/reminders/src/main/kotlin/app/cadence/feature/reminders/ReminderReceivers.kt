@@ -4,20 +4,20 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.util.Log
-import app.cadence.core.data.repository.CycleAnnotationRepository
-import app.cadence.core.data.repository.PeriodRepository
-import app.cadence.core.data.repository.SettingsRepository
+import androidx.core.app.NotificationManagerCompat
+import app.cadence.core.data.repository.ContraceptionRepository
+import app.cadence.core.data.repository.MedicationRepository
 import app.cadence.core.data.time.LocalNow
+import app.cadence.core.domain.contraception.DoseStatus
 import app.cadence.core.domain.reminders.ReminderKind
-import app.cadence.core.domain.reminders.ReminderPlanner
 import dagger.hilt.EntryPoint
 import dagger.hilt.InstallIn
 import dagger.hilt.android.EntryPointAccessors
 import dagger.hilt.components.SingletonComponent
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
+import java.time.LocalDate
 
 /** Dependencies for the receivers, looked up from the app's Hilt component. */
 @EntryPoint
@@ -25,11 +25,11 @@ import kotlinx.coroutines.launch
 interface ReminderEntryPoint {
     fun scheduler(): ReminderScheduler
 
-    fun periods(): PeriodRepository
+    fun plans(): ReminderPlans
 
-    fun settings(): SettingsRepository
+    fun contraception(): ContraceptionRepository
 
-    fun annotations(): CycleAnnotationRepository
+    fun medications(): MedicationRepository
 
     fun now(): LocalNow
 }
@@ -50,35 +50,25 @@ private fun BroadcastReceiver.runAsync(block: suspend () -> Unit) {
     }
 }
 
+private fun Context.reminderDeps() =
+    EntryPointAccessors.fromApplication(applicationContext, ReminderEntryPoint::class.java)
+
 /** An alarm went off: show the reminder (if it's still wanted) and arm the next one. */
 class ReminderReceiver : BroadcastReceiver() {
     override fun onReceive(
         context: Context,
         intent: Intent,
     ) {
-        val kind =
-            intent.getStringExtra(ReminderScheduler.EXTRA_KIND)?.let { k ->
-                ReminderKind.entries.firstOrNull {
-                    it.name ==
-                        k
-                }
-            }
-                ?: return
-        val deps = EntryPointAccessors.fromApplication(context.applicationContext, ReminderEntryPoint::class.java)
+        val key = ReminderKey.from(intent) ?: return
+        val deps = context.reminderDeps()
         runAsync {
-            val settings = deps.settings().settings.first()
             // Re-plan for "now" minus a moment, so a reminder firing exactly on time still counts.
-            val current =
-                ReminderPlanner
-                    .plan(
-                        deps.periods().flowByDay.first(),
-                        settings,
-                        deps.annotations().excludedStarts.first(),
-                        deps.now().now().minusMinutes(STALE_AFTER_MINUTES),
-                    ).firstOrNull { it.kind == kind }
-            // Only notify if this reminder is still on and still due (data may have changed since it was armed).
+            val snapshot = deps.plans().at(deps.now().now().minusMinutes(STALE_AFTER_MINUTES))
+            val current = snapshot.planned.firstOrNull { ReminderKey.of(it) == key }
+            // Only notify if this reminder is still on, still due, and its dose isn't already recorded.
             if (current != null && !current.at.isAfter(deps.now().now())) {
-                ReminderNotifier.post(context, current, settings.reminders.discreet)
+                val name = snapshot.medications.firstOrNull { it.id == current.medicationId }?.name
+                ReminderNotifier.post(context, current, snapshot.settings.discreet, name)
             }
             deps.scheduler().reschedule()
         }
@@ -90,6 +80,33 @@ class ReminderReceiver : BroadcastReceiver() {
     }
 }
 
+/** "Done" on a birth control or medication reminder: record the dose without opening the app. */
+class DoseDoneReceiver : BroadcastReceiver() {
+    override fun onReceive(
+        context: Context,
+        intent: Intent,
+    ) {
+        if (intent.action != ACTION_DONE) return
+        val key = ReminderKey.from(intent) ?: return
+        val date = intent.getStringExtra(EXTRA_DATE)?.let(LocalDate::parse) ?: return
+        val deps = context.reminderDeps()
+        NotificationManagerCompat.from(context).cancel(key.requestCode)
+        runAsync {
+            when (key.kind) {
+                ReminderKind.CONTRACEPTIVE -> deps.contraception().record(date, DoseStatus.TAKEN)
+                ReminderKind.MEDICATION -> key.medicationId?.let { deps.medications().setTaken(date, it, true) }
+                else -> Unit
+            }
+            deps.scheduler().reschedule()
+        }
+    }
+
+    companion object {
+        const val ACTION_DONE = "app.cadence.action.DOSE_DONE"
+        const val EXTRA_DATE = "date"
+    }
+}
+
 /** Reboot, app update, or clock/timezone change: alarms are gone or wrong, so re-arm them. */
 class RescheduleReceiver : BroadcastReceiver() {
     override fun onReceive(
@@ -97,7 +114,7 @@ class RescheduleReceiver : BroadcastReceiver() {
         intent: Intent,
     ) {
         if (intent.action !in HANDLED_ACTIONS) return
-        val deps = EntryPointAccessors.fromApplication(context.applicationContext, ReminderEntryPoint::class.java)
+        val deps = context.reminderDeps()
         runAsync { deps.scheduler().reschedule() }
     }
 

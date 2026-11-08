@@ -31,6 +31,26 @@ fun DayCountStepper(
     label: String,
     modifier: Modifier = Modifier,
 ) {
+    NumberStepper(
+        value,
+        range,
+        onValueChange,
+        label,
+        pluralStringResource(R.plurals.days_count, value, value),
+        modifier,
+    )
+}
+
+/** A stepper whose value reads as [valueText] ("Day 12", "3 weeks"...); [label] names it for accessibility. */
+@Composable
+fun NumberStepper(
+    value: Int,
+    range: IntRange,
+    onValueChange: (Int) -> Unit,
+    label: String,
+    valueText: String,
+    modifier: Modifier = Modifier,
+) {
     Row(
         modifier = modifier,
         verticalAlignment = Alignment.CenterVertically,
@@ -46,7 +66,7 @@ fun DayCountStepper(
             )
         }
         Text(
-            text = pluralStringResource(R.plurals.days_count, value, value),
+            text = valueText,
             style = MaterialTheme.typography.headlineSmall,
             textAlign = TextAlign.Center,
             modifier =

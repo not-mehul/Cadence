@@ -3,6 +3,8 @@ package app.cadence.core.data.db
 import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.PrimaryKey
+import app.cadence.core.domain.contraception.ContraceptiveMethod
+import app.cadence.core.domain.contraception.ContraceptiveSchedule
 import app.cadence.core.domain.log.LogCategory
 import app.cadence.core.domain.model.CycleDefaults
 import app.cadence.core.domain.model.Goal
@@ -10,6 +12,7 @@ import app.cadence.core.domain.model.ThemePreference
 import app.cadence.core.domain.model.UserSettings
 import app.cadence.core.domain.reminders.ReminderSettings
 import app.cadence.core.domain.security.SecuritySettings
+import java.time.LocalDate
 import java.time.LocalTime
 
 /**
@@ -58,6 +61,23 @@ data class SettingsEntity(
     val lockTimeoutMinutes: Int = 0,
     @ColumnInfo(name = "block_screenshots", defaultValue = "1")
     val blockScreenshots: Boolean = true,
+    // Birth control schedule, added in schema v7. No method means no schedule.
+    @ColumnInfo(name = "bc_method")
+    val bcMethod: ContraceptiveMethod? = null,
+    @ColumnInfo(name = "bc_pack_start")
+    val bcPackStart: LocalDate? = null,
+    @ColumnInfo(name = "bc_active_days", defaultValue = "21")
+    val bcActiveDays: Int = 21,
+    @ColumnInfo(name = "bc_break_days", defaultValue = "7")
+    val bcBreakDays: Int = 7,
+    @ColumnInfo(name = "bc_placebo", defaultValue = "0")
+    val bcPlacebo: Boolean = false,
+    @ColumnInfo(name = "bc_since")
+    val bcSince: LocalDate? = null,
+    @ColumnInfo(name = "bc_reminder_enabled", defaultValue = "0")
+    val bcReminderEnabled: Boolean = false,
+    @ColumnInfo(name = "bc_reminder_minute", defaultValue = "540")
+    val bcReminderMinute: Int = 540,
 ) {
     fun toModel(): UserSettings =
         UserSettings(
@@ -83,7 +103,26 @@ data class SettingsEntity(
                     lockTimeoutMinutes = lockTimeoutMinutes.takeIf { it in SecuritySettings.LOCK_TIMEOUT_OPTIONS } ?: 0,
                     blockScreenshots = blockScreenshots,
                 ),
+            contraception = contraception(),
         )
+
+    /** Null when no schedule is set up, or when the stored one isn't valid (it then has to be set up again). */
+    private fun contraception(): ContraceptiveSchedule? {
+        val method = bcMethod ?: return null
+        val packStart = bcPackStart ?: return null
+        return runCatching {
+            ContraceptiveSchedule(
+                method = method,
+                packStart = packStart,
+                activeDays = bcActiveDays,
+                breakDays = bcBreakDays,
+                placebo = bcPlacebo,
+                since = bcSince ?: packStart,
+                reminderEnabled = bcReminderEnabled,
+                reminderTime = minuteToTime(bcReminderMinute),
+            )
+        }.getOrNull()
+    }
 
     companion object {
         const val SINGLETON_ID = 0
@@ -107,7 +146,23 @@ data class SettingsEntity(
                 lockEnabled = settings.security.lockEnabled,
                 lockTimeoutMinutes = settings.security.lockTimeoutMinutes,
                 blockScreenshots = settings.security.blockScreenshots,
-            )
+            ).withContraception(settings.contraception)
+
+        private fun SettingsEntity.withContraception(schedule: ContraceptiveSchedule?): SettingsEntity =
+            if (schedule == null) {
+                this
+            } else {
+                copy(
+                    bcMethod = schedule.method,
+                    bcPackStart = schedule.packStart,
+                    bcActiveDays = schedule.activeDays,
+                    bcBreakDays = schedule.breakDays,
+                    bcPlacebo = schedule.placebo,
+                    bcSince = schedule.since,
+                    bcReminderEnabled = schedule.reminderEnabled,
+                    bcReminderMinute = timeToMinute(schedule.reminderTime),
+                )
+            }
 
         private fun timeToMinute(time: LocalTime) = time.hour * 60 + time.minute
 

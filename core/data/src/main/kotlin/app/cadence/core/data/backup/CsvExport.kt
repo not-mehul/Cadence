@@ -5,12 +5,32 @@ import app.cadence.core.domain.log.DayEntry
 /** One row per logged day, for spreadsheets (RFC 4180 quoting). Not importable; use a backup for that. */
 object CsvExport {
     val HEADER =
-        listOf("date", "flow", "symptoms", "moods", "pain", "energy", "sleep", "stress", "sex", "note")
+        listOf(
+            "date",
+            "flow",
+            "symptoms",
+            "moods",
+            "pain",
+            "energy",
+            "sleep",
+            "stress",
+            "sex",
+            "note",
+            "tags",
+            "birth_control",
+            "medications",
+        )
 
-    fun write(entries: List<DayEntry>): String =
+    fun write(data: BackupData): String =
         buildString {
             appendRow(HEADER)
-            entries.filterNot { it.isEmpty }.sortedBy { it.date }.forEach { e ->
+            val tagLabels = data.customTags.associate { it.id to it.label }
+            val medicationNames = data.medications.associate { it.id to it.name }
+            val byDate = data.entries.filterNot { it.isEmpty }.associateBy { it.date }
+            // A day with only a dose recorded still gets a row.
+            val dates = (byDate.keys + data.contraceptiveDoses.keys + data.medicationDoses.keys).sorted()
+            dates.forEach { date ->
+                val e = byDate[date] ?: DayEntry(date)
                 appendRow(
                     listOf(
                         e.date.toString(),
@@ -32,6 +52,19 @@ object CsvExport {
                             ?.lowercase()
                             .orEmpty(),
                         e.note.orEmpty(),
+                        e.tags
+                            .mapNotNull(tagLabels::get)
+                            .sorted()
+                            .joinToString(";"),
+                        data.contraceptiveDoses[date]
+                            ?.name
+                            ?.lowercase()
+                            .orEmpty(),
+                        data.medicationDoses[date]
+                            .orEmpty()
+                            .mapNotNull(medicationNames::get)
+                            .sorted()
+                            .joinToString(";"),
                     ),
                 )
             }

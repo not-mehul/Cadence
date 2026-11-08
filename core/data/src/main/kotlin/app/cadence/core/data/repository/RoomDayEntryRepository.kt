@@ -47,6 +47,13 @@ class RoomDayEntryRepository
                 .map { days -> days.associate { it.date to it.painLevel } }
                 .flowOn(Dispatchers.IO)
 
+        // Symptom, mood and custom tag ids are all distinct (custom ones start with "tag:"), so the
+        // stored tag ids are exactly the pattern item ids.
+        override val patternItemsByDay: Flow<Map<LocalDate, Set<String>>> =
+            flow { emitAll(database.get().dayTagDao().observeAllTagIds()) }
+                .map { rows -> rows.groupBy({ it.date }, { it.tagId }).mapValues { it.value.toSet() } }
+                .flowOn(Dispatchers.IO)
+
         override fun observeDatesWithDetails(
             from: LocalDate,
             to: LocalDate,

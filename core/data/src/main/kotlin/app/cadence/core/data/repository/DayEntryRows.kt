@@ -4,6 +4,7 @@ import app.cadence.core.data.db.CadenceDatabase
 import app.cadence.core.data.db.DayLogEntity
 import app.cadence.core.data.db.DayTagEntity
 import app.cadence.core.data.db.TagKind
+import app.cadence.core.domain.log.CustomTag
 import app.cadence.core.domain.log.DayEntry
 import app.cadence.core.domain.log.Severity
 import java.time.Instant
@@ -26,6 +27,7 @@ internal object DayEntryRows {
                         Severity.entries[((it.severity ?: 1) - 1).coerceIn(0, Severity.entries.lastIndex)]
                 },
         moods = tags.filter { it.kind == TagKind.MOOD }.map { it.tagId }.toSet(),
+        tags = tags.filter { it.kind == TagKind.CUSTOM }.mapNotNull { CustomTag.fromItemId(it.tagId) }.toSet(),
         painLevel = row?.painLevel,
         energy = row?.energy,
         sleep = row?.sleep,
@@ -64,7 +66,8 @@ internal object DayEntryRows {
             entry.symptoms.map { (id, severity) ->
                 DayTagEntity(entry.date, id, TagKind.SYMPTOM, severity.ordinal + 1)
             } +
-                entry.moods.map { DayTagEntity(entry.date, it, TagKind.MOOD) },
+                entry.moods.map { DayTagEntity(entry.date, it, TagKind.MOOD) } +
+                entry.tags.map { DayTagEntity(entry.date, CustomTag.itemId(it), TagKind.CUSTOM) },
         )
     }
 

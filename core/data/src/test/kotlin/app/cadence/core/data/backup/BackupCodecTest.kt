@@ -1,9 +1,15 @@
 package app.cadence.core.data.backup
 
+import app.cadence.core.domain.contraception.ContraceptiveMethod
+import app.cadence.core.domain.contraception.ContraceptiveSchedule
+import app.cadence.core.domain.contraception.DoseStatus
+import app.cadence.core.domain.log.CustomTag
 import app.cadence.core.domain.log.DayEntry
 import app.cadence.core.domain.log.LogCategory
 import app.cadence.core.domain.log.Severity
 import app.cadence.core.domain.log.SexActivity
+import app.cadence.core.domain.medication.Medication
+import app.cadence.core.domain.medication.MedicationUse
 import app.cadence.core.domain.model.CycleDefaults
 import app.cadence.core.domain.model.Goal
 import app.cadence.core.domain.model.MenstrualFlow
@@ -71,7 +77,7 @@ class BackupCodecTest {
     fun `plain backups are readable JSON with a format and version`() {
         val text = encode().toString(Charsets.UTF_8)
         assertTrue("\"format\": \"cadence-backup\"" in text)
-        assertTrue("\"version\": 1" in text)
+        assertTrue("\"version\": 2" in text)
         assertFalse(BackupCodec.isEncrypted(encode()))
     }
 
@@ -107,9 +113,75 @@ class BackupCodecTest {
         assertFalse(BackupCodec.isEncrypted("garbage".toByteArray()))
     }
 
+    private val phase6 =
+        data.copy(
+            settings =
+                data.settings.copy(
+                    contraception =
+                        ContraceptiveSchedule(
+                            ContraceptiveMethod.RING,
+                            LocalDate.of(2026, 2, 2),
+                            activeDays = 21,
+                            breakDays = 7,
+                            since = LocalDate.of(2026, 2, 10),
+                            reminderEnabled = true,
+                            reminderTime = LocalTime.of(20, 45),
+                        ),
+                ),
+            entries = data.entries.map { if (it.date == day) it.copy(tags = setOf(7)) else it },
+            contraceptiveDoses = mapOf(day to DoseStatus.TAKEN, day.plusDays(1) to DoseStatus.MISSED),
+            medications =
+                listOf(
+                    Medication(3, "Iron", MedicationUse.DAILY, LocalTime.of(8, 0)),
+                    Medication(4, "Ibuprofen", MedicationUse.AS_NEEDED, active = false),
+                ),
+            medicationDoses = mapOf(day to setOf(3L, 4L)),
+            customTags = listOf(CustomTag(7, "Travel")),
+        )
+
+    @Test
+    fun `birth control, medications and custom tags round trip`() {
+        assertEquals(phase6, BackupCodec.decode(BackupCodec.encode(phase6, at, null)))
+    }
+
+    @Test
+    fun `version 1 backups from Phase 5 still restore`() {
+        val v1 =
+            """
+            {
+              "format": "cadence-backup",
+              "version": 1,
+              "exportedAt": "2026-11-01T10:00:00Z",
+              "settings": {"goal": "TRACK", "cycleLength": 28, "periodLength": 5, "lutealPhaseLength": 14, "theme": "SYSTEM"},
+              "days": [{"date": "2026-03-02", "flow": "MEDIUM", "moods": ["calm"]}]
+            }
+            """.trimIndent()
+
+        val restored = BackupCodec.decode(v1.toByteArray())
+        assertEquals(listOf(DayEntry(day, flow = MenstrualFlow.MEDIUM, moods = setOf("calm"))), restored.entries)
+        assertEquals(null, restored.settings.contraception)
+        assertEquals(emptyList(), restored.medications)
+        assertEquals(emptyList(), restored.customTags)
+    }
+
+    @Test
+    fun `references to tags or medications that aren't in the backup are invalid`() {
+        val text = BackupCodec.encode(phase6, at, null).toString(Charsets.UTF_8)
+        listOf(
+            text.replace("\"tags\": [\n                7\n            ]", "\"tags\": [8]"),
+            text.replace("\"medicationId\": 4", "\"medicationId\": 9"),
+            text.replace("\"id\": 4", "\"id\": 3"),
+            text.replace("\"MISSED\"", "\"FORGOT\""),
+            text.replace("\"method\": \"RING\"", "\"method\": \"IMPLANT\""),
+        ).forEach { bad ->
+            assertTrue(bad != text, "replacement didn't apply: $bad")
+            assertEquals(BackupException.Reason.INVALID, reason { BackupCodec.decode(bad.toByteArray()) })
+        }
+    }
+
     @Test
     fun `backups from a newer app version are refused`() {
-        val newer = encode().toString(Charsets.UTF_8).replace("\"version\": 1", "\"version\": 99")
+        val newer = encode().toString(Charsets.UTF_8).replace("\"version\": 2", "\"version\": 99")
         assertEquals(BackupException.Reason.NEWER_VERSION, reason { BackupCodec.decode(newer.toByteArray()) })
     }
 

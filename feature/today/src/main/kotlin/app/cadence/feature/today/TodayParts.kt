@@ -63,6 +63,15 @@ internal fun headline(status: CycleStatus): String =
         is CycleStatus.Late -> {
             pluralStringResource(R.plurals.today_headline_late, status.daysLate, status.daysLate)
         }
+
+        is CycleStatus.PackActive -> {
+            status.daysUntilBreak?.let { pluralStringResource(R.plurals.today_headline_break_in, it, it) }
+                ?: stringResource(R.string.today_headline_pack_day, status.dayOfPack)
+        }
+
+        is CycleStatus.PackBreak -> {
+            stringResource(R.string.today_headline_break_day, status.dayOfBreak, status.breakDays)
+        }
     }
 
 @Composable
@@ -245,8 +254,9 @@ internal fun TodayLogCard(
     entry: DayEntry,
     onOpen: () -> Unit,
     modifier: Modifier = Modifier,
+    tagLabels: Map<Long, String> = emptyMap(),
 ) {
-    val items = LogLabels.summary(entry)
+    val items = LogLabels.summary(entry, tagLabels)
     CadenceCard(modifier) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             Text(

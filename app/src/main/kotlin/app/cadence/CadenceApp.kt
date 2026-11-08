@@ -70,7 +70,12 @@ fun CadenceApp(
                 startDestination = TodayRoute,
                 modifier = Modifier.fillMaxSize().windowInsetsPadding(WindowInsets.statusBars),
             ) {
-                composable<TodayRoute> { TodayScreen(onOpenLog = openLog) }
+                composable<TodayRoute> {
+                    TodayScreen(
+                        onOpenLog = openLog,
+                        onOpenSettings = { navController.navigateToTopLevel(TopLevelDestination.SETTINGS) },
+                    )
+                }
                 composable<CalendarRoute> { CalendarScreen(onOpenLog = openLog) }
                 composable<InsightsRoute> { InsightsScreen() }
                 composable<SettingsRoute> { SettingsScreen() }

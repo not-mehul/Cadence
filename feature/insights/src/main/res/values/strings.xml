@@ -57,4 +57,20 @@
         <item quantity="one">%d-day</item>
         <item quantity="other">%d-day</item>
     </plurals>
+
+    <!-- Phase 6: symptom patterns -->
+    <string name="insights_patterns_title">Patterns</string>
+    <string name="insights_patterns_empty">Log symptoms, moods or tags across three or more cycles and any patterns will show up here.</string>
+    <string name="insights_patterns_note">Things you tend to log at the same point in your cycle. They\'re observations from your own logs, not a diagnosis.</string>
+    <string name="insights_pattern_line">%1$s, %2$s</string>
+    <string name="insights_pattern_during">during your period</string>
+    <plurals name="insights_pattern_before">
+        <item quantity="one">about %d day before your period</item>
+        <item quantity="other">about %d days before your period</item>
+    </plurals>
+    <string name="insights_pattern_cycle_day">around day %1$d of your cycle</string>
+    <plurals name="insights_pattern_cycles">
+        <item quantity="one">in %1$d of %2$d cycle</item>
+        <item quantity="other">in %1$d of %2$d cycles</item>
+    </plurals>
 </resources>

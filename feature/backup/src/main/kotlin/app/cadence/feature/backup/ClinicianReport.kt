@@ -8,13 +8,21 @@ import android.text.Layout
 import android.text.StaticLayout
 import android.text.TextPaint
 import app.cadence.core.data.backup.BackupData
+import app.cadence.core.domain.contraception.ContraceptiveMethod
+import app.cadence.core.domain.contraception.ContraceptiveSchedule
+import app.cadence.core.domain.contraception.DoseStatus
 import app.cadence.core.domain.cycles.CycleHistory
 import app.cadence.core.domain.cycles.CycleInsights
 import app.cadence.core.domain.cycles.CyclePrediction
 import app.cadence.core.domain.cycles.CyclePredictor
 import app.cadence.core.domain.cycles.CycleStats
 import app.cadence.core.domain.cycles.HealthFlag
+import app.cadence.core.domain.log.CustomTag
+import app.cadence.core.domain.medication.MedicationUse
 import app.cadence.core.domain.model.Goal
+import app.cadence.core.domain.patterns.PatternTiming
+import app.cadence.core.domain.patterns.SymptomPattern
+import app.cadence.core.domain.patterns.SymptomPatterns
 import app.cadence.core.ui.log.LogLabels
 import java.io.OutputStream
 import java.time.LocalDate
@@ -35,7 +43,22 @@ internal data class ReportContent(
     val averagePainOnPeriodDays: Double?,
     val painDays: Int,
     val flags: List<HealthFlag>,
+    /** The pill, patch or ring schedule being followed, if any. */
+    val birthControl: ContraceptiveSchedule? = null,
+    /** Doses recorded as missed in the last [MISSED_DOSE_DAYS] days. */
+    val missedDoses: Int = 0,
+    val medications: List<ReportMedication> = emptyList(),
+    val patterns: List<SymptomPattern> = emptyList(),
+    val tagLabels: Map<Long, String> = emptyMap(),
 ) {
+    data class ReportMedication(
+        val name: String,
+        val use: MedicationUse,
+        val active: Boolean,
+        /** Days taken in the last [SYMPTOM_MONTHS] months. */
+        val daysTaken: Int,
+    )
+
     data class ReportCycle(
         val start: LocalDate,
         val lengthDays: Int,
@@ -47,6 +70,7 @@ internal data class ReportContent(
         const val MAX_CYCLES = 12
         const val MAX_SYMPTOMS = 8
         const val SYMPTOM_MONTHS = 6L
+        const val MISSED_DOSE_DAYS = 90L
 
         fun build(
             data: BackupData,
@@ -63,7 +87,15 @@ internal data class ReportContent(
                 firstLogged = data.entries.minOfOrNull { it.date },
                 goal = data.settings.goal,
                 stats = CycleInsights.stats(history, today),
-                prediction = CyclePredictor.predict(history, data.settings.cycleDefaults, today),
+                // On a pill, patch or ring schedule, bleeds follow the pack rather than the cycle history.
+                prediction =
+                    if (data.settings.activeSchedule !=
+                        null
+                    ) {
+                        null
+                    } else {
+                        CyclePredictor.predict(history, data.settings.cycleDefaults, today)
+                    },
                 cycles =
                     history.cycles
                         .takeLast(MAX_CYCLES)
@@ -88,6 +120,26 @@ internal data class ReportContent(
                         data.settings.goal,
                         today,
                     ),
+                birthControl = data.settings.activeSchedule,
+                missedDoses =
+                    data.contraceptiveDoses.count { (date, status) ->
+                        status == DoseStatus.MISSED && date.isAfter(today.minusDays(MISSED_DOSE_DAYS)) &&
+                            !date.isAfter(today)
+                    },
+                medications =
+                    data.medications.map { m ->
+                        ReportMedication(
+                            m.name,
+                            m.use,
+                            m.active,
+                            data.medicationDoses.count { (date, ids) ->
+                                m.id in ids && !date.isBefore(since) &&
+                                    !date.isAfter(today)
+                            },
+                        )
+                    },
+                patterns = SymptomPatterns.find(history, data.entries.associate { it.date to it.patternItems() }),
+                tagLabels = data.customTags.associate { it.id to it.label },
             )
         }
     }
@@ -147,6 +199,10 @@ internal class ReportPdfWriter(
                 },
             ),
         )
+        c.birthControl?.let { bc ->
+            row(s(R.string.report_birth_control), birthControlText(bc))
+            row(s(R.string.report_missed_doses), c.missedDoses.toString())
+        }
         row(s(R.string.report_cycles_recorded), stats.cyclesCounted.toString())
         row(s(R.string.report_average_cycle), stats.averageCycleLength?.let { days(it) } ?: s(R.string.report_none))
         if (stats.shortestCycle != null && stats.longestCycle != null) {
@@ -210,12 +266,70 @@ internal class ReportPdfWriter(
             body,
         )
 
+        if (c.medications.isNotEmpty()) {
+            section(s(R.string.report_medications))
+            c.medications.forEach { m ->
+                val use =
+                    s(
+                        if (m.use ==
+                            MedicationUse.DAILY
+                        ) {
+                            R.string.report_medication_daily
+                        } else {
+                            R.string.report_medication_as_needed
+                        },
+                    )
+                val stopped = if (m.active) "" else " " + s(R.string.report_medication_stopped)
+                row(m.name + stopped, use + " · " + q(R.plurals.report_medication_days, m.daysTaken, m.daysTaken))
+            }
+        }
+
+        if (c.patterns.isNotEmpty()) {
+            section(s(R.string.report_patterns))
+            c.patterns.forEach { p ->
+                row(itemLabel(p.itemId, c.tagLabels), patternText(p))
+            }
+        }
+
         section(s(R.string.report_flags))
         if (c.flags.isEmpty()) paragraph(s(R.string.report_flags_none), body)
         c.flags.forEach { paragraph("• " + flagText(it), body) }
 
         y += 16
         paragraph(s(R.string.report_footer), small)
+    }
+
+    private fun birthControlText(bc: ContraceptiveSchedule): String {
+        val method =
+            s(
+                when (bc.method) {
+                    ContraceptiveMethod.PILL -> R.string.report_bc_pill
+                    ContraceptiveMethod.PATCH -> R.string.report_bc_patch
+                    ContraceptiveMethod.RING -> R.string.report_bc_ring
+                },
+            )
+        return when {
+            !bc.hasBreak -> s(R.string.report_bc_continuous, method, bc.activeDays)
+            bc.placebo -> s(R.string.report_bc_placebo, method, bc.activeDays, bc.breakDays)
+            else -> s(R.string.report_bc_break, method, bc.activeDays, bc.breakDays)
+        }
+    }
+
+    private fun itemLabel(
+        id: String,
+        tagLabels: Map<Long, String>,
+    ): String =
+        CustomTag.fromItemId(id)?.let { tagLabels[it] } ?: LogLabels.itemRes(id)?.let { context.getString(it) } ?: id
+
+    private fun patternText(p: SymptomPattern): String {
+        val day = p.day ?: 0
+        val timing =
+            when (p.timing) {
+                PatternTiming.DURING_PERIOD -> s(R.string.report_pattern_during)
+                PatternTiming.BEFORE_PERIOD -> q(R.plurals.report_pattern_before, day, day)
+                PatternTiming.AROUND_CYCLE_DAY -> s(R.string.report_pattern_cycle_day, day)
+            }
+        return timing + " · " + q(R.plurals.report_pattern_cycles, p.outOf, p.cycles, p.outOf)
     }
 
     private fun flagText(flag: HealthFlag): String =

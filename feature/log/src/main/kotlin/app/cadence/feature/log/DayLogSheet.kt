@@ -80,6 +80,12 @@ fun DayLogSheet(
                     onEdit = viewModel::edit,
                     onNoteChange = viewModel::editNote,
                     onDone = close,
+                    tracking =
+                        DayLogTrackingActions(
+                            onDose = viewModel::recordDose,
+                            onMedicationTaken = viewModel::setMedicationTaken,
+                            onCreateTag = viewModel::createTag,
+                        ),
                 )
             }
         }
@@ -94,6 +100,7 @@ fun DayLogContent(
     onNoteChange: (String) -> Unit,
     onDone: () -> Unit,
     modifier: Modifier = Modifier,
+    tracking: DayLogTrackingActions = DayLogTrackingActions(),
 ) {
     val entry = state.entry
     val spacing = CadenceTheme.spacing
@@ -109,10 +116,16 @@ fun DayLogContent(
         Header(entry.date, state.isToday, onDone)
 
         Section(LogCategory.FLOW, state) { FlowPicker(entry.flow) { flow -> onEdit { it.copy(flow = flow) } } }
+        state.dose?.let { DoseSection(it, state.doseStatus, state.isToday, tracking.onDose) }
         Section(LogCategory.SYMPTOMS, state, hint = stringResource(R.string.log_symptoms_hint)) {
             SymptomChips(entry) { id -> onEdit { it.cycleSymptom(id) } }
         }
         Section(LogCategory.MOOD, state) { MoodChips(entry) { id -> onEdit { it.toggleMood(id) } } }
+        Section(LogCategory.TAGS, state) {
+            TagChips(entry, state.tags, onToggle = { id ->
+                onEdit { it.toggleTag(id) }
+            }, onCreate = tracking.onCreateTag)
+        }
         Section(LogCategory.PAIN, state) {
             ScaleSelector(
                 range = DayEntry.PAIN_RANGE,
@@ -143,6 +156,9 @@ fun DayLogContent(
             R.string.log_rating_high,
         ) { value ->
             onEdit { it.copy(stress = value) }
+        }
+        if (state.medications.isNotEmpty()) {
+            Section(LogCategory.MEDICATIONS, state) { MedicationChips(state.medications, tracking.onMedicationTaken) }
         }
         Section(LogCategory.SEX, state) { SexPicker(entry.sex) { sex -> onEdit { it.copy(sex = sex) } } }
         Section(LogCategory.NOTES, state) { NoteField(entry.note.orEmpty(), onNoteChange) }
@@ -180,7 +196,7 @@ private fun Header(
 }
 
 @Composable
-private fun Section(
+internal fun Section(
     category: LogCategory,
     state: DayLogUiState.Ready,
     hint: String? = null,
@@ -225,7 +241,7 @@ private fun RatingSection(
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
-private fun ChipRow(content: @Composable () -> Unit) {
+internal fun ChipRow(content: @Composable () -> Unit) {
     FlowRow(
         horizontalArrangement = Arrangement.spacedBy(CadenceTheme.spacing.sm),
         verticalArrangement = Arrangement.spacedBy(CadenceTheme.spacing.xs),

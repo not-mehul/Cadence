@@ -6,7 +6,16 @@ import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
 
 @Database(
-    entities = [DayLogEntity::class, SettingsEntity::class, DayTagEntity::class, CycleAnnotationEntity::class],
+    entities = [
+        DayLogEntity::class,
+        SettingsEntity::class,
+        DayTagEntity::class,
+        CycleAnnotationEntity::class,
+        ContraceptiveDoseEntity::class,
+        MedicationEntity::class,
+        MedicationDoseEntity::class,
+        CustomTagEntity::class,
+    ],
     version = CadenceDatabase.VERSION,
     exportSchema = true,
     autoMigrations = [
@@ -20,6 +29,8 @@ import androidx.room.TypeConverters
         AutoMigration(from = 4, to = 5),
         // v6 (Phase 5): app lock and screenshot blocking.
         AutoMigration(from = 5, to = 6),
+        // v7 (Phase 6): birth control schedule and doses, medications, custom tags.
+        AutoMigration(from = 6, to = 7),
     ],
 )
 @TypeConverters(Converters::class)
@@ -32,8 +43,14 @@ abstract class CadenceDatabase : RoomDatabase() {
 
     abstract fun cycleAnnotationDao(): CycleAnnotationDao
 
+    abstract fun contraceptiveDoseDao(): ContraceptiveDoseDao
+
+    abstract fun medicationDao(): MedicationDao
+
+    abstract fun customTagDao(): CustomTagDao
+
     companion object {
-        const val VERSION = 6
+        const val VERSION = 7
         const val FILE_NAME = "cadence.db"
     }
 }

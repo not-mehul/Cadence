@@ -2,12 +2,20 @@ package app.cadence.core.data.backup
 
 import app.cadence.core.data.asLazy
 import app.cadence.core.data.inMemoryDatabase
+import app.cadence.core.data.repository.RoomContraceptionRepository
+import app.cadence.core.data.repository.RoomCustomTagRepository
 import app.cadence.core.data.repository.RoomCycleAnnotationRepository
 import app.cadence.core.data.repository.RoomDataEraser
 import app.cadence.core.data.repository.RoomDayEntryRepository
+import app.cadence.core.data.repository.RoomMedicationRepository
 import app.cadence.core.data.repository.RoomSettingsRepository
+import app.cadence.core.domain.contraception.ContraceptiveMethod
+import app.cadence.core.domain.contraception.ContraceptiveSchedule
+import app.cadence.core.domain.contraception.DoseStatus
 import app.cadence.core.domain.log.DayEntry
 import app.cadence.core.domain.log.Severity
+import app.cadence.core.domain.medication.Medication
+import app.cadence.core.domain.medication.MedicationUse
 import app.cadence.core.domain.model.Goal
 import app.cadence.core.domain.model.MenstrualFlow
 import app.cadence.core.domain.security.SecuritySettings
@@ -20,6 +28,7 @@ import org.robolectric.RobolectricTestRunner
 import java.time.Clock
 import java.time.Instant
 import java.time.LocalDate
+import java.time.LocalTime
 import kotlin.test.assertEquals
 
 @RunWith(RobolectricTestRunner::class)
@@ -30,18 +39,48 @@ class RoomBackupRepositoryTest {
     private val entries = RoomDayEntryRepository(db.asLazy(), clock)
     private val settings = RoomSettingsRepository(db.asLazy())
     private val annotations = RoomCycleAnnotationRepository(db.asLazy())
+    private val contraception = RoomContraceptionRepository(db.asLazy(), clock)
+    private val medications = RoomMedicationRepository(db.asLazy())
+    private val tags = RoomCustomTagRepository(db.asLazy())
     private val d1 = LocalDate.of(2026, 3, 1)
 
     @After
     fun tearDown() = db.close()
 
+    private val schedule =
+        ContraceptiveSchedule(
+            ContraceptiveMethod.PILL,
+            LocalDate.of(2026, 2, 23),
+            activeDays = 24,
+            breakDays = 4,
+            placebo = true,
+            since = LocalDate.of(2026, 2, 25),
+            reminderEnabled = true,
+            reminderTime = LocalTime.of(21, 30),
+        )
+
     private suspend fun seed() {
-        settings.update { it.copy(goal = Goal.BIRTH_CONTROL, onboardingComplete = true) }
+        settings.update { it.copy(goal = Goal.BIRTH_CONTROL, onboardingComplete = true, contraception = schedule) }
+        val travel = tags.create("Travel")
+        tags.create("Gym")
         entries.save(
-            DayEntry(d1, flow = MenstrualFlow.HEAVY, symptoms = mapOf("cramps" to Severity.MODERATE), painLevel = 6),
+            DayEntry(
+                d1,
+                flow = MenstrualFlow.HEAVY,
+                symptoms = mapOf("cramps" to Severity.MODERATE),
+                painLevel = 6,
+                tags = setOf(travel),
+            ),
         )
         entries.save(DayEntry(d1.plusDays(1), moods = setOf("calm"), note = "fine"))
         annotations.setExcluded(LocalDate.of(2026, 1, 1), true)
+        contraception.record(d1, DoseStatus.TAKEN)
+        contraception.record(d1.plusDays(1), DoseStatus.MISSED)
+        val iron = medications.save(Medication(0, "Iron", MedicationUse.DAILY, LocalTime.of(8, 0)))
+        val ibuprofen = medications.save(Medication(0, "Ibuprofen", MedicationUse.AS_NEEDED, active = false))
+        medications.setTaken(d1, iron, true)
+        medications.setTaken(d1, ibuprofen, true)
+        medications.setTaken(d1.plusDays(1), iron, true)
     }
 
     @Test
@@ -57,6 +96,49 @@ class RoomBackupRepositoryTest {
             backups.restore(BackupCodec.decode(file, "pw".toCharArray()), ImportMode.REPLACE)
 
             assertEquals(before, backups.snapshot())
+            // Everything Phase 6 adds made the trip.
+            assertEquals(schedule, before.settings.contraception)
+            assertEquals(2, before.customTags.size)
+            assertEquals(2, before.medications.size)
+            assertEquals(2, before.contraceptiveDoses.size)
+            assertEquals(3, before.medicationDoses.values.sumOf { it.size })
+        }
+
+    @Test
+    fun `merge matches tags and medications by name and adds the rest`() =
+        runTest {
+            seed()
+            val backup = backups.snapshot()
+            RoomDataEraser(db.asLazy()).eraseAll()
+            // Here already: "travel" (different id and case) and a different medication.
+            tags.create("Other")
+            val localTravel = tags.create("travel")
+            medications.save(Medication(0, "Vitamin D", MedicationUse.DAILY))
+            val localIron = medications.save(Medication(0, "IRON", MedicationUse.DAILY))
+
+            backups.restore(backup, ImportMode.MERGE)
+
+            val after = backups.snapshot()
+            assertEquals(listOf("Other", "travel", "Gym"), after.customTags.map { it.label })
+            assertEquals(setOf(localTravel), after.entries.first { it.date == d1 }.tags)
+            assertEquals(listOf("Vitamin D", "IRON", "Ibuprofen"), after.medications.map { it.name })
+            assertEquals(setOf(localIron), after.medicationDoses[d1.plusDays(1)])
+            assertEquals(backup.contraceptiveDoses, after.contraceptiveDoses)
+        }
+
+    @Test
+    fun `replace removes tags, medications and doses that aren't in the backup`() =
+        runTest {
+            seed()
+            val backup = backups.snapshot()
+            tags.create("Extra")
+            val extra = medications.save(Medication(0, "Extra", MedicationUse.AS_NEEDED))
+            medications.setTaken(d1.plusDays(5), extra, true)
+            contraception.record(d1.plusDays(5), DoseStatus.TAKEN)
+
+            backups.restore(backup, ImportMode.REPLACE)
+
+            assertEquals(backup, backups.snapshot())
         }
 
     @Test
@@ -101,7 +183,10 @@ class RoomBackupRepositoryTest {
 
             val after = backups.snapshot()
             assertEquals(Goal.TRACK, after.settings.goal)
-            assertEquals(backup.entries.first(), after.entries.first { it.date == d1 })
+            // Merged tags get ids of their own here, so compare them by label.
+            val merged = after.entries.first { it.date == d1 }
+            assertEquals(backup.entries.first().copy(tags = emptySet()), merged.copy(tags = emptySet()))
+            assertEquals(listOf("Travel"), merged.tags.map { id -> after.customTags.first { it.id == id }.label })
             assertEquals(DayEntry(d1.plusDays(20), stress = 2), after.entries.last())
             assertEquals(3, after.entries.size)
             assertEquals(setOf(LocalDate.of(2026, 1, 1)), after.excludedCycleStarts)

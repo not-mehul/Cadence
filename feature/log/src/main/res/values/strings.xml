@@ -13,4 +13,14 @@
     <string name="log_note_placeholder">Anything else worth remembering?</string>
     <string name="log_note_count">%1$d / %2$d</string>
     <string name="log_symptom_state_off">Not logged</string>
+
+    <!-- Phase 6 -->
+    <string name="log_birth_control">Birth control</string>
+    <string name="log_dose_taken">Did it</string>
+    <string name="log_dose_missed">Missed it</string>
+    <string name="log_tag_new">+ New tag</string>
+    <string name="log_tag_new_title">New tag</string>
+    <string name="log_tag_label">Tag</string>
+    <string name="log_tag_add">Add</string>
+    <string name="log_cancel">Cancel</string>
 </resources>

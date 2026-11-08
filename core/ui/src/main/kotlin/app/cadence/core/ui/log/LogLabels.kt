@@ -3,6 +3,7 @@ package app.cadence.core.ui.log
 import androidx.annotation.StringRes
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.res.stringResource
+import app.cadence.core.domain.log.CustomTag
 import app.cadence.core.domain.log.DayEntry
 import app.cadence.core.domain.log.LogCatalog
 import app.cadence.core.domain.log.LogCategory
@@ -53,6 +54,17 @@ object LogLabels {
     @Composable
     fun mood(id: String): String = moods[id]?.let { stringResource(it) } ?: id
 
+    /** A symptom, mood or custom tag by its pattern item id (see [app.cadence.core.domain.log.DayEntry.patternItems]). */
+    @Composable
+    fun item(
+        id: String,
+        tagLabels: Map<Long, String>,
+    ): String = CustomTag.fromItemId(id)?.let { tagLabels[it] } ?: itemRes(id)?.let { stringResource(it) } ?: id
+
+    /** For non-Compose callers: the built-in symptom or mood label, or null (a custom tag or unknown id). */
+    @StringRes
+    fun itemRes(id: String): Int? = symptoms[id] ?: moods[id]
+
     @StringRes
     fun flow(flow: MenstrualFlow?): Int =
         when (flow) {
@@ -91,11 +103,16 @@ object LogLabels {
             LogCategory.STRESS -> R.string.category_stress
             LogCategory.SEX -> R.string.category_sex
             LogCategory.NOTES -> R.string.category_notes
+            LogCategory.TAGS -> R.string.category_tags
+            LogCategory.MEDICATIONS -> R.string.category_medications
         }
 
-    /** Short labels summarising a day, in log-sheet order. Used on Today. */
+    /** Short labels summarising a day, in log-sheet order. Used on Today. [tagLabels] names custom tags. */
     @Composable
-    fun summary(entry: DayEntry): List<String> =
+    fun summary(
+        entry: DayEntry,
+        tagLabels: Map<Long, String> = emptyMap(),
+    ): List<String> =
         buildList {
             entry.flow?.let { add(stringResource(R.string.flow_summary, stringResource(flow(it)))) }
             LogCatalog.symptoms.filter { it in entry.symptoms }.forEach { id ->
@@ -103,6 +120,10 @@ object LogLabels {
                 add(stringResource(R.string.symptom_with_severity, symptom(id), severity))
             }
             LogCatalog.moods.filter { it in entry.moods }.forEach { add(mood(it)) }
+            entry.tags
+                .mapNotNull(tagLabels::get)
+                .sortedBy { it.lowercase() }
+                .forEach(::add)
             entry.painLevel?.let { add(stringResource(R.string.summary_pain, it)) }
             entry.energy?.let {
                 add(

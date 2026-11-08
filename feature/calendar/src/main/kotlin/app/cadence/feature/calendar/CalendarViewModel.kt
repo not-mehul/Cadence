@@ -7,6 +7,7 @@ import app.cadence.core.data.repository.DayEntryRepository
 import app.cadence.core.data.repository.PeriodRepository
 import app.cadence.core.data.repository.SettingsRepository
 import app.cadence.core.data.time.DateSource
+import app.cadence.core.domain.contraception.ContraceptiveSchedule
 import app.cadence.core.domain.cycles.CalendarMarks
 import app.cadence.core.domain.cycles.CycleHistory
 import app.cadence.core.domain.cycles.CyclePrediction
@@ -36,12 +37,15 @@ sealed interface CalendarUiState {
         val detailDates: Set<LocalDate> = emptySet(),
         /** Set when fertile-window estimates apply (tracking mode); null on hormonal birth control. */
         val lutealPhaseLength: Int? = null,
+        /** On a pill, patch or ring schedule, its breaks are the expected bleeds. */
+        val schedule: ContraceptiveSchedule? = null,
     ) : CalendarUiState {
         val showsFertileWindow: Boolean
             get() = lutealPhaseLength != null
 
         fun marksFor(month: YearMonth): Map<LocalDate, DayMark> =
-            CalendarMarks.forMonth(month, flowByDay, prediction, lutealPhaseLength)
+            schedule?.let { CalendarMarks.forSchedule(month, flowByDay, it, today) }
+                ?: CalendarMarks.forMonth(month, flowByDay, prediction, lutealPhaseLength)
 
         /** Past days and today can be toggled; future days can only be cleared (e.g. a pre-filled period). */
         fun canToggle(date: LocalDate): Boolean = !date.isAfter(today) || isLogged(date)
@@ -74,14 +78,15 @@ class CalendarViewModel
                         details,
                         annotations.excludedStarts,
                     ) { flowByDay, s, detailDates, excluded ->
+                        val schedule = s.activeSchedule
                         val prediction =
-                            CyclePredictor.predict(
-                                CycleHistory.from(flowByDay, excluded),
-                                s.cycleDefaults,
-                                today,
-                            )
+                            if (schedule != null) {
+                                null
+                            } else {
+                                CyclePredictor.predict(CycleHistory.from(flowByDay, excluded), s.cycleDefaults, today)
+                            }
                         val luteal = s.lutealPhaseLength.takeIf { s.goal.showsOvulationEstimates }
-                        CalendarUiState.Ready(today, flowByDay, prediction, detailDates, luteal)
+                        CalendarUiState.Ready(today, flowByDay, prediction, detailDates, luteal, schedule)
                     }
                 }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), CalendarUiState.Loading)
 

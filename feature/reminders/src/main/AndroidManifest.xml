@@ -12,6 +12,11 @@
             android:name=".ReminderReceiver"
             android:exported="false" />
 
+        <!-- "Done" on a dose reminder; sent by our own notifications only. -->
+        <receiver
+            android:name=".DoseDoneReceiver"
+            android:exported="false" />
+
         <!-- System broadcasts after which alarms must be re-armed. -->
         <receiver
             android:name=".RescheduleReceiver"

@@ -46,6 +46,7 @@ internal fun RemindersSection(
     reminders: ReminderSettings,
     status: ReminderStatus,
     actions: SettingsActions,
+    onSchedule: Boolean = false,
 ) {
     var dialog by rememberSaveable { mutableStateOf(ReminderDialog.NONE) }
     val gutter = CadenceTheme.spacing.screenGutter
@@ -60,41 +61,16 @@ internal fun RemindersSection(
 
     Column {
         SectionHeader(stringResource(R.string.settings_section_reminders), Modifier.padding(horizontal = gutter))
-        SwitchRow(
-            title = stringResource(R.string.settings_reminder_period),
-            detail =
-                pluralStringResource(
-                    R.plurals.settings_reminder_period_detail,
-                    reminders.periodDaysBefore,
-                    reminders.periodDaysBefore,
-                ),
-            checked = reminders.periodEnabled,
-            onCheckedChange = { change(reminders.copy(periodEnabled = it)) },
-        )
-        if (reminders.periodEnabled) {
-            ValueRow(
-                title = stringResource(R.string.settings_reminder_days_before),
-                value =
-                    pluralStringResource(
-                        R.plurals.settings_reminder_days_value,
-                        reminders.periodDaysBefore,
-                        reminders.periodDaysBefore,
-                    ),
-                onClick = { dialog = ReminderDialog.DAYS_BEFORE },
+        if (onSchedule) {
+            // Bleeds follow the pack, so period reminders don't apply; the birth control reminder is above.
+            Text(
+                stringResource(R.string.settings_reminder_on_schedule),
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.padding(horizontal = gutter, vertical = CadenceTheme.spacing.sm),
             )
-        }
-        SwitchRow(
-            title = stringResource(R.string.settings_reminder_late),
-            detail = stringResource(R.string.settings_reminder_late_detail),
-            checked = reminders.lateEnabled,
-            onCheckedChange = { change(reminders.copy(lateEnabled = it)) },
-        )
-        if (reminders.periodEnabled || reminders.lateEnabled) {
-            ValueRow(
-                title = stringResource(R.string.settings_reminder_period_time),
-                value = timeFormat.format(reminders.periodTime),
-                onClick = { dialog = ReminderDialog.PERIOD_TIME },
-            )
+        } else {
+            PeriodReminderRows(reminders, timeFormat, ::change) { dialog = it }
         }
         SwitchRow(
             title = stringResource(R.string.settings_reminder_daily),
@@ -187,7 +163,7 @@ internal fun SwitchRow(
 }
 
 @Composable
-private fun ValueRow(
+internal fun ValueRow(
     title: String,
     value: String,
     onClick: () -> Unit,
@@ -221,7 +197,7 @@ private fun Warning(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun TimeDialog(
+internal fun TimeDialog(
     title: String,
     initial: LocalTime,
     onDismiss: () -> Unit,
@@ -244,4 +220,52 @@ private fun TimeDialog(
         },
         dismissButton = { TextButton(onClick = onDismiss) { Text(stringResource(R.string.settings_cancel)) } },
     )
+}
+
+/** Before-the-period and late-period reminders; not used on a birth control schedule. */
+@Composable
+private fun PeriodReminderRows(
+    reminders: ReminderSettings,
+    timeFormat: DateTimeFormatter,
+    change: (ReminderSettings) -> Unit,
+    open: (ReminderDialog) -> Unit,
+) {
+    Column {
+        SwitchRow(
+            title = stringResource(R.string.settings_reminder_period),
+            detail =
+                pluralStringResource(
+                    R.plurals.settings_reminder_period_detail,
+                    reminders.periodDaysBefore,
+                    reminders.periodDaysBefore,
+                ),
+            checked = reminders.periodEnabled,
+            onCheckedChange = { change(reminders.copy(periodEnabled = it)) },
+        )
+        if (reminders.periodEnabled) {
+            ValueRow(
+                title = stringResource(R.string.settings_reminder_days_before),
+                value =
+                    pluralStringResource(
+                        R.plurals.settings_reminder_days_value,
+                        reminders.periodDaysBefore,
+                        reminders.periodDaysBefore,
+                    ),
+                onClick = { open(ReminderDialog.DAYS_BEFORE) },
+            )
+        }
+        SwitchRow(
+            title = stringResource(R.string.settings_reminder_late),
+            detail = stringResource(R.string.settings_reminder_late_detail),
+            checked = reminders.lateEnabled,
+            onCheckedChange = { change(reminders.copy(lateEnabled = it)) },
+        )
+        if (reminders.periodEnabled || reminders.lateEnabled) {
+            ValueRow(
+                title = stringResource(R.string.settings_reminder_period_time),
+                value = timeFormat.format(reminders.periodTime),
+                onClick = { open(ReminderDialog.PERIOD_TIME) },
+            )
+        }
+    }
 }

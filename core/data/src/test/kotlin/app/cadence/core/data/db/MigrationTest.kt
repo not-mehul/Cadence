@@ -10,6 +10,7 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import kotlin.test.assertEquals
+import kotlin.test.assertTrue
 
 /**
  * Guards the committed schema files and the migration chain. Runs on the JVM with
@@ -119,6 +120,36 @@ class MigrationTest {
                     c.moveToFirst()
                     assertEquals(listOf(0, 2, 540, 0, 0, 1200, 1), (0..6).map { c.getInt(it) })
                 }
+        }
+    }
+
+    @Test
+    fun `v6 to v7 adds birth control settings with no schedule, and empty Phase 6 tables`() {
+        helper.createDatabase(TEST_DB, 6).use { db ->
+            db.execSQL(
+                "INSERT INTO settings (id, goal, cycle_length, period_length, luteal_phase_length, theme, " +
+                    "onboarding_complete, hidden_categories) VALUES (0, 'BIRTH_CONTROL', 28, 5, 14, 'SYSTEM', 1, '')",
+            )
+        }
+
+        helper.runMigrationsAndValidate(TEST_DB, 7, true, *ALL_MIGRATIONS).use { db ->
+            db
+                .query(
+                    "SELECT bc_method, bc_pack_start, bc_active_days, bc_break_days, bc_placebo, " +
+                        "bc_reminder_enabled, bc_reminder_minute, goal FROM settings",
+                ).use { c ->
+                    c.moveToFirst()
+                    assertTrue(c.isNull(0))
+                    assertTrue(c.isNull(1))
+                    assertEquals(listOf(21, 7, 0, 0, 540), (2..6).map { c.getInt(it) })
+                    assertEquals("BIRTH_CONTROL", c.getString(7))
+                }
+            listOf("contraceptive_dose", "medication", "medication_dose", "custom_tag").forEach { table ->
+                db.query("SELECT COUNT(*) FROM $table").use { c ->
+                    c.moveToFirst()
+                    assertEquals(0, c.getInt(0), table)
+                }
+            }
         }
     }
 

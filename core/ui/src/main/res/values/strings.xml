@@ -63,6 +63,8 @@
     <string name="category_stress">Stress</string>
     <string name="category_sex">Sex</string>
     <string name="category_notes">Notes</string>
+    <string name="category_tags">Tags</string>
+    <string name="category_medications">Medications</string>
 
     <!-- Summaries -->
     <string name="summary_pain">Pain %1$d/10</string>
@@ -71,4 +73,37 @@
 
     <!-- Scale -->
     <string name="scale_value">%1$s, %2$d of %3$d</string>
+
+    <!-- Birth control (Phase 6) -->
+    <string name="bc_method_pill">Pill</string>
+    <string name="bc_method_patch">Patch</string>
+    <string name="bc_method_ring">Ring</string>
+    <string name="bc_task_pill">Take today\'s pill</string>
+    <string name="bc_task_placebo">Take today\'s placebo pill</string>
+    <string name="bc_task_new_patch">Put on a new patch</string>
+    <string name="bc_task_remove_patch">Take off your patch</string>
+    <string name="bc_task_new_ring">Put in a new ring</string>
+    <string name="bc_task_remove_ring">Take out your ring</string>
+    <string name="bc_noun_pill">Pill</string>
+    <string name="bc_noun_placebo">Placebo pill</string>
+    <string name="bc_noun_new_patch">New patch</string>
+    <string name="bc_noun_remove_patch">Patch off</string>
+    <string name="bc_noun_new_ring">New ring</string>
+    <string name="bc_noun_remove_ring">Ring out</string>
+    <string name="bc_done_pill">Pill taken</string>
+    <string name="bc_done_placebo">Placebo pill taken</string>
+    <string name="bc_done_new_patch">New patch on</string>
+    <string name="bc_done_remove_patch">Patch off</string>
+    <string name="bc_done_new_ring">New ring in</string>
+    <string name="bc_done_remove_ring">Ring out</string>
+    <string name="bc_layout_continuous">continuous, no break</string>
+    <plurals name="bc_layout_break">
+        <item quantity="one">%1$s, then a %2$d-day break</item>
+        <item quantity="other">%1$s, then a %2$d-day break</item>
+    </plurals>
+    <plurals name="bc_layout_placebo">
+        <item quantity="one">%1$s, then %2$d placebo day</item>
+        <item quantity="other">%1$s, then %2$d placebo days</item>
+    </plurals>
+    <string name="bc_summary">%1$s · %2$s</string>
 </resources>

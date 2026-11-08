@@ -24,6 +24,8 @@ data class DayEntry(
     val stress: Int? = null,
     val sex: SexActivity? = null,
     val note: String? = null,
+    /** Ids of the user's own tags (see [CustomTag]). */
+    val tags: Set<Long> = emptySet(),
 ) {
     init {
         painLevel?.let { require(it in PAIN_RANGE) { "painLevel must be in $PAIN_RANGE, was $it" } }
@@ -49,11 +51,39 @@ data class DayEntry(
 
     fun toggleMood(id: String): DayEntry = copy(moods = if (id in moods) moods - id else moods + id)
 
+    fun toggleTag(id: Long): DayEntry = copy(tags = if (id in tags) tags - id else tags + id)
+
+    /** Everything that can form a pattern: symptoms, moods and custom tags (see [CustomTag.itemId]). */
+    fun patternItems(): Set<String> = symptoms.keys + moods + tags.map(CustomTag::itemId)
+
     companion object {
         private val SEVERITY_CYCLE = listOf(null) + Severity.entries
 
         val PAIN_RANGE = 0..10
         val RATING_RANGE = 1..5
         const val MAX_NOTE_LENGTH = 1_000
+    }
+}
+
+/** A tag the user made up, logged like a mood. */
+data class CustomTag(
+    val id: Long,
+    val label: String,
+) {
+    init {
+        require(
+            label.isNotBlank() && label.length <= MAX_LABEL_LENGTH,
+        ) { "label must be 1 to $MAX_LABEL_LENGTH characters" }
+    }
+
+    companion object {
+        const val MAX_LABEL_LENGTH = 30
+        private const val ITEM_PREFIX = "tag:"
+
+        /** How a custom tag is named among symptom and mood ids, which never contain a colon. */
+        fun itemId(id: Long): String = "$ITEM_PREFIX$id"
+
+        /** The tag id inside [itemId], or null for a symptom or mood. */
+        fun fromItemId(itemId: String): Long? = itemId.removePrefix(ITEM_PREFIX).takeIf { it != itemId }?.toLongOrNull()
     }
 }

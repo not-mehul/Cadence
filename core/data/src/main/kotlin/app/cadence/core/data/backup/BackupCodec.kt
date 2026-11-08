@@ -1,9 +1,15 @@
 package app.cadence.core.data.backup
 
+import app.cadence.core.domain.contraception.ContraceptiveMethod
+import app.cadence.core.domain.contraception.ContraceptiveSchedule
+import app.cadence.core.domain.contraception.DoseStatus
+import app.cadence.core.domain.log.CustomTag
 import app.cadence.core.domain.log.DayEntry
 import app.cadence.core.domain.log.LogCategory
 import app.cadence.core.domain.log.Severity
 import app.cadence.core.domain.log.SexActivity
+import app.cadence.core.domain.medication.Medication
+import app.cadence.core.domain.medication.MedicationUse
 import app.cadence.core.domain.model.CycleDefaults
 import app.cadence.core.domain.model.Goal
 import app.cadence.core.domain.model.MenstrualFlow
@@ -33,6 +39,12 @@ data class BackupData(
     val settings: UserSettings,
     val entries: List<DayEntry>,
     val excludedCycleStarts: Set<LocalDate>,
+    val contraceptiveDoses: Map<LocalDate, DoseStatus> = emptyMap(),
+    val medications: List<Medication> = emptyList(),
+    /** Medication ids taken each day; ids match [medications]. */
+    val medicationDoses: Map<LocalDate, Set<Long>> = emptyMap(),
+    /** Ids match the entries' [DayEntry.tags]. */
+    val customTags: List<CustomTag> = emptyList(),
 )
 
 /**
@@ -234,6 +246,19 @@ object BackupCodec {
                     dailyReminderEnabled = s.reminders.dailyEnabled,
                     dailyReminderTime = s.reminders.dailyTime.toString(),
                     discreetNotifications = s.reminders.discreet,
+                    contraception =
+                        s.contraception?.let { c ->
+                            BackupContraception(
+                                method = c.method.name,
+                                packStart = c.packStart.toString(),
+                                activeDays = c.activeDays,
+                                breakDays = c.breakDays,
+                                placebo = c.placebo,
+                                since = c.since.toString(),
+                                reminderEnabled = c.reminderEnabled,
+                                reminderTime = c.reminderTime.toString(),
+                            )
+                        },
                 ),
             days =
                 data.entries.filterNot { it.isEmpty }.sortedBy { it.date }.map { e ->
@@ -248,9 +273,23 @@ object BackupCodec {
                         stress = e.stress,
                         sex = e.sex?.name,
                         note = e.note,
+                        tags = e.tags.sorted(),
                     )
                 },
             excludedCycleStarts = data.excludedCycleStarts.sorted().map { it.toString() },
+            contraceptiveDoses =
+                data.contraceptiveDoses.toSortedMap().map { (date, status) ->
+                    BackupDose(date.toString(), status.name)
+                },
+            medications =
+                data.medications.sortedBy { it.id }.map { m ->
+                    BackupMedication(m.id, m.name, m.use.name, m.reminderTime?.toString(), m.active)
+                },
+            medicationDoses =
+                data.medicationDoses.toSortedMap().flatMap { (date, ids) ->
+                    ids.sorted().map { BackupMedicationDose(date.toString(), it) }
+                },
+            customTags = data.customTags.sortedBy { it.id }.map { BackupTag(it.id, it.label) },
         )
     }
 
@@ -274,6 +313,19 @@ object BackupCodec {
                         dailyTime = LocalTime.parse(s.dailyReminderTime),
                         discreet = s.discreetNotifications,
                     ),
+                contraception =
+                    s.contraception?.let { c ->
+                        ContraceptiveSchedule(
+                            method = ContraceptiveMethod.valueOf(c.method),
+                            packStart = LocalDate.parse(c.packStart),
+                            activeDays = c.activeDays,
+                            breakDays = c.breakDays,
+                            placebo = c.placebo,
+                            since = LocalDate.parse(c.since),
+                            reminderEnabled = c.reminderEnabled,
+                            reminderTime = LocalTime.parse(c.reminderTime),
+                        )
+                    },
             )
         val entries =
             doc.days.map { d ->
@@ -288,9 +340,46 @@ object BackupCodec {
                     stress = d.stress,
                     sex = d.sex?.let(SexActivity::valueOf),
                     note = d.note,
+                    tags = d.tags.toSet(),
                 )
             }
         require(entries.map { it.date }.toSet().size == entries.size) { "Duplicate days" }
-        return BackupData(settings, entries, doc.excludedCycleStarts.map(LocalDate::parse).toSet())
+        val tags = doc.customTags.map { CustomTag(it.id, it.label) }
+        val tagIds = tags.map { it.id }.toSet()
+        require(tagIds.size == tags.size) { "Duplicate tag ids" }
+        require(entries.all { tagIds.containsAll(it.tags) }) { "A day uses a tag that isn't in the backup" }
+        val medications =
+            doc.medications.map { m ->
+                Medication(m.id, m.name, MedicationUse.valueOf(m.use), m.reminderTime?.let(LocalTime::parse), m.active)
+            }
+        val medicationIds = medications.map { it.id }.toSet()
+        require(medicationIds.size == medications.size) { "Duplicate medication ids" }
+        require(
+            doc.medicationDoses.all {
+                it.medicationId in medicationIds
+            },
+        ) { "A dose is for a medication that isn't in the backup" }
+        require(
+            doc.contraceptiveDoses
+                .map { it.date }
+                .toSet()
+                .size == doc.contraceptiveDoses.size,
+        ) { "Duplicate doses" }
+        return BackupData(
+            settings = settings,
+            entries = entries,
+            excludedCycleStarts = doc.excludedCycleStarts.map(LocalDate::parse).toSet(),
+            contraceptiveDoses =
+                doc.contraceptiveDoses.associate {
+                    LocalDate.parse(it.date) to
+                        DoseStatus.valueOf(it.status)
+                },
+            medications = medications,
+            medicationDoses =
+                doc.medicationDoses
+                    .groupBy({ LocalDate.parse(it.date) }, { it.medicationId })
+                    .mapValues { it.value.toSet() },
+            customTags = tags,
+        )
     }
 }

@@ -2,7 +2,7 @@ package app.cadence.core.domain.log
 
 /**
  * The built-in symptoms and moods. Ids are stored in the database, so they must never
- * change; labels live in the UI's string resources. Custom tags arrive in Phase 6.
+ * change; labels live in the UI's string resources. Custom tags are [CustomTag]s.
  */
 object LogCatalog {
     val symptoms: List<String> =
@@ -47,6 +47,12 @@ enum class LogCategory {
     STRESS,
     SEX,
     NOTES,
+
+    /** The user's own tags (Phase 6). */
+    TAGS,
+
+    /** Medications besides birth control (Phase 6). */
+    MEDICATIONS,
     ;
 
     val canBeHidden: Boolean

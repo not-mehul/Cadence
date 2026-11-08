@@ -2,6 +2,7 @@ package app.cadence.feature.insights
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import app.cadence.core.data.repository.CustomTagRepository
 import app.cadence.core.data.repository.CycleAnnotationRepository
 import app.cadence.core.data.repository.DayEntryRepository
 import app.cadence.core.data.repository.PeriodRepository
@@ -13,6 +14,9 @@ import app.cadence.core.domain.cycles.CyclePrediction
 import app.cadence.core.domain.cycles.CyclePredictor
 import app.cadence.core.domain.cycles.CycleStats
 import app.cadence.core.domain.cycles.HealthFlag
+import app.cadence.core.domain.log.CustomTag
+import app.cadence.core.domain.patterns.SymptomPattern
+import app.cadence.core.domain.patterns.SymptomPatterns
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -50,6 +54,10 @@ sealed interface InsightsUiState {
         val cycles: List<CycleRow>,
         val currentCycle: CurrentCycle?,
         val flags: List<HealthFlag>,
+        /** Symptoms, moods and tags the user tends to log at the same point in their cycle. */
+        val patterns: List<SymptomPattern> = emptyList(),
+        /** Custom tag labels by id, for [patterns]. */
+        val tagLabels: Map<Long, String> = emptyMap(),
     ) : InsightsUiState {
         /** The chart shows the most recent cycles. */
         val chartCycles: List<CycleRow>
@@ -70,21 +78,32 @@ class InsightsViewModel
         entries: DayEntryRepository,
         private val annotations: CycleAnnotationRepository,
         dates: DateSource,
+        tags: CustomTagRepository,
     ) : ViewModel() {
+        private val logged = combine(entries.painByDay, entries.patternItemsByDay, tags.tags, ::Logged)
+
         val uiState: StateFlow<InsightsUiState> =
             combine(
                 periods.flowByDay,
                 settings.settings,
                 annotations.excludedStarts,
-                entries.painByDay,
+                logged,
                 dates.today,
-            ) { flowByDay, s, excluded, pain, today ->
+            ) { flowByDay, s, excluded, l, today ->
                 val history = CycleHistory.from(flowByDay, excluded)
                 val periodLengths = history.periods.associate { it.start to it.length }
                 val current = history.latestPeriodStartedBy(today)
                 InsightsUiState.Ready(
                     stats = CycleInsights.stats(history, today),
-                    prediction = CyclePredictor.predict(history, s.cycleDefaults, today),
+                    // On a pill, patch or ring schedule, bleeds follow the pack, not the cycle history.
+                    prediction =
+                        if (s.activeSchedule !=
+                            null
+                        ) {
+                            null
+                        } else {
+                            CyclePredictor.predict(history, s.cycleDefaults, today)
+                        },
                     cycles =
                         history.cycles.map {
                             CycleRow(it.start, it.length, periodLengths.getValue(it.start), it.excluded)
@@ -96,9 +115,17 @@ class InsightsViewModel
                                 ChronoUnit.DAYS.between(it.start, today).toInt() + 1,
                             )
                         },
-                    flags = CycleInsights.healthFlags(history, pain, s.goal, today),
+                    flags = CycleInsights.healthFlags(history, l.pain, s.goal, today),
+                    patterns = SymptomPatterns.find(history, l.items),
+                    tagLabels = l.tags.associate { it.id to it.label },
                 )
             }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), InsightsUiState.Loading)
+
+        private class Logged(
+            val pain: Map<LocalDate, Int>,
+            val items: Map<LocalDate, Set<String>>,
+            val tags: List<CustomTag>,
+        )
 
         fun setIncluded(
             cycleStart: LocalDate,

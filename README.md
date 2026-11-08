@@ -4,12 +4,12 @@ A simple, private period-tracking companion app for **Android**, built natively 
 
 - **Device only:** no account and no server. The app doesn't even hold the `INTERNET` permission; its only permissions are for showing reminders, re-arming them after a reboot, and showing the system's fingerprint or screen-lock prompt for the optional app lock.
 - **Encrypted:** data is stored in a SQLCipher database whose key is protected by the Android Keystore.
-- **Two modes:** cycle tracking and hormonal birth control.
+- **Two modes:** cycle tracking, and hormonal birth control (follows your pill, patch or ring schedule, with dose check-off and reminders).
 - **Sideloaded:** distributed as an APK; no Play Store required.
 
-> **Status:** Phases 0 (foundation), 1 (MVP: onboarding, one-tap period logging, predictions, calendar, settings) 2 (daily logging: symptoms, mood, pain, energy, sleep, stress, sex, notes) 3 (confidence-ranged predictions, fertile window, Insights with health flags), 4 (discreet reminders) and 5 (app lock, screenshot blocking, password-protected backup and restore, CSV export, clinician PDF report) are done. See [`docs/PLAN.md`](docs/PLAN.md) for the feature inventory, architecture, data model, prediction engine and phased roadmap.
+> **Status:** Phases 0 (foundation), 1 (MVP: onboarding, one-tap period logging, predictions, calendar, settings) 2 (daily logging: symptoms, mood, pain, energy, sleep, stress, sex, notes) 3 (confidence-ranged predictions, fertile window, Insights with health flags), 4 (discreet reminders) 5 (app lock, screenshot blocking, password-protected backup and restore, CSV export, clinician PDF report) and 6 (pill, patch and ring schedules with dose check-off, missed-dose prompts and reminders; medications; custom tags; symptom patterns) are done. See [`docs/PLAN.md`](docs/PLAN.md) for the feature inventory, architecture, data model, prediction engine and phased roadmap.
 
-![Phase 5: lock screen, privacy settings and the privacy explainer](docs/images/phase5-ui.png)
+![Phase 6: Today on a pill schedule, birth control and medication settings, and symptom patterns](docs/images/phase6-ui.png)
 
 ## Project layout
 

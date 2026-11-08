@@ -14,6 +14,9 @@ interface DayEntryRepository {
     /** Pain level for every day it was logged (for the pain health flag). */
     val painByDay: Flow<Map<LocalDate, Int>>
 
+    /** Symptoms, moods and custom tags logged each day (see [DayEntry.patternItems]), for symptom patterns. */
+    val patternItemsByDay: Flow<Map<LocalDate, Set<String>>>
+
     /** Days between [from] and [to] (inclusive) with anything logged besides flow. */
     fun observeDatesWithDetails(
         from: LocalDate,

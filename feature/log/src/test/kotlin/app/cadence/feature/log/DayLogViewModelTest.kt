@@ -1,11 +1,21 @@
 package app.cadence.feature.log
 
+import app.cadence.core.domain.contraception.ContraceptiveMethod
+import app.cadence.core.domain.contraception.ContraceptiveSchedule
+import app.cadence.core.domain.contraception.DoseAction
+import app.cadence.core.domain.contraception.DoseStatus
 import app.cadence.core.domain.log.DayEntry
 import app.cadence.core.domain.log.LogCategory
 import app.cadence.core.domain.log.Severity
+import app.cadence.core.domain.medication.Medication
+import app.cadence.core.domain.medication.MedicationUse
+import app.cadence.core.domain.model.Goal
 import app.cadence.core.domain.model.MenstrualFlow
 import app.cadence.core.domain.model.UserSettings
+import app.cadence.core.testing.FakeContraceptionRepository
+import app.cadence.core.testing.FakeCustomTagRepository
 import app.cadence.core.testing.FakeDayEntryRepository
+import app.cadence.core.testing.FakeMedicationRepository
 import app.cadence.core.testing.FakePeriodRepository
 import app.cadence.core.testing.FakeSettingsRepository
 import app.cadence.core.testing.MainDispatcherRule
@@ -33,7 +43,10 @@ class DayLogViewModelTest {
     private val entries = FakeDayEntryRepository(periods)
     private val settings =
         FakeSettingsRepository(UserSettings(onboardingComplete = true, hiddenCategories = setOf(LogCategory.SEX)))
-    private val vm by lazy { DayLogViewModel(entries, settings) { today } }
+    private val contraception = FakeContraceptionRepository()
+    private val medications = FakeMedicationRepository()
+    private val tags = FakeCustomTagRepository(entries)
+    private val vm by lazy { DayLogViewModel(entries, settings, { today }, contraception, medications, tags) }
 
     private fun kotlinx.coroutines.test.TestScope.ready(date: LocalDate = today): DayLogUiState.Ready {
         backgroundScope.launch { vm.uiState.collect {} }
@@ -134,5 +147,67 @@ class DayLogViewModelTest {
 
             assertEquals("for today", entries.entries.value[today]?.note)
             assertEquals(today.minusDays(1), assertIs<DayLogUiState.Ready>(vm.uiState.value).entry.date)
+        }
+
+    @Test
+    fun `the day's birth control dose is shown and recorded on a schedule`() =
+        runTest {
+            assertNull(ready().dose)
+            settings.update {
+                it.copy(
+                    goal = Goal.BIRTH_CONTROL,
+                    contraception = ContraceptiveSchedule.typical(ContraceptiveMethod.RING, LocalDate.of(2026, 3, 2)),
+                )
+            }
+            // 23 March is when the ring comes out.
+            val state = ready(LocalDate.of(2026, 3, 23))
+            assertEquals(DoseAction.REMOVE_RING, state.dose)
+
+            vm.recordDose(DoseStatus.TAKEN)
+            runCurrent()
+            assertEquals(DoseStatus.TAKEN, (vm.uiState.value as DayLogUiState.Ready).doseStatus)
+            assertEquals(mapOf(LocalDate.of(2026, 3, 23) to DoseStatus.TAKEN), contraception.doses.value)
+        }
+
+    @Test
+    fun `active medications, and stopped ones taken that day`() =
+        runTest {
+            val iron = medications.save(Medication(0, "Iron", MedicationUse.DAILY))
+            val old = medications.save(Medication(0, "Old", MedicationUse.DAILY, active = false))
+            medications.save(Medication(0, "Unused", MedicationUse.AS_NEEDED, active = false))
+            medications.setTaken(today, old, true)
+
+            assertEquals(
+                listOf("Iron" to false, "Old" to true),
+                ready().medications.map {
+                    it.medication.name to
+                        it.taken
+                },
+            )
+
+            vm.setMedicationTaken(iron, true)
+            runCurrent()
+            assertEquals(mapOf(today to setOf(old, iron)), medications.doses.value)
+        }
+
+    @Test
+    fun `a new tag is created and added to the day, once`() =
+        runTest {
+            ready()
+            vm.createTag("Travel")
+            runCurrent()
+            vm.createTag("travel")
+            vm.createTag(" ")
+            runCurrent()
+
+            val state = ready()
+            assertEquals(listOf("Travel"), state.tags.map { it.label })
+            assertEquals(setOf(state.tags.single().id), state.entry.tags)
+            assertEquals(
+                setOf(state.tags.single().id),
+                entries.entries.value
+                    .getValue(today)
+                    .tags,
+            )
         }
 }

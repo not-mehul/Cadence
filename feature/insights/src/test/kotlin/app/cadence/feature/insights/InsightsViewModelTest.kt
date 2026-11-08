@@ -1,8 +1,14 @@
 package app.cadence.feature.insights
 
+import app.cadence.core.domain.contraception.ContraceptiveMethod
+import app.cadence.core.domain.contraception.ContraceptiveSchedule
 import app.cadence.core.domain.cycles.HealthFlag
 import app.cadence.core.domain.log.DayEntry
+import app.cadence.core.domain.model.Goal
 import app.cadence.core.domain.model.MenstrualFlow
+import app.cadence.core.domain.patterns.PatternTiming
+import app.cadence.core.domain.patterns.SymptomPattern
+import app.cadence.core.testing.FakeCustomTagRepository
 import app.cadence.core.testing.FakeCycleAnnotationRepository
 import app.cadence.core.testing.FakeDateSource
 import app.cadence.core.testing.FakeDayEntryRepository
@@ -30,8 +36,10 @@ class InsightsViewModelTest {
     private val periods = FakePeriodRepository()
     private val entries = FakeDayEntryRepository(periods)
     private val annotations = FakeCycleAnnotationRepository()
+    private val settings = FakeSettingsRepository()
+    private val tags = FakeCustomTagRepository()
     private val vm by lazy {
-        InsightsViewModel(periods, FakeSettingsRepository(), entries, annotations, FakeDateSource(today))
+        InsightsViewModel(periods, settings, entries, annotations, FakeDateSource(today), tags)
     }
 
     private fun period(
@@ -98,5 +106,34 @@ class InsightsViewModelTest {
             }
 
             assertEquals(listOf<HealthFlag>(HealthFlag.SeverePain(3)), ready().flags)
+        }
+
+    @Test
+    fun `patterns, with custom tag labels`() =
+        runTest {
+            // Periods 5 Jan, 2 Feb, 2 Mar, 30 Mar: three completed cycles.
+            val starts = (0L until 4L).map { LocalDate.of(2026, 1, 5).plusDays(it * 28) }
+            periods.flowByDay.value = starts.map { period(it) }.reduce { a, b -> a + b }
+            val travel = tags.create("Travel")
+            starts.dropLast(1).forEach { start ->
+                entries.save(DayEntry(start.plusDays(13), tags = setOf(travel)))
+            }
+
+            val s = ready()
+            assertEquals(listOf(SymptomPattern("tag:$travel", PatternTiming.AROUND_CYCLE_DAY, 14, 3, 3)), s.patterns)
+            assertEquals(mapOf(travel to "Travel"), s.tagLabels)
+        }
+
+    @Test
+    fun `no history-based prediction on a pill schedule`() =
+        runTest {
+            periods.flowByDay.value = period(LocalDate.of(2026, 3, 1))
+            settings.update {
+                it.copy(
+                    goal = Goal.BIRTH_CONTROL,
+                    contraception = ContraceptiveSchedule.typical(ContraceptiveMethod.PILL, LocalDate.of(2026, 3, 2)),
+                )
+            }
+            assertNull(ready().prediction)
         }
 }

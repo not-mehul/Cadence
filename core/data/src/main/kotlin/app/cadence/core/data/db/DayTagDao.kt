@@ -23,6 +23,13 @@ interface DayTagDao {
     @Query("DELETE FROM day_tag WHERE date = :date")
     suspend fun deleteFor(date: LocalDate)
 
+    /** Removes a tag from every day it was logged (when a custom tag is deleted). */
+    @Query("DELETE FROM day_tag WHERE tag_id = :tagId")
+    suspend fun deleteTag(tagId: String)
+
+    @Query("SELECT date, tag_id FROM day_tag")
+    fun observeAllTagIds(): Flow<List<DateTagId>>
+
     /** Days in the range with anything logged besides flow: tags, or any other day_log field. */
     @Query(
         "SELECT date FROM day_tag WHERE date BETWEEN :from AND :to " +
@@ -34,3 +41,11 @@ interface DayTagDao {
         to: LocalDate,
     ): Flow<List<LocalDate>>
 }
+
+/** A tag logged on a day, without its details. */
+data class DateTagId(
+    @androidx.room.ColumnInfo(name = "date")
+    val date: LocalDate,
+    @androidx.room.ColumnInfo(name = "tag_id")
+    val tagId: String,
+)

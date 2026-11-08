@@ -277,7 +277,7 @@ data class Settings(                    // single-row table in the encrypted dat
 data class CycleAnnotation(val startDate: LocalDate, val excludeFromPredictions: Boolean, val reason: String?)
 ```
 
-**As built (schema v3):** symptoms and moods live in a `day_tag` table (`date`, `tag_id`, `kind`, `severity`) keyed by ids from a built-in catalogue in `:core:domain` (`LogCatalog`); custom tags (Phase 6) will add a definitions table. Discharge, medications and pregnancy tests come in later phases.
+**As built (schema v3):** symptoms and moods live in a `day_tag` table (`date`, `tag_id`, `kind`, `severity`) keyed by ids from a built-in catalogue in `:core:domain` (`LogCatalog`). **Schema v7 (Phase 6):** custom tags are rows in `custom_tag`, logged in `day_tag` with kind `CUSTOM` and tag id `tag:<id>`. Medications are in `medication` and `medication_dose`. Birth control doses are in `contraceptive_dose`, one per day (`TAKEN` or `MISSED`). The pill, patch or ring schedule is a set of settings columns rather than the generic `Medication` sketched above, because it drives predictions. Discharge and pregnancy tests are not built yet.
 
 **Deriving periods:** consecutive days with flow `LIGHT | MEDIUM | HEAVY` form a period. A gap of ≤ 1 day without flow is bridged. Spotting alone never *starts* a period.
 **Deriving cycles:** a cycle runs from one period's start to the day before the next period's start. The current cycle is open-ended.
@@ -466,7 +466,7 @@ Each phase ends with a **working, shippable app**. Phases are sized for one deve
 - **Permissions:** `androidx.biometric` adds `USE_BIOMETRIC` and `USE_FINGERPRINT` (Android 8.x). Both are normal permissions that only allow showing the system prompt, and they are now on the APK allowlist. There is still no network permission.
 - **Tests:** an export → erase → import round trip gives an identical snapshot. The PDF is rendered page by page on a device with `PdfRenderer`, in the emulator CI job. An E2E test shows that while locked, nothing but the lock screen is composed.
 
-### Phase 6: Birth control, medications & patterns
+### Phase 6: Birth control, medications & patterns ✅
 **Goal:** first-class support for hormonal birth control, plus deeper insights.
 - Birth control mode in full: contraceptive schedule (daily pill including placebo or break weeks, weekly patch, monthly ring), dose check-off on Today, missed-dose prompts, and reminders.
 - Other medications (painkillers, supplements) with optional reminders.
@@ -474,6 +474,17 @@ Each phase ends with a **working, shippable app**. Phases are sized for one deve
 - Custom tags.
 
 **Done when:** birth control mode changes predictions, the Today screen and reminders as specified, missed doses are surfaced, and switching between the two modes never loses data.
+
+**As built:**
+- **The schedule** is a repeating pack: active days, then 0 to 7 break days, with placebo pills as an option for pills. Settings offers pill, patch (changed weekly, with or without a patch-free week) and ring, plus "Something else" for an IUD, implant or injection. The user says which day of the pack today is, rather than picking a start date. The schedule is stored with the settings and kept when switching to cycle tracking, so switching back restores it. Doses live in their own table, so switching modes never touches them.
+- **Predictions on a schedule:** the pack, not cycle history, says when a bleed is expected. The break is the expected withdrawal bleed (on the calendar too), and "late" doesn't apply. On continuous use (no break), Cadence doesn't predict bleeding and says so. Without a pill, patch or ring schedule (an IUD, implant or injection), birth control mode keeps history-based predictions as before, still without ovulation estimates.
+- **Today** shows the pack as a ring (active days, then the break), "Break in N days", and today's task ("Take today's pill", "Take out your ring") with a one-tap Done. Missed doses are required doses (not placebo pills) from the last 7 days with nothing recorded, never before the schedule was set up. Each is asked about with "I did" or "I missed it", plus a pointer to the pack leaflet; Cadence gives no dosing advice of its own. The log sheet records the same dose for past days.
+- **Reminders:** in birth control mode with a schedule, period and late reminders are replaced by a birth control reminder at a chosen time, on days with something to do (placebo pills included, for the habit). Daily medications can each have a reminder. Both use a new "Birth control and medications" channel, are discreet by default, and have a "Done" action that records the dose without opening the app. A dose already recorded isn't reminded.
+- **Medications** are daily or as-needed, and are ticked off on Today and in the log. A stopped medication keeps its history; deleting one removes it and its days.
+- **Custom tags** are created from the log sheet or Settings, and can be renamed or deleted (which removes them from every day). They're stored with symptoms and moods in `day_tag`.
+- **Symptom patterns** (`SymptomPatterns`, pure and fully tested) look at the last 12 completed, non-excluded cycles that have anything logged. A symptom, mood or tag counts as a pattern when it shows up in at least 3 cycles and at least half of them: during the period, in the 5 days before it (with the typical day), or around the same cycle day (±1). Insights lists them as observations, not diagnoses.
+- **Data:** schema v7 adds the schedule columns to settings, plus `contraceptive_dose`, `medication`, `medication_dose` and `custom_tag`, all by auto-migration with a test. Backups are format version 2 and still read version 1. Merging a backup matches tags and medications by name. The CSV adds tags, birth control and medication columns. The clinician report adds the birth control layout, missed doses in the last 90 days, medications, and patterns.
+- **Tests:** end to end through the real app (pill schedule, check-offs, switching to tracking and back with nothing lost), domain logic at 100% coverage, repositories, backup round trip with all Phase 6 data, reminders, and UI.
 
 ### Phase 7: Polish & ecosystem
 **Goal:** release quality and nice-to-haves.

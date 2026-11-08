@@ -53,7 +53,9 @@ import androidx.fragment.app.FragmentActivity
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.LifecycleResumeEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import app.cadence.core.domain.contraception.ContraceptiveSchedule
 import app.cadence.core.domain.log.LogCategory
+import app.cadence.core.domain.medication.Medication
 import app.cadence.core.domain.model.Goal
 import app.cadence.core.domain.model.ThemePreference
 import app.cadence.core.domain.model.UserSettings
@@ -65,6 +67,7 @@ import app.cadence.core.ui.log.LogLabels
 import app.cadence.core.ui.security.DeviceAuth
 import app.cadence.core.ui.theme.CadenceTheme
 import app.cadence.feature.backup.BackupSettingsRows
+import java.time.LocalDate
 import app.cadence.core.ui.R as UiR
 
 @Composable
@@ -73,6 +76,7 @@ fun SettingsScreen(
     viewModel: SettingsViewModel = hiltViewModel(),
 ) {
     val settings by viewModel.settings.collectAsStateWithLifecycle()
+    val tracking by viewModel.tracking.collectAsStateWithLifecycle()
     val context = LocalContext.current
     val currentActivity = LocalActivity.current
     var status by remember { mutableStateOf(readReminderStatus(context)) }
@@ -89,7 +93,8 @@ fun SettingsScreen(
                 readReminderStatus(context)
         }
     val current = settings
-    if (current == null) {
+    val currentTracking = tracking
+    if (current == null || currentTracking == null) {
         Box(modifier.fillMaxSize())
         return
     }
@@ -138,9 +143,16 @@ fun SettingsScreen(
                 },
                 onLockTimeout = viewModel::setLockTimeout,
                 onBlockScreenshots = viewModel::setBlockScreenshots,
+                onContraception = viewModel::setContraception,
+                onSaveMedication = viewModel::saveMedication,
+                onDeleteMedication = viewModel::deleteMedication,
+                onCreateTag = viewModel::createTag,
+                onRenameTag = viewModel::renameTag,
+                onDeleteTag = viewModel::deleteTag,
             ),
         modifier = modifier,
         backupRows = { BackupSettingsRows() },
+        tracking = currentTracking,
     )
     if (noScreenLock) {
         AlertDialog(
@@ -170,6 +182,13 @@ class SettingsActions(
     val onLockChange: (Boolean) -> Unit = {},
     val onLockTimeout: (Int) -> Unit = {},
     val onBlockScreenshots: (Boolean) -> Unit = {},
+    /** Null: no pill, patch or ring schedule. */
+    val onContraception: (ContraceptiveSchedule?) -> Unit = {},
+    val onSaveMedication: (Medication) -> Unit = {},
+    val onDeleteMedication: (Long) -> Unit = {},
+    val onCreateTag: (String) -> Unit = {},
+    val onRenameTag: (Long, String) -> Unit = { _, _ -> },
+    val onDeleteTag: (Long) -> Unit = {},
 )
 
 private fun readReminderStatus(context: Context): ReminderStatus {
@@ -211,6 +230,7 @@ fun SettingsContent(
     modifier: Modifier = Modifier,
     reminderStatus: ReminderStatus = ReminderStatus(),
     backupRows: @Composable () -> Unit = {},
+    tracking: TrackingSettingsState = TrackingSettingsState(LocalDate.now()),
 ) {
     var dialog by rememberSaveable { mutableStateOf(SettingsDialog.NONE) }
     val defaults = settings.cycleDefaults
@@ -234,6 +254,9 @@ fun SettingsContent(
             value = stringResource(goalLabel(settings.goal)),
             onClick = { dialog = SettingsDialog.MODE },
         )
+        if (settings.goal == Goal.BIRTH_CONTROL) {
+            BirthControlRows(settings.contraception, tracking.today, actions, reminderStatus.notificationsAllowed)
+        }
 
         Divider()
         SectionHeader(stringResource(R.string.settings_section_log), Modifier.padding(horizontal = gutter))
@@ -244,9 +267,13 @@ fun SettingsContent(
             value = pluralStringResource(R.plurals.settings_log_categories_value, hideable.size, shown, hideable.size),
             onClick = { dialog = SettingsDialog.CATEGORIES },
         )
+        TagsRow(tracking.tags, actions)
 
         Divider()
-        RemindersSection(settings.reminders, reminderStatus, actions)
+        MedicationsSection(tracking.medications, actions, reminderStatus.notificationsAllowed)
+
+        Divider()
+        RemindersSection(settings.reminders, reminderStatus, actions, onSchedule = settings.activeSchedule != null)
 
         Divider()
         SectionHeader(stringResource(R.string.settings_section_appearance), Modifier.padding(horizontal = gutter))
@@ -441,7 +468,7 @@ private fun appVersion(): String {
 }
 
 @Composable
-private fun SettingRow(
+internal fun SettingRow(
     title: String,
     value: String,
     onClick: () -> Unit,
@@ -456,7 +483,7 @@ private fun SettingRow(
 }
 
 @Composable
-private fun Note(text: String) {
+internal fun Note(text: String) {
     Text(
         text,
         style = MaterialTheme.typography.bodyMedium,

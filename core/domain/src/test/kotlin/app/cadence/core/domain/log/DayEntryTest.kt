@@ -4,6 +4,7 @@ import app.cadence.core.domain.d
 import app.cadence.core.domain.model.MenstrualFlow
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
+import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
@@ -39,8 +40,8 @@ class DayEntryTest {
 
     @Test
     fun `scales match the log sheet`() {
-        kotlin.test.assertEquals(0..10, DayEntry.PAIN_RANGE)
-        kotlin.test.assertEquals(1..5, DayEntry.RATING_RANGE)
+        assertEquals(0..10, DayEntry.PAIN_RANGE)
+        assertEquals(1..5, DayEntry.RATING_RANGE)
     }
 
     @Test
@@ -65,19 +66,41 @@ class DayEntryTest {
             generateSequence(
                 DayEntry(day),
             ) { it.cycleSymptom("cramps") }.take(5).map { it.symptoms["cramps"] }.toList()
-        kotlin.test.assertEquals(listOf(null, Severity.MILD, Severity.MODERATE, Severity.SEVERE, null), steps)
+        assertEquals(listOf(null, Severity.MILD, Severity.MODERATE, Severity.SEVERE, null), steps)
     }
 
     @Test
     fun `cycling one symptom leaves others alone`() {
         val entry = DayEntry(day, symptoms = mapOf("acne" to Severity.SEVERE)).cycleSymptom("cramps")
-        kotlin.test.assertEquals(mapOf("acne" to Severity.SEVERE, "cramps" to Severity.MILD), entry.symptoms)
+        assertEquals(mapOf("acne" to Severity.SEVERE, "cramps" to Severity.MILD), entry.symptoms)
     }
 
     @Test
     fun `moods toggle`() {
         val on = DayEntry(day).toggleMood("calm")
-        kotlin.test.assertEquals(setOf("calm"), on.moods)
-        kotlin.test.assertEquals(emptySet(), on.toggleMood("calm").moods)
+        assertEquals(setOf("calm"), on.moods)
+        assertEquals(emptySet(), on.toggleMood("calm").moods)
+    }
+}
+
+class CustomTagTest {
+    @Test
+    fun `custom tags toggle and appear among pattern items`() {
+        val entry =
+            DayEntry(d(2026, 3, 1), symptoms = mapOf("cramps" to Severity.MILD), moods = setOf("calm"))
+                .toggleTag(4)
+        assertEquals(setOf(4L), entry.tags)
+        assertEquals(setOf("cramps", "calm", "tag:4"), entry.patternItems())
+        assertEquals(emptySet(), entry.toggleTag(4).tags)
+        assertEquals(4L, CustomTag.fromItemId("tag:4"))
+        assertEquals(null, CustomTag.fromItemId("cramps"))
+        assertEquals(null, CustomTag.fromItemId("tag:x"))
+    }
+
+    @Test
+    fun `labels are validated`() {
+        assertThrows<IllegalArgumentException> { CustomTag(1, " ") }
+        assertThrows<IllegalArgumentException> { CustomTag(1, "x".repeat(31)) }
+        assertEquals("Travel", CustomTag(1, "Travel").label)
     }
 }

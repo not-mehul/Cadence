@@ -4,50 +4,41 @@ import android.app.AlarmManager
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
-import app.cadence.core.data.repository.CycleAnnotationRepository
-import app.cadence.core.data.repository.PeriodRepository
-import app.cadence.core.data.repository.SettingsRepository
 import app.cadence.core.data.time.LocalNow
 import app.cadence.core.domain.reminders.PlannedReminder
 import app.cadence.core.domain.reminders.ReminderKind
-import app.cadence.core.domain.reminders.ReminderPlanner
 import dagger.hilt.android.qualifiers.ApplicationContext
-import kotlinx.coroutines.flow.first
 import java.time.ZoneId
 import javax.inject.Inject
 import javax.inject.Singleton
 
 /**
- * Arms one alarm per reminder kind for its next occurrence, and cancels the rest. Uses
- * inexact, Doze-friendly alarms, so no exact-alarm permission is needed; a reminder a few
- * minutes late is fine (docs/PLAN.md Phase 4).
+ * Arms one alarm per reminder (one per kind, and one per medication) for its next
+ * occurrence, and cancels the rest. Uses inexact, Doze-friendly alarms, so no exact-alarm
+ * permission is needed; a reminder a few minutes late is fine (docs/PLAN.md Phase 4).
  */
 @Singleton
 class ReminderScheduler
     @Inject
     constructor(
         @param:ApplicationContext private val context: Context,
-        private val periods: PeriodRepository,
-        private val settings: SettingsRepository,
-        private val annotations: CycleAnnotationRepository,
+        private val plans: ReminderPlans,
         private val now: LocalNow,
     ) {
         private val alarmManager = context.getSystemService(AlarmManager::class.java)
 
         /** Re-plans every reminder from current data. Returns what was scheduled. */
         suspend fun reschedule(): List<PlannedReminder> {
-            val planned =
-                ReminderPlanner.plan(
-                    flowByDay = periods.flowByDay.first(),
-                    settings = settings.settings.first(),
-                    excludedCycleStarts = annotations.excludedStarts.first(),
-                    now = now.now(),
-                )
-            val byKind = planned.associateBy { it.kind }
-            ReminderKind.entries.forEach { kind ->
-                val reminder = byKind[kind]
+            val snapshot = plans.at(now.now())
+            val planned = snapshot.planned.associateBy { ReminderKey(it.kind, it.medicationId) }
+            // Every alarm that could exist: one per kind, plus one per medication (stopped ones included).
+            val keys =
+                ReminderKind.entries.filter { it != ReminderKind.MEDICATION }.map { ReminderKey(it, null) } +
+                    snapshot.medications.map { ReminderKey(ReminderKind.MEDICATION, it.id) }
+            keys.forEach { key ->
+                val reminder = planned[key]
                 if (reminder == null) {
-                    existingAlarm(kind)?.let {
+                    alarmIntent(key, PendingIntent.FLAG_NO_CREATE)?.let {
                         alarmManager.cancel(it)
                         it.cancel()
                     }
@@ -60,30 +51,57 @@ class ReminderScheduler
                     alarmManager.setAndAllowWhileIdle(
                         AlarmManager.RTC_WAKEUP,
                         triggerAt,
-                        alarmIntent(kind, PendingIntent.FLAG_UPDATE_CURRENT)!!,
+                        alarmIntent(key, PendingIntent.FLAG_UPDATE_CURRENT)!!,
                     )
                 }
             }
-            return planned
+            return snapshot.planned
         }
 
-        private fun existingAlarm(kind: ReminderKind): PendingIntent? = alarmIntent(kind, PendingIntent.FLAG_NO_CREATE)
-
         private fun alarmIntent(
-            kind: ReminderKind,
+            key: ReminderKey,
             flags: Int,
         ): PendingIntent? =
             PendingIntent.getBroadcast(
                 context,
-                kind.ordinal,
+                key.requestCode,
                 Intent(context, ReminderReceiver::class.java)
                     .setAction(ACTION_REMINDER)
-                    .putExtra(EXTRA_KIND, kind.name),
+                    .putExtra(EXTRA_KIND, key.kind.name)
+                    .apply { key.medicationId?.let { putExtra(EXTRA_MEDICATION_ID, it) } },
                 flags or PendingIntent.FLAG_IMMUTABLE,
             )
 
         companion object {
             const val ACTION_REMINDER = "app.cadence.action.REMINDER"
             const val EXTRA_KIND = "kind"
+            const val EXTRA_MEDICATION_ID = "medication_id"
         }
     }
+
+/** Identifies one alarm (and its notification): a kind, plus the medication for medication reminders. */
+data class ReminderKey(
+    val kind: ReminderKind,
+    val medicationId: Long?,
+) {
+    /** Unique per alarm, for PendingIntent request codes and notification ids. */
+    val requestCode: Int
+        get() = if (medicationId == null) kind.ordinal else (MEDICATION_BASE + medicationId).toInt()
+
+    companion object {
+        /** Medication alarms come after the fixed kinds. */
+        private const val MEDICATION_BASE = 1_000L
+
+        fun of(reminder: PlannedReminder) = ReminderKey(reminder.kind, reminder.medicationId)
+
+        fun from(intent: Intent): ReminderKey? {
+            val kind =
+                intent.getStringExtra(ReminderScheduler.EXTRA_KIND)?.let { name ->
+                    ReminderKind.entries.firstOrNull { it.name == name }
+                } ?: return null
+            val medicationId =
+                intent.getLongExtra(ReminderScheduler.EXTRA_MEDICATION_ID, -1L).takeIf { it >= 0 }
+            return ReminderKey(kind, medicationId)
+        }
+    }
+}

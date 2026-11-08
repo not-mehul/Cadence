@@ -89,4 +89,55 @@
 
     <string name="settings_save">Save</string>
     <string name="settings_cancel">Cancel</string>
+
+    <!-- Phase 6: birth control, medications, custom tags -->
+    <string name="settings_bc">Your birth control</string>
+    <string name="settings_bc_none">No pill, patch or ring. Tap to set one up.</string>
+    <string name="settings_bc_reminder">Birth control reminder</string>
+    <string name="settings_bc_reminder_detail">On days with a pill to take or a patch or ring to change</string>
+    <string name="settings_bc_reminder_time">Birth control reminder time</string>
+    <string name="settings_bc_other">Something else (IUD, implant, injection)</string>
+    <string name="settings_bc_other_detail">Cadence won\'t follow a schedule. Ovulation estimates stay off, and periods are predicted from the bleeds you log.</string>
+    <string name="settings_bc_patch_free_week">Patch-free week after 3 patches</string>
+    <string name="settings_bc_active_pills">Active pills in a pack</string>
+    <string name="settings_bc_ring_days">Days with the ring in</string>
+    <string name="settings_bc_break_days">Break or placebo days</string>
+    <string name="settings_bc_placebo">Placebo pills during the break</string>
+    <string name="settings_bc_day_today">Which day of your pack is today?</string>
+    <string name="settings_bc_day_value">Day %1$d</string>
+    <string name="settings_bc_break_note">A withdrawal bleed usually comes in the break, so Cadence expects one then instead of predicting from your cycles. Follow your pack\'s leaflet or your clinician\'s advice on how to take it.</string>
+    <string name="settings_bc_continuous_note">With no break, bleeding doesn\'t follow a schedule, so Cadence doesn\'t predict it. Log any bleeding as usual.</string>
+    <string name="settings_reminder_on_schedule">Period reminders are off while Cadence follows your pill, patch or ring: bleeds follow your pack instead.</string>
+
+    <string name="settings_section_medications">Medications</string>
+    <string name="settings_medication_add">Add a medication</string>
+    <string name="settings_medication_add_detail">Painkillers, supplements, anything you want to keep track of</string>
+    <string name="settings_medication_edit">Edit medication</string>
+    <string name="settings_medication_name">Name</string>
+    <string name="settings_medication_daily">Every day</string>
+    <string name="settings_medication_daily_at">Every day, reminder at %1$s</string>
+    <string name="settings_medication_as_needed">When needed</string>
+    <string name="settings_medication_stopped">Not taking it now</string>
+    <string name="settings_medication_reminder">Daily reminder</string>
+    <string name="settings_medication_reminder_at">Remind me at %1$s</string>
+    <string name="settings_medication_active">Still taking it</string>
+    <string name="settings_medication_delete">Delete medication</string>
+    <string name="settings_medication_delete_title">Delete %1$s?</string>
+    <string name="settings_medication_delete_body">The days you logged it are deleted too. To keep them, turn off \"Still taking it\" instead.</string>
+
+    <string name="settings_tags">Your tags</string>
+    <string name="settings_tags_none">None yet. Add your own, like \"Travel\" or \"Gym\".</string>
+    <plurals name="settings_tags_count">
+        <item quantity="one">%d tag</item>
+        <item quantity="other">%d tags</item>
+    </plurals>
+    <string name="settings_tags_detail">Tags you add show up in the daily log next to symptoms and moods.</string>
+    <string name="settings_tags_new">New tag</string>
+    <string name="settings_tags_edit">Edit tag</string>
+    <string name="settings_tags_label">Tag</string>
+    <string name="settings_tags_delete">Delete tag</string>
+    <string name="settings_tags_delete_title">Delete \"%1$s\"?</string>
+    <string name="settings_tags_delete_body">It\'s removed from every day you logged it.</string>
+    <string name="settings_delete">Delete</string>
+    <string name="settings_done">Done</string>
 </resources>

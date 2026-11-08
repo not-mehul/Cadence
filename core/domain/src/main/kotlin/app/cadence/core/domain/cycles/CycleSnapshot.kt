@@ -1,5 +1,7 @@
 package app.cadence.core.domain.cycles
 
+import app.cadence.core.domain.contraception.ContraceptiveSchedule
+import app.cadence.core.domain.contraception.PackDay
 import app.cadence.core.domain.model.CyclePhase
 import app.cadence.core.domain.model.MenstrualFlow
 import app.cadence.core.domain.model.Period
@@ -29,6 +31,19 @@ sealed interface CycleStatus {
     data class Late(
         val daysLate: Int,
     ) : CycleStatus
+
+    /** On a birth control schedule, in the active part of the pack. */
+    data class PackActive(
+        val dayOfPack: Int,
+        /** Null on continuous use. */
+        val daysUntilBreak: Int?,
+    ) : CycleStatus
+
+    /** On a birth control schedule, in the break (when a withdrawal bleed is expected). */
+    data class PackBreak(
+        val dayOfBreak: Int,
+        val breakDays: Int,
+    ) : CycleStatus
 }
 
 /** Phase boundaries as cycle days (day 1 = first day of the period), for drawing the cycle ring. */
@@ -56,6 +71,8 @@ data class CycleSnapshot(
     val canExtendPeriod: Boolean,
     /** The current or next estimated fertile window; null on birth control or without data. */
     val fertileWindow: FertileWindow? = null,
+    /** Where today is in the pack, when following a birth control schedule. */
+    val pack: PackDay? = null,
 ) {
     companion object {
         fun compute(
@@ -65,6 +82,7 @@ data class CycleSnapshot(
             excludedCycleStarts: Set<LocalDate> = emptySet(),
         ): CycleSnapshot {
             val history = CycleHistory.from(flowByDay, excludedCycleStarts)
+            settings.activeSchedule?.let { return onSchedule(history, it, today) }
             val latest =
                 history.latestPeriodStartedBy(today)
                     ?: return CycleSnapshot(today, CycleStatus.NoData, null, null, null, null, null, false)
@@ -119,8 +137,7 @@ data class CycleSnapshot(
                     else -> CyclePhase.LUTEAL
                 }
 
-            val daysSincePeriodEnded = ChronoUnit.DAYS.between(latest.end, today)
-            val canExtend = currentPeriod == null && daysSincePeriodEnded <= CycleHistory.MAX_BRIDGED_GAP_DAYS + 1
+            val canExtend = canExtend(latest, today)
 
             val nextFertileWindow =
                 if (settings.goal.showsOvulationEstimates) {
@@ -143,5 +160,52 @@ data class CycleSnapshot(
                 nextFertileWindow,
             )
         }
+
+        /**
+         * Birth control with a pill, patch or ring schedule (docs/PLAN.md Phase 6): the pack, not
+         * cycle history, says when a bleed is expected, so there's no history-based prediction,
+         * no "late", and no ovulation estimate.
+         */
+        private fun onSchedule(
+            history: CycleHistory,
+            schedule: ContraceptiveSchedule,
+            today: LocalDate,
+        ): CycleSnapshot {
+            val latest = history.latestPeriodStartedBy(today)
+            val currentPeriod = latest?.takeIf { today in it }
+            val pack = schedule.packDay(today)
+            val status =
+                when {
+                    currentPeriod != null -> {
+                        CycleStatus.OnPeriod(ChronoUnit.DAYS.between(currentPeriod.start, today).toInt() + 1)
+                    }
+
+                    pack.dayOfBreak != null -> {
+                        CycleStatus.PackBreak(pack.dayOfBreak, schedule.breakDays)
+                    }
+
+                    else -> {
+                        CycleStatus.PackActive(pack.dayOfPack, pack.daysUntilBreak)
+                    }
+                }
+            return CycleSnapshot(
+                today = today,
+                status = status,
+                prediction = null,
+                currentPeriod = currentPeriod,
+                cycleDay = null,
+                phase = if (currentPeriod != null) CyclePhase.MENSTRUAL else null,
+                timeline = null,
+                canExtendPeriod = latest != null && canExtend(latest, today),
+                pack = pack,
+            )
+        }
+
+        /** True the day or two after [latest] ended, when the period may simply not be over yet. */
+        private fun canExtend(
+            latest: Period,
+            today: LocalDate,
+        ): Boolean =
+            today !in latest && ChronoUnit.DAYS.between(latest.end, today) <= CycleHistory.MAX_BRIDGED_GAP_DAYS + 1
     }
 }

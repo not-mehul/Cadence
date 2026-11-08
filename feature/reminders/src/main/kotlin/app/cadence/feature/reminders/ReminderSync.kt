@@ -1,7 +1,9 @@
 package app.cadence.feature.reminders
 
 import android.util.Log
+import app.cadence.core.data.repository.ContraceptionRepository
 import app.cadence.core.data.repository.CycleAnnotationRepository
+import app.cadence.core.data.repository.MedicationRepository
 import app.cadence.core.data.repository.PeriodRepository
 import app.cadence.core.data.repository.SettingsRepository
 import kotlinx.coroutines.CoroutineExceptionHandler
@@ -28,6 +30,8 @@ class ReminderSync
         private val periods: PeriodRepository,
         private val settings: SettingsRepository,
         private val annotations: CycleAnnotationRepository,
+        private val contraception: ContraceptionRepository,
+        private val medications: MedicationRepository,
     ) {
         private val scope =
             CoroutineScope(
@@ -42,7 +46,13 @@ class ReminderSync
             if (started) return
             started = true
             scope.launch {
-                combine(periods.flowByDay, settings.settings, annotations.excludedStarts) { a, b, c -> Triple(a, b, c) }
+                combine(
+                    periods.flowByDay,
+                    settings.settings,
+                    annotations.excludedStarts,
+                    contraception.doses,
+                    combine(medications.medications, medications.doses, ::Pair),
+                ) { a, b, c, d, e -> listOf(a, b, c, d, e) }
                     .distinctUntilChanged()
                     .debounce(DEBOUNCE_MS)
                     .collect { scheduler.reschedule() }

@@ -104,7 +104,7 @@ class BackupViewModel
             write(
                 uri,
                 BackupMessage.CsvDone,
-            ) { out -> out.write(CsvExport.write(backups.snapshot().entries).toByteArray()) }
+            ) { out -> out.write(CsvExport.write(backups.snapshot()).toByteArray()) }
 
         fun exportReport(uri: Uri) =
             write(uri, BackupMessage.ReportDone) { out ->

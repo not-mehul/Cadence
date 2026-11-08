@@ -18,4 +18,17 @@
     <string name="reminder_late_text">It\'s later than expected. Tap to log it when it starts.</string>
     <string name="reminder_daily_title">Daily check-in</string>
     <string name="reminder_daily_text">How are you feeling today? Tap to log.</string>
+
+    <string name="reminder_channel_medication">Birth control and medications</string>
+    <string name="reminder_channel_medication_description">Your pill, patch or ring, and medications you take daily.</string>
+    <string name="reminder_action_done">Done</string>
+    <string name="reminder_dose_title">Birth control</string>
+    <string name="reminder_dose_pill">Time for today\'s pill.</string>
+    <string name="reminder_dose_placebo">Time for today\'s pill (a placebo pill).</string>
+    <string name="reminder_dose_new_patch">Time to change your patch.</string>
+    <string name="reminder_dose_remove_patch">Time to take off your patch for the patch-free week.</string>
+    <string name="reminder_dose_new_ring">Time to put in a new ring.</string>
+    <string name="reminder_dose_remove_ring">Time to take out your ring for the ring-free week.</string>
+    <string name="reminder_medication_title">Medication</string>
+    <string name="reminder_medication_text">Time for %1$s.</string>
 </resources>

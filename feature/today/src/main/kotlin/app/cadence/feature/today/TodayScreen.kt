@@ -37,7 +37,9 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import app.cadence.core.domain.contraception.DoseStatus
 import app.cadence.core.domain.cycles.CycleStatus
+import app.cadence.core.domain.model.Goal
 import app.cadence.core.ui.components.CadenceCard
 import app.cadence.core.ui.components.PrimaryButton
 import app.cadence.core.ui.format.DateSkeletons
@@ -49,6 +51,7 @@ import java.time.LocalDate
 fun TodayScreen(
     onOpenLog: (LocalDate) -> Unit,
     modifier: Modifier = Modifier,
+    onOpenSettings: () -> Unit = {},
     viewModel: TodayViewModel = hiltViewModel(),
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
@@ -91,6 +94,9 @@ fun TodayScreen(
                     onLogToday = viewModel::logToday,
                     onOpenLog = { onOpenLog(s.snapshot.today) },
                     modifier = Modifier.padding(padding),
+                    onRecordDose = viewModel::recordDose,
+                    onMedicationTakenChange = viewModel::setMedicationTaken,
+                    onOpenSettings = onOpenSettings,
                 )
             }
         }
@@ -106,8 +112,13 @@ fun TodayContent(
     onLogToday: () -> Unit,
     onOpenLog: () -> Unit,
     modifier: Modifier = Modifier,
+    onRecordDose: (LocalDate, DoseStatus?) -> Unit = { _, _ -> },
+    onMedicationTakenChange: (Long, Boolean) -> Unit = { _, _ -> },
+    onOpenSettings: () -> Unit = {},
 ) {
     val snapshot = state.snapshot
+    val birthControl = state.birthControl
+    val pack = snapshot.pack
     val spacing = CadenceTheme.spacing
     var showEndDialog by rememberSaveable { mutableStateOf(false) }
 
@@ -126,7 +137,11 @@ fun TodayContent(
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
 
-        TodayRing(snapshot, Modifier.widthIn(max = 280.dp).fillMaxWidth())
+        if (birthControl != null && pack != null) {
+            PackRing(birthControl.schedule, pack, Modifier.widthIn(max = 280.dp).fillMaxWidth())
+        } else {
+            TodayRing(snapshot, Modifier.widthIn(max = 280.dp).fillMaxWidth())
+        }
 
         Text(
             text = headline(snapshot.status),
@@ -134,7 +149,7 @@ fun TodayContent(
             textAlign = TextAlign.Center,
             modifier = Modifier.semantics { heading() },
         )
-        SupportingText(snapshot)
+        if (pack != null) PackSupportingText(pack) else SupportingText(snapshot)
 
         Spacer(Modifier.height(spacing.xs))
         if (snapshot.status is CycleStatus.OnPeriod) {
@@ -151,7 +166,13 @@ fun TodayContent(
         }
 
         Spacer(Modifier.height(spacing.xs))
-        TodayLogCard(entry = state.todayEntry, onOpen = onOpenLog)
+        if (birthControl != null) {
+            DoseCard(birthControl, snapshot.today, onRecordDose)
+            if (birthControl.missed.isNotEmpty()) MissedDosesCard(birthControl.missed, onRecordDose)
+        }
+        if (state.goal == Goal.BIRTH_CONTROL && birthControl == null) SetUpBirthControlCard(onOpenSettings)
+        if (state.medications.isNotEmpty()) MedicationsCard(state.medications, onMedicationTakenChange)
+        TodayLogCard(entry = state.todayEntry, onOpen = onOpenLog, tagLabels = state.tagLabels)
         PhaseCard(snapshot = snapshot, goal = state.goal)
     }
 

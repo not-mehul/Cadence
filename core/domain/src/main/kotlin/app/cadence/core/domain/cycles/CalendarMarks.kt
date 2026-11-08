@@ -1,6 +1,8 @@
 package app.cadence.core.domain.cycles
 
+import app.cadence.core.domain.contraception.ContraceptiveSchedule
 import app.cadence.core.domain.model.MenstrualFlow
+import app.cadence.core.domain.model.Period
 import java.time.LocalDate
 import java.time.YearMonth
 
@@ -21,6 +23,9 @@ enum class DayMark {
 object CalendarMarks {
     /** Never predict further ahead than this many cycles. */
     const val MAX_PREDICTED_CYCLES = 24
+
+    /** Packs are often shorter than cycles, so look a little further ahead (about two years of 4-week packs). */
+    const val MAX_PREDICTED_PACKS = 26
 
     /**
      * @param lutealPhaseLength when non-null, estimated fertile windows and ovulation are shown;
@@ -46,7 +51,34 @@ object CalendarMarks {
             } else {
                 emptyList()
             }
-        return (1..month.lengthOfMonth()).associate { dayOfMonth ->
+        return marks(month, history, predicted, fertile)
+    }
+
+    /**
+     * On a pill, patch or ring schedule, the bleeds Cadence expects are the pack breaks
+     * from [today] on (docs/PLAN.md Phase 6); there are no fertile-window estimates.
+     */
+    fun forSchedule(
+        month: YearMonth,
+        flowByDay: Map<LocalDate, MenstrualFlow>,
+        schedule: ContraceptiveSchedule,
+        today: LocalDate,
+    ): Map<LocalDate, DayMark> {
+        val monthEnd = month.atEndOfMonth()
+        val breaks =
+            schedule
+                .upcomingBreaks(today, MAX_PREDICTED_PACKS)
+                .takeWhile { !it.start.isAfter(monthEnd) }
+        return marks(month, CycleHistory.from(flowByDay), breaks, emptyList())
+    }
+
+    private fun marks(
+        month: YearMonth,
+        history: CycleHistory,
+        predicted: List<Period>,
+        fertile: List<FertileWindow>,
+    ): Map<LocalDate, DayMark> =
+        (1..month.lengthOfMonth()).associate { dayOfMonth ->
             val date = month.atDay(dayOfMonth)
             date to
                 when {
@@ -57,5 +89,4 @@ object CalendarMarks {
                     else -> DayMark.NONE
                 }
         }
-    }
 }

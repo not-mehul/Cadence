@@ -5,7 +5,13 @@ import androidx.room.Entity
 import androidx.room.Index
 import java.time.LocalDate
 
-enum class TagKind { SYMPTOM, MOOD }
+enum class TagKind {
+    SYMPTOM,
+    MOOD,
+
+    /** A [app.cadence.core.domain.log.CustomTag]; the tag id is its item id ("tag:<id>"). */
+    CUSTOM,
+}
 
 /** A symptom or mood logged on a day. Ids come from [app.cadence.core.domain.log.LogCatalog]. */
 @Entity(

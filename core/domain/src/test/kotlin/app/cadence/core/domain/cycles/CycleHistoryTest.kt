@@ -91,4 +91,13 @@ class CycleHistoryTest {
         assertTrue(history.isPeriodDay(d(2026, 1, 3)))
         assertFalse(history.isPeriodDay(d(2026, 1, 4)))
     }
+
+    @Test
+    fun `excluded cycles are marked and left out of included cycles`() {
+        val days = periodDays(d(2026, 1, 1), 5) + periodDays(d(2026, 1, 29), 5) + periodDays(d(2026, 3, 1), 5)
+        val history = CycleHistory.from(days, excludedStarts = setOf(d(2026, 1, 1)))
+
+        assertEquals(listOf(true, false), history.cycles.map { it.excluded })
+        assertEquals(listOf(d(2026, 1, 29)), history.includedCycles.map { it.start })
+    }
 }

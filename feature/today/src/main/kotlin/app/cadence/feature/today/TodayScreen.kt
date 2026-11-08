@@ -178,24 +178,56 @@ private fun SupportingText(snapshot: app.cadence.core.domain.cycles.CycleSnapsho
                 listOf(stringResource(R.string.today_no_data_body))
             }
 
+            snapshot.status is CycleStatus.Late || snapshot.status is CycleStatus.Due -> {
+                listOf(
+                    stringResource(R.string.today_was_expected, dateFormat.format(prediction.expectedNextStart)),
+                    basisText(prediction),
+                )
+            }
+
             else -> {
                 listOf(
-                    if (snapshot.status is CycleStatus.Late) {
-                        stringResource(R.string.today_was_expected, dateFormat.format(prediction.expectedNextStart))
-                    } else {
-                        stringResource(R.string.today_next_expected, dateFormat.format(prediction.nextStart))
-                    },
+                    stringResource(R.string.today_next_expected, dateFormat.format(prediction.expectedNextStart)),
+                    stringResource(
+                        R.string.today_likely_range,
+                        dateFormat.format(prediction.earliestNextStart),
+                        dateFormat.format(prediction.latestNextStart),
+                    ),
                     basisText(prediction),
                 )
             }
         }
-    lines.forEach { line ->
-        Text(
-            text = line,
-            style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-            textAlign = TextAlign.Center,
-        )
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.spacedBy(CadenceTheme.spacing.xs),
+    ) {
+        lines.forEach { line ->
+            Text(
+                text = line,
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                textAlign = TextAlign.Center,
+            )
+        }
+        snapshot.fertileWindow?.let { fertile ->
+            Text(
+                text =
+                    stringResource(
+                        R.string.today_fertile_window,
+                        dateFormat.format(fertile.window.start),
+                        dateFormat.format(fertile.window.end),
+                    ),
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.tertiary,
+                textAlign = TextAlign.Center,
+            )
+            Text(
+                text = stringResource(R.string.today_fertile_disclaimer),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                textAlign = TextAlign.Center,
+            )
+        }
     }
 }
 

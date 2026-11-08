@@ -39,6 +39,7 @@ import app.cadence.core.ui.format.DateSkeletons
 import app.cadence.core.ui.format.currentLocale
 import app.cadence.core.ui.format.rememberDateFormatter
 import app.cadence.core.ui.theme.CadenceTheme
+import app.cadence.core.ui.theme.CycleColors
 import java.time.DayOfWeek
 import java.time.LocalDate
 import java.time.YearMonth
@@ -123,6 +124,7 @@ private fun DayCell(
     val textColor =
         when {
             mark == DayMark.LOGGED_PERIOD -> colors.onPeriod
+            mark == DayMark.FERTILE || mark == DayMark.OVULATION -> colors.onFertileWindow
             !enabled -> MaterialTheme.colorScheme.onSurfaceVariant
             else -> onSurface
         }
@@ -130,12 +132,19 @@ private fun DayCell(
         buildList {
             add(rememberDateFormatter(DateSkeletons.DAY_MONTH_YEAR).format(date))
             if (mark == DayMark.PREDICTED_PERIOD) add(stringResource(R.string.calendar_desc_predicted))
+            if (mark == DayMark.FERTILE) add(stringResource(R.string.calendar_desc_fertile))
+            if (mark == DayMark.OVULATION) add(stringResource(R.string.calendar_desc_ovulation))
             if (isToday) add(stringResource(R.string.calendar_desc_today))
             if (hasDetails) add(stringResource(R.string.calendar_desc_has_log))
         }.joinToString(", ")
     val state = stringResource(if (logged) R.string.calendar_state_period else R.string.calendar_state_not_period)
     val openLabel = stringResource(R.string.calendar_open_log)
-    val markerColor = if (mark == DayMark.LOGGED_PERIOD) colors.onPeriod else onSurface
+    val markerColor =
+        when (mark) {
+            DayMark.LOGGED_PERIOD -> colors.onPeriod
+            DayMark.FERTILE, DayMark.OVULATION -> colors.onFertileWindow
+            else -> onSurface
+        }
 
     val interaction =
         if (editPeriods) {
@@ -152,7 +161,7 @@ private fun DayCell(
                 .semantics {
                     contentDescription = description
                     stateDescription = state
-                }.dayMarkBackground(mark, colors.period, colors.predictedPeriod)
+                }.dayMarkBackground(mark, colors)
                 .then(if (isToday) Modifier.todayRing(markerColor) else Modifier),
         contentAlignment = Alignment.Center,
     ) {
@@ -183,19 +192,34 @@ private fun Modifier.todayRing(color: Color): Modifier =
 
 private fun Modifier.dayMarkBackground(
     mark: DayMark,
-    period: Color,
-    predicted: Color,
+    colors: CycleColors,
 ): Modifier =
     when (mark) {
         DayMark.LOGGED_PERIOD -> {
-            background(period, CircleShape)
+            background(colors.period, CircleShape)
+        }
+
+        DayMark.FERTILE -> {
+            background(colors.fertileWindow, CircleShape)
+        }
+
+        // Fertile fill plus a solid ring, so ovulation differs by shape, not just colour.
+        DayMark.OVULATION -> {
+            background(colors.fertileWindow, CircleShape).drawBehind {
+                val stroke = 2.dp.toPx()
+                drawCircle(
+                    colors.ovulation,
+                    radius = size.minDimension / 2 - stroke / 2,
+                    style = Stroke(width = stroke),
+                )
+            }
         }
 
         DayMark.PREDICTED_PERIOD -> {
             drawBehind {
                 val stroke = 2.dp.toPx()
                 drawCircle(
-                    color = predicted,
+                    color = colors.predictedPeriod,
                     radius = size.minDimension / 2 - stroke / 2,
                     style =
                         Stroke(
@@ -213,7 +237,10 @@ private fun Modifier.dayMarkBackground(
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
-internal fun Legend(modifier: Modifier = Modifier) {
+internal fun Legend(
+    showFertileWindow: Boolean,
+    modifier: Modifier = Modifier,
+) {
     val colors = CadenceTheme.cycleColors
     FlowRow(
         modifier = modifier,
@@ -225,7 +252,15 @@ internal fun Legend(modifier: Modifier = Modifier) {
             Box(Modifier.size(16.dp).background(colors.period, CircleShape))
         }
         LegendItem(stringResource(R.string.calendar_legend_predicted)) {
-            Box(Modifier.size(16.dp).dayMarkBackground(DayMark.PREDICTED_PERIOD, colors.period, colors.predictedPeriod))
+            Box(Modifier.size(16.dp).dayMarkBackground(DayMark.PREDICTED_PERIOD, colors))
+        }
+        if (showFertileWindow) {
+            LegendItem(stringResource(R.string.calendar_legend_fertile)) {
+                Box(Modifier.size(16.dp).dayMarkBackground(DayMark.FERTILE, colors))
+            }
+            LegendItem(stringResource(R.string.calendar_legend_ovulation)) {
+                Box(Modifier.size(16.dp).dayMarkBackground(DayMark.OVULATION, colors))
+            }
         }
         LegendItem(stringResource(R.string.calendar_legend_today)) {
             Box(Modifier.size(16.dp).todayRing(MaterialTheme.colorScheme.onSurface))

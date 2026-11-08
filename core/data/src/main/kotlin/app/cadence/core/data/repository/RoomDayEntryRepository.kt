@@ -64,6 +64,11 @@ class RoomDayEntryRepository
                 }
             }
 
+        override val painByDay: Flow<Map<LocalDate, Int>> =
+            flow { emitAll(database.get().dayLogDao().observePainLevels()) }
+                .map { days -> days.associate { it.date to it.painLevel } }
+                .flowOn(Dispatchers.IO)
+
         override fun observeDatesWithDetails(
             from: LocalDate,
             to: LocalDate,

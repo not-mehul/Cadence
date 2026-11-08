@@ -2,6 +2,7 @@ package app.cadence.feature.today
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import app.cadence.core.data.repository.CycleAnnotationRepository
 import app.cadence.core.data.repository.DayEntryRepository
 import app.cadence.core.data.repository.PeriodRepository
 import app.cadence.core.data.repository.SettingsRepository
@@ -51,15 +52,21 @@ class TodayViewModel
         private val periods: PeriodRepository,
         settings: SettingsRepository,
         entries: DayEntryRepository,
+        annotations: CycleAnnotationRepository,
         dates: DateSource,
     ) : ViewModel() {
         @OptIn(ExperimentalCoroutinesApi::class)
         val uiState: StateFlow<TodayUiState> =
             dates.today
                 .flatMapLatest { today ->
-                    combine(periods.flowByDay, settings.settings, entries.observe(today)) { flowByDay, s, entry ->
+                    combine(
+                        periods.flowByDay,
+                        settings.settings,
+                        entries.observe(today),
+                        annotations.excludedStarts,
+                    ) { flowByDay, s, entry, excluded ->
                         TodayUiState.Ready(
-                            snapshot = CycleSnapshot.compute(flowByDay, s, today),
+                            snapshot = CycleSnapshot.compute(flowByDay, s, today, excluded),
                             goal = s.goal,
                             typicalPeriodLength = s.cycleDefaults.periodLength,
                             todayEntry = entry,

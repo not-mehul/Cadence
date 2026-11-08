@@ -2,6 +2,7 @@ package app.cadence.feature.calendar
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import app.cadence.core.data.repository.CycleAnnotationRepository
 import app.cadence.core.data.repository.DayEntryRepository
 import app.cadence.core.data.repository.PeriodRepository
 import app.cadence.core.data.repository.SettingsRepository
@@ -33,8 +34,14 @@ sealed interface CalendarUiState {
         val prediction: CyclePrediction?,
         /** Days with something logged besides flow (shown as a dot). */
         val detailDates: Set<LocalDate> = emptySet(),
+        /** Set when fertile-window estimates apply (tracking mode); null on hormonal birth control. */
+        val lutealPhaseLength: Int? = null,
     ) : CalendarUiState {
-        fun marksFor(month: YearMonth): Map<LocalDate, DayMark> = CalendarMarks.forMonth(month, flowByDay, prediction)
+        val showsFertileWindow: Boolean
+            get() = lutealPhaseLength != null
+
+        fun marksFor(month: YearMonth): Map<LocalDate, DayMark> =
+            CalendarMarks.forMonth(month, flowByDay, prediction, lutealPhaseLength)
 
         /** Past days and today can be toggled; future days can only be cleared (e.g. a pre-filled period). */
         fun canToggle(date: LocalDate): Boolean = !date.isAfter(today) || isLogged(date)
@@ -53,6 +60,7 @@ class CalendarViewModel
         private val periods: PeriodRepository,
         settings: SettingsRepository,
         entries: DayEntryRepository,
+        annotations: CycleAnnotationRepository,
         dates: DateSource,
     ) : ViewModel() {
         @OptIn(ExperimentalCoroutinesApi::class)
@@ -60,9 +68,20 @@ class CalendarViewModel
             dates.today
                 .flatMapLatest { today ->
                     val details = entries.observeDatesWithDetails(today.minusYears(DETAIL_YEARS), today)
-                    combine(periods.flowByDay, settings.settings, details) { flowByDay, s, detailDates ->
-                        val prediction = CyclePredictor.predict(CycleHistory.from(flowByDay), s.cycleDefaults, today)
-                        CalendarUiState.Ready(today, flowByDay, prediction, detailDates)
+                    combine(
+                        periods.flowByDay,
+                        settings.settings,
+                        details,
+                        annotations.excludedStarts,
+                    ) { flowByDay, s, detailDates, excluded ->
+                        val prediction =
+                            CyclePredictor.predict(
+                                CycleHistory.from(flowByDay, excluded),
+                                s.cycleDefaults,
+                                today,
+                            )
+                        val luteal = s.lutealPhaseLength.takeIf { s.goal.showsOvulationEstimates }
+                        CalendarUiState.Ready(today, flowByDay, prediction, detailDates, luteal)
                     }
                 }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), CalendarUiState.Loading)
 

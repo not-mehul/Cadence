@@ -6,7 +6,7 @@ import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
 
 @Database(
-    entities = [DayLogEntity::class, SettingsEntity::class, DayTagEntity::class],
+    entities = [DayLogEntity::class, SettingsEntity::class, DayTagEntity::class, CycleAnnotationEntity::class],
     version = CadenceDatabase.VERSION,
     exportSchema = true,
     autoMigrations = [
@@ -14,6 +14,8 @@ import androidx.room.TypeConverters
         AutoMigration(from = 1, to = 2),
         // v3 (Phase 2): daily log fields, symptoms and moods, hidden log categories.
         AutoMigration(from = 2, to = 3),
+        // v4 (Phase 3): cycles excluded from predictions.
+        AutoMigration(from = 3, to = 4),
     ],
 )
 @TypeConverters(Converters::class)
@@ -24,8 +26,10 @@ abstract class CadenceDatabase : RoomDatabase() {
 
     abstract fun dayTagDao(): DayTagDao
 
+    abstract fun cycleAnnotationDao(): CycleAnnotationDao
+
     companion object {
-        const val VERSION = 3
+        const val VERSION = 4
         const val FILE_NAME = "cadence.db"
     }
 }

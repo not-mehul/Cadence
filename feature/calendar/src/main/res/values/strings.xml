@@ -8,6 +8,11 @@
     <string name="calendar_hint_log">Tap a day to see or change what you logged.</string>
     <string name="calendar_edit_periods">Edit period days</string>
     <string name="calendar_legend_logged">Logged</string>
+    <string name="calendar_legend_fertile">Fertile window (estimate)</string>
+    <string name="calendar_legend_ovulation">Ovulation (estimate)</string>
+    <string name="calendar_desc_fertile">estimated fertile window</string>
+    <string name="calendar_desc_ovulation">estimated ovulation</string>
+    <string name="calendar_fertile_disclaimer">Fertile window and ovulation are estimates. They can\'t be used to prevent pregnancy.</string>
     <string name="calendar_desc_has_log">has a log</string>
     <string name="calendar_open_log">Open log</string>
     <string name="calendar_legend_period">Period</string>

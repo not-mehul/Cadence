@@ -70,6 +70,9 @@ class CadenceEndToEndTest {
         tap("Period started")
         waitFor("Day 1 of your period")
 
+        // Let the undo snackbar time out, so it can't sit on top of what we tap next.
+        compose.waitUntil(SNACKBAR_TIMEOUT_MS) { compose.onAllNodesWithText("Undo").fetchSemanticsNodes().isEmpty() }
+
         // Daily log: today's flow is already summarised; open the log and add a symptom and mood.
         waitFor("Medium flow")
         tap("Edit")
@@ -86,6 +89,10 @@ class CadenceEndToEndTest {
                 SemanticsMatcher.expectValue(SemanticsProperties.StateDescription, "Period day")
         compose.waitUntil(TIMEOUT_MS) { compose.onAllNodes(todayCell).fetchSemanticsNodes().isNotEmpty() }
 
+        // Insights: one period so far.
+        tab("Insights")
+        waitFor("Your first cycle is in progress")
+
         // Settings: delete everything returns to onboarding.
         tab("Settings")
         tap("Delete all data")
@@ -95,5 +102,6 @@ class CadenceEndToEndTest {
 
     private companion object {
         const val TIMEOUT_MS = 10_000L
+        const val SNACKBAR_TIMEOUT_MS = 15_000L
     }
 }

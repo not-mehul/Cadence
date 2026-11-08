@@ -7,6 +7,8 @@ import java.time.temporal.ChronoUnit
 data class Cycle(
     val start: LocalDate,
     val nextStart: LocalDate,
+    /** The user marked this cycle as unusual (illness, travel...), so predictions and stats skip it. */
+    val excluded: Boolean = false,
 ) {
     init {
         require(nextStart.isAfter(start)) { "Cycle must end after it starts" }

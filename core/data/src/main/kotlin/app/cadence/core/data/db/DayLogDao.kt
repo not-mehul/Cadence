@@ -15,6 +15,12 @@ data class FlowDay(
     @ColumnInfo(name = "flow") val flow: MenstrualFlow,
 )
 
+/** Projection of a day with pain logged. */
+data class PainDay(
+    @ColumnInfo(name = "date") val date: LocalDate,
+    @ColumnInfo(name = "pain_level") val painLevel: Int,
+)
+
 @Dao
 interface DayLogDao {
     @Upsert
@@ -53,6 +59,9 @@ interface DayLogDao {
             "AND energy IS NULL AND sleep IS NULL AND stress IS NULL AND sex IS NULL",
     )
     suspend fun deleteEmpty(dates: List<LocalDate>)
+
+    @Query("SELECT date, pain_level FROM day_log WHERE pain_level IS NOT NULL")
+    fun observePainLevels(): Flow<List<PainDay>>
 
     @Query("DELETE FROM day_log WHERE date = :date")
     suspend fun delete(date: LocalDate)

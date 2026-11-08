@@ -21,6 +21,7 @@ import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
+import app.cadence.core.domain.cycles.Confidence
 import app.cadence.core.domain.cycles.CyclePrediction
 import app.cadence.core.domain.cycles.CycleSnapshot
 import app.cadence.core.domain.cycles.CycleStatus
@@ -55,6 +56,10 @@ internal fun headline(status: CycleStatus): String =
             }
         }
 
+        is CycleStatus.Due -> {
+            stringResource(R.string.today_headline_due)
+        }
+
         is CycleStatus.Late -> {
             pluralStringResource(R.plurals.today_headline_late, status.daysLate, status.daysLate)
         }
@@ -68,8 +73,22 @@ internal fun basisText(prediction: CyclePrediction): String =
         }
 
         PredictionBasis.HISTORY -> {
-            pluralStringResource(R.plurals.today_basis_history, prediction.cyclesUsed, prediction.cyclesUsed)
+            val cycles =
+                pluralStringResource(R.plurals.today_basis_history, prediction.cyclesUsed, prediction.cyclesUsed)
+            stringResource(
+                R.string.today_basis_with_confidence,
+                cycles,
+                stringResource(confidenceLabel(prediction.confidence)),
+            )
         }
+    }
+
+@StringRes
+internal fun confidenceLabel(confidence: Confidence): Int =
+    when (confidence) {
+        Confidence.HIGH -> R.string.today_confidence_high
+        Confidence.MEDIUM -> R.string.today_confidence_medium
+        Confidence.LOW -> R.string.today_confidence_low
     }
 
 @StringRes
@@ -106,6 +125,10 @@ internal fun phaseCopy(
 
         snapshot.status is CycleStatus.Late -> {
             R.string.phase_late to R.string.phase_late_body
+        }
+
+        snapshot.status is CycleStatus.Due -> {
+            R.string.phase_due to R.string.phase_due_body
         }
 
         goal == Goal.BIRTH_CONTROL && snapshot.status != CycleStatus.NoData -> {

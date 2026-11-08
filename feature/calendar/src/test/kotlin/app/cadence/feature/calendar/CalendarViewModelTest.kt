@@ -1,6 +1,7 @@
 package app.cadence.feature.calendar
 
 import app.cadence.core.domain.model.MenstrualFlow
+import app.cadence.core.testing.FakeCycleAnnotationRepository
 import app.cadence.core.testing.FakeDateSource
 import app.cadence.core.testing.FakeDayEntryRepository
 import app.cadence.core.testing.FakePeriodRepository
@@ -23,7 +24,10 @@ class CalendarViewModelTest {
     private val today = LocalDate.of(2026, 3, 20)
     private val periods = FakePeriodRepository()
     private val entries = FakeDayEntryRepository(periods)
-    private val vm by lazy { CalendarViewModel(periods, FakeSettingsRepository(), entries, FakeDateSource(today)) }
+    private val settings = FakeSettingsRepository()
+    private val vm by lazy {
+        CalendarViewModel(periods, settings, entries, FakeCycleAnnotationRepository(), FakeDateSource(today))
+    }
 
     private fun kotlinx.coroutines.test.TestScope.start() {
         backgroundScope.launch { vm.uiState.collect {} }
@@ -102,5 +106,18 @@ class CalendarViewModelTest {
             val state = assertIs<CalendarUiState.Ready>(vm.uiState.value)
             assertEquals(setOf(LocalDate.of(2026, 3, 3)), state.detailDates)
             assertEquals(false, state.canOpenLog(today.plusDays(1)))
+        }
+
+    @Test
+    fun `fertile window shows when tracking, not on birth control`() =
+        runTest {
+            periods.flowByDay.value = mapOf(LocalDate.of(2026, 3, 1) to MenstrualFlow.MEDIUM)
+            start()
+            assertEquals(14, assertIs<CalendarUiState.Ready>(vm.uiState.value).lutealPhaseLength)
+
+            settings.settings.value =
+                settings.settings.value.copy(goal = app.cadence.core.domain.model.Goal.BIRTH_CONTROL)
+            runCurrent()
+            assertEquals(false, assertIs<CalendarUiState.Ready>(vm.uiState.value).showsFertileWindow)
         }
 }

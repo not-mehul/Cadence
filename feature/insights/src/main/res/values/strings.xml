@@ -1,5 +1,60 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="insights_title">Insights</string>
-    <string name="insights_placeholder">Cycle averages, trends and patterns will appear here once you have logged a few cycles.</string>
+
+    <!-- Empty states -->
+    <string name="insights_empty_title">Nothing to show yet</string>
+    <string name="insights_empty_body">Log your periods and insights about your cycle will appear here.</string>
+    <string name="insights_first_cycle_title">Your first cycle is in progress</string>
+    <string name="insights_first_cycle_body">Insights appear once you log the start of your next period.</string>
+
+    <!-- Summary tiles -->
+    <string name="insights_average_cycle">Average cycle</string>
+    <string name="insights_average_period">Average period</string>
+    <string name="insights_variation">Cycle variation</string>
+    <string name="insights_prediction">Prediction confidence</string>
+    <string name="insights_range">%1$s to %2$s</string>
+    <string name="insights_shortest_to_longest">Shortest to longest</string>
+    <string name="insights_plus_minus">Within %1$s either way</string>
+    <string name="insights_no_value">–</string>
+    <string name="insights_confidence_high">High</string>
+    <string name="insights_confidence_medium">Medium</string>
+    <string name="insights_confidence_low">Low</string>
+    <string name="insights_based_on_typical">From your typical cycle</string>
+
+    <!-- Chart -->
+    <string name="insights_chart_title">Cycle length</string>
+    <string name="insights_chart_caption">The shaded band is 24 to 38 days, the typical range. Tap a bar for details.</string>
+    <string name="insights_chart_description">Cycle lengths, oldest to newest: %1$s.</string>
+    <string name="insights_chart_selected">Cycle starting %1$s: %2$s</string>
+    <string name="insights_chart_selected_excluded">Cycle starting %1$s: %2$s, not used for predictions</string>
+
+    <!-- Health flags -->
+    <string name="insights_flags_title">Worth mentioning to a clinician</string>
+    <string name="insights_flags_footer">These are patterns in what you logged, not a diagnosis. Cadence isn\'t a medical device. The ranges come from the International Federation of Gynecology and Obstetrics (FIGO).</string>
+    <string name="flag_short_title">Short cycles</string>
+    <string name="flag_short_body">Your recent cycles have averaged %1$s. Cycles shorter than 24 days are less common and can be worth mentioning to a clinician.</string>
+    <string name="flag_long_title">Long cycles</string>
+    <string name="flag_long_body">Your recent cycles have averaged %1$s. Cycles longer than 38 days are less common and can be worth mentioning to a clinician.</string>
+    <string name="flag_irregular_title">Cycle length varies a lot</string>
+    <string name="flag_irregular_body">Your shortest and longest recent cycles differ by %1$s. A difference of more than 7 to 9 days is worth mentioning to a clinician.</string>
+    <string name="flag_long_period_title">A long period</string>
+    <string name="flag_long_period_body">Your period starting %1$s lasted %2$s. Bleeding for more than 8 days is worth mentioning to a clinician.</string>
+    <string name="flag_no_period_title">No recent period</string>
+    <string name="flag_no_period_body">It\'s been %1$s since your last logged period. If you haven\'t just missed logging one, this is worth mentioning to a clinician. A pregnancy test can rule out pregnancy.</string>
+    <string name="flag_pain_title">Severe period pain</string>
+    <string name="flag_pain_body">You logged pain of 7 or more out of 10 on several days in %1$s of your recent periods. Period pain that gets in the way of daily life is worth mentioning to a clinician; there are effective treatments.</string>
+
+    <!-- Cycle history -->
+    <string name="insights_history_title">Your cycles</string>
+    <string name="insights_history_help">Turn off a cycle that wasn\'t typical for you, for example during illness or travel, so it doesn\'t skew predictions.</string>
+    <string name="insights_current_cycle">Current cycle</string>
+    <string name="insights_current_cycle_detail">Started %1$s · day %2$d</string>
+    <string name="insights_cycle_dates">%1$s to %2$s</string>
+    <string name="insights_cycle_detail">%1$s cycle · %2$s period</string>
+    <string name="insights_cycle_excluded">Not used for predictions</string>
+    <plurals name="insights_day_length">
+        <item quantity="one">%d-day</item>
+        <item quantity="other">%d-day</item>
+    </plurals>
 </resources>

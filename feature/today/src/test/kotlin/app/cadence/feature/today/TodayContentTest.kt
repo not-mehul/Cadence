@@ -22,6 +22,7 @@ import java.time.LocalDate
 import kotlin.test.assertEquals
 
 @RunWith(RobolectricTestRunner::class)
+@org.robolectric.annotation.Config(qualifiers = "en-rGB")
 class TodayContentTest {
     @get:Rule
     val compose = createComposeRule()
@@ -129,5 +130,26 @@ class TodayContentTest {
     fun `empty log invites logging today`() {
         show(today = LocalDate.of(2026, 3, 20))
         compose.onNodeWithText("Log today").performScrollTo().assertExists()
+    }
+
+    @Test
+    fun `due within the likely range`() {
+        show(today = LocalDate.of(2026, 3, 31))
+        compose.onNodeWithText("Period due any day now").assertIsDisplayed()
+        compose.onNodeWithText("Due any day").performScrollTo().assertExists()
+    }
+
+    @Test
+    fun `likely range and fertile window with its disclaimer`() {
+        show(today = LocalDate.of(2026, 3, 8))
+        compose.onNodeWithText("Likely between 26 Mar and 1 Apr", substring = true).performScrollTo().assertExists()
+        compose.onNodeWithText("Estimated fertile window 10 Mar to 16 Mar").performScrollTo().assertExists()
+        compose.onNodeWithText("can't be used to prevent pregnancy", substring = true).performScrollTo().assertExists()
+    }
+
+    @Test
+    fun `no fertile window on birth control`() {
+        show(today = LocalDate.of(2026, 3, 8), goal = Goal.BIRTH_CONTROL)
+        compose.onNodeWithText("Estimated fertile window", substring = true).assertDoesNotExist()
     }
 }

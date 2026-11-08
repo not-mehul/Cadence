@@ -69,6 +69,31 @@ class CycleSnapshotTest {
     }
 
     @Test
+    fun `due within the likely range`() {
+        // Expected 29 March, typical range +/- 3 days.
+        val s = snapshot(d(2026, 3, 31))
+        assertEquals(CycleStatus.Due(daysPastExpected = 2), s.status)
+        assertNull(s.phase)
+    }
+
+    @Test
+    fun `fertile window is the current one, then the next`() {
+        assertEquals(d(2026, 3, 15), snapshot(d(2026, 3, 8)).fertileWindow?.ovulation)
+        assertEquals(d(2026, 3, 15), snapshot(d(2026, 3, 16)).fertileWindow?.ovulation, "still in it on its last day")
+        assertEquals(d(2026, 4, 12), snapshot(d(2026, 3, 17)).fertileWindow?.ovulation)
+        assertNull(snapshot(d(2026, 3, 8), settings = birthControl).fertileWindow)
+    }
+
+    @Test
+    fun `excluded cycles are passed through to predictions`() {
+        val days = march + periodDays(d(2026, 2, 1), 5)
+        val withAll = snapshot(d(2026, 3, 10), days = days)
+        val excluded = CycleSnapshot.compute(days, track, d(2026, 3, 10), excludedCycleStarts = setOf(d(2026, 2, 1)))
+        assertEquals(PredictionBasis.TYPICAL, withAll.prediction?.basis)
+        assertEquals(withAll.prediction?.cycleLength, excluded.prediction?.cycleLength)
+    }
+
+    @Test
     fun `late`() {
         val s = snapshot(d(2026, 4, 2))
 

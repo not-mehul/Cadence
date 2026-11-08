@@ -11,6 +11,9 @@ interface DayEntryRepository {
     /** Replaces everything logged for the entry's date. An empty entry removes the day's log. */
     suspend fun save(entry: DayEntry)
 
+    /** Pain level for every day it was logged (for the pain health flag). */
+    val painByDay: Flow<Map<LocalDate, Int>>
+
     /** Days between [from] and [to] (inclusive) with anything logged besides flow. */
     fun observeDatesWithDetails(
         from: LocalDate,

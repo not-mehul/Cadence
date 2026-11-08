@@ -1,5 +1,6 @@
 package app.cadence.core.testing
 
+import app.cadence.core.data.repository.CycleAnnotationRepository
 import app.cadence.core.data.repository.DataEraser
 import app.cadence.core.data.repository.DayEntryRepository
 import app.cadence.core.data.repository.PeriodRepository
@@ -81,6 +82,9 @@ class FakeDayEntryRepository(
         }
     }
 
+    override val painByDay: Flow<Map<LocalDate, Int>> =
+        entries.map { all -> all.values.mapNotNull { e -> e.painLevel?.let { e.date to it } }.toMap() }
+
     override fun observeDatesWithDetails(
         from: LocalDate,
         to: LocalDate,
@@ -91,4 +95,15 @@ class FakeDayEntryRepository(
                 .map { it.date }
                 .toSet()
         }
+}
+
+class FakeCycleAnnotationRepository : CycleAnnotationRepository {
+    override val excludedStarts = MutableStateFlow<Set<LocalDate>>(emptySet())
+
+    override suspend fun setExcluded(
+        cycleStart: LocalDate,
+        excluded: Boolean,
+    ) {
+        excludedStarts.update { if (excluded) it + cycleStart else it - cycleStart }
+    }
 }

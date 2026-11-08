@@ -84,6 +84,24 @@ class MigrationTest {
     }
 
     @Test
+    fun `v3 to v4 adds an empty cycle annotation table`() {
+        helper.createDatabase(TEST_DB, 3).use { db ->
+            db.execSQL("INSERT INTO day_tag (date, tag_id, kind, severity) VALUES (20500, 'cramps', 'SYMPTOM', 2)")
+        }
+
+        helper.runMigrationsAndValidate(TEST_DB, 4, true, *ALL_MIGRATIONS).use { db ->
+            db.query("SELECT tag_id FROM day_tag").use { c ->
+                c.moveToFirst()
+                assertEquals("cramps", c.getString(0))
+            }
+            db.query("SELECT count(*) FROM cycle_annotation").use { c ->
+                c.moveToFirst()
+                assertEquals(0, c.getInt(0))
+            }
+        }
+    }
+
+    @Test
     fun `room opens a database created from the oldest schema`() {
         helper.createDatabase(TEST_DB, 1).close()
 

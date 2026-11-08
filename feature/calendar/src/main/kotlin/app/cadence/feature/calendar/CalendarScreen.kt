@@ -131,7 +131,15 @@ fun CalendarContent(
                 Text(stringResource(R.string.calendar_jump_today))
             }
         }
-        Legend(Modifier.widthIn(max = 480.dp).fillMaxWidth())
+        Legend(showFertileWindow = state.showsFertileWindow, modifier = Modifier.widthIn(max = 480.dp).fillMaxWidth())
+        if (state.showsFertileWindow) {
+            Text(
+                stringResource(R.string.calendar_fertile_disclaimer),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                textAlign = TextAlign.Center,
+            )
+        }
         FilterChip(
             selected = editPeriods,
             onClick = { editPeriods = !editPeriods },

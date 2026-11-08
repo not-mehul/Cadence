@@ -21,6 +21,11 @@ sealed interface CycleStatus {
         val daysUntil: Int,
     ) : CycleStatus
 
+    /** Past the expected day but still within the likely range: due any day. */
+    data class Due(
+        val daysPastExpected: Int,
+    ) : CycleStatus
+
     data class Late(
         val daysLate: Int,
     ) : CycleStatus
@@ -44,23 +49,22 @@ data class CycleSnapshot(
     val currentPeriod: Period?,
     /** Day of the current cycle (1-based), or null with no data. */
     val cycleDay: Int?,
-    /** Null with no data, on birth control outside a period, or when the period is late. */
+    /** Null with no data, on birth control outside a period, or once the expected day has passed. */
     val phase: CyclePhase?,
     val timeline: CycleTimeline?,
     /** True the day or two after a period's last logged day, when it may simply not be over yet. */
     val canExtendPeriod: Boolean,
+    /** The current or next estimated fertile window; null on birth control or without data. */
+    val fertileWindow: FertileWindow? = null,
 ) {
     companion object {
-        /** Days on either side of ovulation that make up the fertile window (docs/PLAN.md §5.3). */
-        private const val FERTILE_DAYS_BEFORE_OVULATION = 5
-        private const val FERTILE_DAYS_AFTER_OVULATION = 1
-
         fun compute(
             flowByDay: Map<LocalDate, MenstrualFlow>,
             settings: UserSettings,
             today: LocalDate,
+            excludedCycleStarts: Set<LocalDate> = emptySet(),
         ): CycleSnapshot {
-            val history = CycleHistory.from(flowByDay)
+            val history = CycleHistory.from(flowByDay, excludedCycleStarts)
             val latest =
                 history.latestPeriodStartedBy(today)
                     ?: return CycleSnapshot(today, CycleStatus.NoData, null, null, null, null, null, false)
@@ -74,8 +78,12 @@ data class CycleSnapshot(
                         CycleStatus.OnPeriod(dayOfPeriod = cycleDay)
                     }
 
-                    prediction.daysLate > 0 -> {
+                    prediction.isLate -> {
                         CycleStatus.Late(prediction.daysLate)
+                    }
+
+                    prediction.daysLate > 0 -> {
+                        CycleStatus.Due(prediction.daysLate)
                     }
 
                     else -> {
@@ -85,25 +93,28 @@ data class CycleSnapshot(
                     }
                 }
 
-            val fertileWindow =
+            val fertileDays =
                 if (settings.goal.showsOvulationEstimates) {
                     val ovulationDay = prediction.cycleLength - settings.lutealPhaseLength + 1
-                    (ovulationDay - FERTILE_DAYS_BEFORE_OVULATION)..(ovulationDay + FERTILE_DAYS_AFTER_OVULATION)
+                    val before = CyclePrediction.FERTILE_DAYS_BEFORE_OVULATION.toInt()
+                    val after = CyclePrediction.FERTILE_DAYS_AFTER_OVULATION.toInt()
+                    (ovulationDay - before)..(ovulationDay + after)
                 } else {
                     null
                 }
-            val timeline = CycleTimeline(prediction.cycleLength, latest.length, fertileWindow)
+            val timeline = CycleTimeline(prediction.cycleLength, latest.length, fertileDays)
 
             val phase =
                 when {
                     currentPeriod != null -> CyclePhase.MENSTRUAL
 
-                    // No fertile window means ovulation estimates don't apply (birth control).
-                    fertileWindow == null || status is CycleStatus.Late -> null
+                    // No fertile window means ovulation estimates don't apply (birth control);
+                    // past the expected day, where the cycle stands is unknown.
+                    fertileDays == null || prediction.daysLate > 0 -> null
 
-                    cycleDay < fertileWindow.first -> CyclePhase.FOLLICULAR
+                    cycleDay < fertileDays.first -> CyclePhase.FOLLICULAR
 
-                    cycleDay <= fertileWindow.last -> CyclePhase.OVULATORY
+                    cycleDay <= fertileDays.last -> CyclePhase.OVULATORY
 
                     else -> CyclePhase.LUTEAL
                 }
@@ -111,7 +122,26 @@ data class CycleSnapshot(
             val daysSincePeriodEnded = ChronoUnit.DAYS.between(latest.end, today)
             val canExtend = currentPeriod == null && daysSincePeriodEnded <= CycleHistory.MAX_BRIDGED_GAP_DAYS + 1
 
-            return CycleSnapshot(today, status, prediction, currentPeriod, cycleDay, phase, timeline, canExtend)
+            val nextFertileWindow =
+                if (settings.goal.showsOvulationEstimates) {
+                    prediction
+                        .fertileWindows(count = 2, lutealPhaseLength = settings.lutealPhaseLength)
+                        .firstOrNull { !it.window.end.isBefore(today) }
+                } else {
+                    null
+                }
+
+            return CycleSnapshot(
+                today,
+                status,
+                prediction,
+                currentPeriod,
+                cycleDay,
+                phase,
+                timeline,
+                canExtend,
+                nextFertileWindow,
+            )
         }
     }
 }

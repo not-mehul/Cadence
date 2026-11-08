@@ -55,4 +55,29 @@ class CalendarMarksTest {
         val marks = CalendarMarks.forMonth(YearMonth.of(2026, 3), emptyMap(), null)
         assertEquals(setOf(DayMark.NONE), marks.values.toSet())
     }
+
+    @Test
+    fun `fertile window and ovulation when a luteal length is given`() {
+        val marks = CalendarMarks.forMonth(YearMonth.of(2026, 3), days, prediction, lutealPhaseLength = 14)
+
+        assertEquals(DayMark.OVULATION, marks[d(2026, 3, 15)])
+        assertEquals(
+            (10..16).filter { it != 15 }.map { d(2026, 3, it) },
+            marks.filterValues { it == DayMark.FERTILE }.keys.sorted(),
+        )
+    }
+
+    @Test
+    fun `no fertile marks without a luteal length (birth control)`() {
+        val marks = CalendarMarks.forMonth(YearMonth.of(2026, 3), days, prediction, lutealPhaseLength = null)
+        assertEquals(setOf(DayMark.NONE, DayMark.LOGGED_PERIOD, DayMark.PREDICTED_PERIOD), marks.values.toSet())
+    }
+
+    @Test
+    fun `period marks win over fertile marks`() {
+        // A 15-day typical cycle puts the fertile window over the period.
+        val shortPrediction = CyclePredictor.predict(CycleHistory.from(days), CycleDefaults(15, 5), d(2026, 3, 3))
+        val marks = CalendarMarks.forMonth(YearMonth.of(2026, 3), days, shortPrediction, lutealPhaseLength = 14)
+        assertEquals(DayMark.LOGGED_PERIOD, marks[d(2026, 3, 2)])
+    }
 }

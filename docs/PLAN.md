@@ -315,7 +315,7 @@ Weighted average of the last 6 period lengths, falling back to `defaultPeriodLen
 | Luteal | After ovulation until the next period |
 
 ### 5.5 Late period
-If today is past `nextStart + rangeHigh` with no flow logged, the state becomes **Late by N days**. Predictions for later cycles shift off today rather than staying in the past.
+If today is past `nextStart + rangeHigh` with no flow logged, the state becomes **Late by N days**. Between the expected day and the end of the range it is **Due** ("Period due any day now"). Once the expected day has passed, predictions for later cycles shift off today rather than staying in the past, and the current cycle's fertile window and phase are no longer shown.
 
 ### 5.6 Health flags (FIGO-based, informational only)
 - Average cycle < 24 or > 38 days
@@ -419,7 +419,7 @@ Each phase ends with a **working, shippable app**. Phases are sized for one deve
 
 **Done when:** a typical day can be logged in under 10 seconds, every field persists and is editable, and categories can be hidden.
 
-### Phase 3: Smarter predictions & insights
+### Phase 3: Smarter predictions & insights ✅
 **Goal:** predictions people can trust, plus useful statistics.
 - Weighted-average prediction, outlier filtering, confidence ranges and labels.
 - Ovulation and fertile window on Today and Calendar (hidden in birth control mode).

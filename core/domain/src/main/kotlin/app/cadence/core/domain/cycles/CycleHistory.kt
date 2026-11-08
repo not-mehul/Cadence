@@ -16,9 +16,20 @@ import java.time.temporal.ChronoUnit
 class CycleHistory private constructor(
     /** All periods, oldest first. */
     val periods: List<Period>,
+    excludedStarts: Set<LocalDate>,
 ) {
     /** Completed cycles (period start to next period start), oldest first. */
-    val cycles: List<Cycle> = periods.zipWithNext { a, b -> Cycle(a.start, b.start) }
+    val cycles: List<Cycle> =
+        periods.zipWithNext {
+            a,
+            b,
+            ->
+            Cycle(a.start, b.start, excluded = a.start in excludedStarts)
+        }
+
+    /** Completed cycles that count towards predictions and statistics. */
+    val includedCycles: List<Cycle>
+        get() = cycles.filterNot { it.excluded }
 
     /** The most recent period that has started on or before [date], or null. */
     fun latestPeriodStartedBy(date: LocalDate): Period? = periods.lastOrNull { !it.start.isAfter(date) }
@@ -29,9 +40,13 @@ class CycleHistory private constructor(
         /** Days without flow that can sit inside one period. */
         const val MAX_BRIDGED_GAP_DAYS = 1
 
-        val EMPTY = CycleHistory(emptyList())
+        val EMPTY = CycleHistory(emptyList(), emptySet())
 
-        fun from(flowByDay: Map<LocalDate, MenstrualFlow>): CycleHistory {
+        /** [excludedStarts]: first days of cycles the user excluded from predictions. */
+        fun from(
+            flowByDay: Map<LocalDate, MenstrualFlow>,
+            excludedStarts: Set<LocalDate> = emptySet(),
+        ): CycleHistory {
             val days = flowByDay.filterValues { it.countsAsPeriod }.keys.sorted()
             if (days.isEmpty()) return EMPTY
 
@@ -48,7 +63,7 @@ class CycleHistory private constructor(
                 }
             }
             periods += Period(start, end)
-            return CycleHistory(periods)
+            return CycleHistory(periods, excludedStarts)
         }
     }
 }

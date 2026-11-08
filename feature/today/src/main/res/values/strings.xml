@@ -10,6 +10,7 @@
         <item quantity="one">Period in %d day</item>
         <item quantity="other">Period in %d days</item>
     </plurals>
+    <string name="today_headline_due">Period due any day now</string>
     <plurals name="today_headline_late">
         <item quantity="one">Period %d day late</item>
         <item quantity="other">Period %d days late</item>
@@ -19,6 +20,13 @@
     <string name="today_no_data_body">Tap Period started on the first day of your period. You can also add earlier periods on the calendar.</string>
     <string name="today_next_expected">Next period expected %1$s</string>
     <string name="today_was_expected">It was expected %1$s</string>
+    <string name="today_likely_range">Likely between %1$s and %2$s</string>
+    <string name="today_basis_with_confidence">%1$s · %2$s</string>
+    <string name="today_confidence_high">high confidence</string>
+    <string name="today_confidence_medium">medium confidence</string>
+    <string name="today_confidence_low">low confidence</string>
+    <string name="today_fertile_window">Estimated fertile window %1$s to %2$s</string>
+    <string name="today_fertile_disclaimer">An estimate only. It can\'t be used to prevent pregnancy.</string>
     <string name="today_basis_typical">Based on your typical cycle. Predictions get more personal as you log periods.</string>
     <plurals name="today_basis_history">
         <item quantity="one">Based on your last %d cycle</item>
@@ -59,6 +67,8 @@
     <string name="phase_luteal_body">Progesterone rises after ovulation. In the days before your period you might notice bloating, tender breasts or mood changes.</string>
     <string name="phase_birth_control">Hormonal birth control</string>
     <string name="phase_birth_control_body">Most hormonal birth control prevents ovulation, so Cadence doesn\'t show cycle phases or ovulation estimates. You can still log bleeding and see when to expect it.</string>
+    <string name="phase_due">Due any day</string>
+    <string name="phase_due_body">Your period was expected around now. Cycles naturally vary by a few days from one month to the next.</string>
     <string name="phase_late">Running late</string>
     <string name="phase_late_body">Cycles vary for many reasons, including stress, illness, travel and changes in weight or exercise. If you might be pregnant, a test can tell you for sure.</string>
     <string name="phase_welcome">How Cadence works</string>

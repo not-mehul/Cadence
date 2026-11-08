@@ -38,7 +38,13 @@ class CalendarContentTest {
         compose.setContent {
             CadenceTheme {
                 CalendarContent(
-                    CalendarUiState.Ready(today, days, prediction, detailDates = setOf(LocalDate.of(2026, 3, 12))),
+                    CalendarUiState.Ready(
+                        today,
+                        days,
+                        prediction,
+                        detailDates = setOf(LocalDate.of(2026, 3, 22)),
+                        lutealPhaseLength = 14,
+                    ),
                     onToggle = onToggle,
                     onOpenLog = onOpenLog,
                 )
@@ -94,12 +100,25 @@ class CalendarContentTest {
     @Test
     fun `days with a log are described`() {
         show()
-        day("March 12, 2026, has a log").assertExists()
+        day("March 22, 2026, has a log").assertExists()
     }
 
     @Test
     fun `future days without a log are disabled`() {
         show()
         day("March 25, 2026").assertIsNotEnabled()
+    }
+
+    @Test
+    fun `fertile window and ovulation are described as estimates`() {
+        show()
+        day("April 12, 2026, estimated ovulation").assertExists()
+        day("April 10, 2026, estimated fertile window").assertExists()
+        compose
+            .onNodeWithText(
+                "Fertile window and ovulation are estimates",
+                substring = true,
+            ).performScrollTo()
+            .assertExists()
     }
 }

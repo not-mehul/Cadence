@@ -63,6 +63,13 @@ jobs:
     steps:
       - uses: actions/checkout@v5
 
+      - name: Free disk space for the emulator
+        # The emulator needs several GB for its data partition; drop toolchains this build never uses.
+        # Runs before setup-java, because it clears the tool cache that Java is installed into.
+        run: |
+          sudo rm -rf /usr/share/dotnet /opt/ghc /usr/local/.ghcup /usr/local/share/boost /usr/local/lib/android/sdk/ndk "$AGENT_TOOLSDIRECTORY"
+          df -h /
+
       - uses: actions/setup-java@v5
         with:
           distribution: temurin
@@ -72,12 +79,6 @@ jobs:
 
       - name: Install Android SDK platform
         run: yes | "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" "platforms;android-37.0" "build-tools;36.0.0" > /dev/null
-
-      - name: Free disk space for the emulator
-        # The emulator needs several GB for its data partition; drop toolchains this build never uses.
-        run: |
-          sudo rm -rf /usr/share/dotnet /opt/ghc /usr/local/.ghcup /usr/local/share/boost /usr/local/lib/android/sdk/ndk "$AGENT_TOOLSDIRECTORY"
-          df -h /
 
       - name: Enable KVM
         run: |

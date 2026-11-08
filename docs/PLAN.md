@@ -45,7 +45,7 @@ Priority key: **P0** = MVP, must have · **P1** = core, expected by users · **P
 | Next period date and countdown | P0 | "Period in 5 days" or "Period is 2 days late". |
 | Current cycle day and phase | P0 | Menstrual, follicular, ovulatory or luteal, each with a short explanation. |
 | Predicted period length | P0 | Used to pre-fill predicted days on the calendar. |
-| Estimated ovulation day and fertile window | P1 | Clearly labelled as an estimate. Hidden when hormonal birth control is on. |
+| Estimated ovulation day and fertile window | P1 | Shown only as general cycle awareness and clearly labelled as an estimate. Hidden when hormonal birth control is on. **No trying-to-conceive features** (see §2.9). |
 | PMS window estimate | P2 | Learned from symptoms the user logs in the luteal phase. |
 | Confidence ranges ("likely Mar 3–6") | P1 | Driven by how variable the user's cycles are. |
 | Late or missed period detection | P1 | Prompts the user to log, take a test, or note a skipped cycle. |
@@ -58,10 +58,9 @@ Priority key: **P0** = MVP, must have · **P1** = core, expected by users · **P
 | Energy, sleep quality, stress (1–5 scale) | P1 | |
 | Pain level (0–10) | P1 | Useful for spotting possible endometriosis or dysmenorrhea patterns. |
 | Sexual activity (protected / unprotected), libido | P1 | Optional. Can be hidden in settings. |
-| Discharge / cervical mucus | P2 | Dry, sticky, creamy, watery, egg-white. |
+| Discharge | P2 | Dry, sticky, creamy, watery, egg-white. Logged as a general health symptom. |
 | Medications and contraception taken | P2 | Pill check-off, painkillers, supplements. |
-| Basal body temperature (BBT) | P2 | Charted. Used to confirm ovulation after the fact. |
-| Ovulation test (LH) and pregnancy test results | P2 | |
+| Pregnancy test result | P2 | Useful when a period is late. |
 | Weight | P3 | Opt-in only. |
 | Free-text notes | P1 | |
 | Custom tags and symptoms | P2 | |
@@ -81,7 +80,6 @@ Priority key: **P0** = MVP, must have · **P1** = core, expected by users · **P
 | Cycle length chart over time | P1 | Bar chart per cycle, with a band for the normal range. |
 | Symptom patterns by cycle day ("you often log headaches 2 days before your period") | P2 | |
 | Health flags: cycles < 24 or > 38 days, variation > 9 days, period > 8 days, no period in 90 days | P1 | Based on FIGO normal ranges. Gentle wording plus "consider talking to a clinician". |
-| BBT chart with cover line | P2 | |
 
 ### 2.6 Reminders & notifications
 | Feature | Priority | Notes |
@@ -97,6 +95,7 @@ Priority key: **P0** = MVP, must have · **P1** = core, expected by users · **P
 | Feature | Priority | Notes |
 |---|---|---|
 | Local-only storage, no account | P0 | |
+| **No `INTERNET` permission** | P0 | The app physically cannot send data anywhere. The manifest explicitly removes the permission, even if a library tries to add it, and CI checks the built APK. |
 | Encrypted database at rest | P0 | Much cheaper to do from day one than to retrofit later. |
 | App lock (PIN plus biometrics) | P1 | |
 | Delete all data | P0 | |
@@ -114,29 +113,32 @@ Priority key: **P0** = MVP, must have · **P1** = core, expected by users · **P
 | Export CSV | P2 | |
 | Clinician report (PDF): cycle table, averages, symptom summary, flags | P2 | |
 | Encrypted backup file (password-protected) | P2 | |
-| Optional end-to-end-encrypted sync across devices | P3 | Needs a server, so it is deliberately deferred. |
+| ~~Sync across devices~~ | **Not offered** | Device only, by decision. Moving to a new phone means export then import. |
 
 ### 2.9 Goals / life-stage modes
 | Feature | Priority | Notes |
 |---|---|---|
+Cadence has **exactly two modes**.
+
+| Feature | Priority | Notes |
+|---|---|---|
 | Track my cycle (default) | P0 | |
-| Hormonal birth control mode | P1 | Turns off ovulation and fertile predictions, which don't apply, and adds pill reminders. |
-| Trying to conceive (TTC) mode | P2 | Puts the fertile window, LH tests, BBT and mucus first. |
-| Pregnancy mode | P3 | Pauses predictions and shows week count. |
-| Perimenopause mode | P3 | Tolerates irregular cycles and tracks hot flashes and night sweats. |
+| Hormonal birth control mode | P1 | Turns off ovulation and fertile predictions, which don't apply, and adds pill / patch / ring reminders. |
+| ~~Trying to conceive (TTC)~~ | **Not offered** | Out of scope by decision: no TTC mode, no BBT, no LH tests, no ovulation confirmation. |
+| ~~Pregnancy / perimenopause modes~~ | **Not offered** | Out of scope by decision. |
 | ~~Avoid pregnancy / contraception mode~~ | **Not offered** | Using an app as contraception requires regulatory clearance and clinical validation. We show a clear disclaimer instead. |
 
 ### 2.10 Experience & platform
 | Feature | Priority | Notes |
 |---|---|---|
 | Onboarding (last period, typical lengths, goal) | P0 | Every question is skippable, with sensible defaults. |
-| Light and dark theme (Material 3), with an optional Material You dynamic colour | P1 | |
+| Light and dark theme (Material 3) using Cadence's own fixed palette (§6.1) | P0 | No Material You dynamic colour, so the cycle colours always mean the same thing. |
 | Accessibility: TalkBack labels, font scaling up to 200%, 48dp touch targets, WCAG AA contrast | P1 | |
 | Educational cards per phase | P2 | Short, factual, sourced. |
 | Localization (dates, first day of week, translations) | P2 | |
 | Home-screen widget (cycle day / next period) | P3 | Built with Jetpack Glance. |
-| Health Connect sync (menstruation, cervical mucus, BBT, ovulation tests) | P3 | Health Connect has native record types for all of these. |
-| Partner sharing (read-only) | P3 | Needs a backend, so it is deferred. |
+| Health Connect sync (menstruation periods and flow) | P3 | Opt-in. Health Connect is on-device storage, so this stays within the device-only rule. |
+| ~~Partner sharing~~ | **Not offered** | Would need a server. |
 
 ### 2.11 Explicit non-goals
 - Social feeds, community forums, gamification, ads, or selling data.
@@ -154,7 +156,8 @@ Since the app only targets Android, a cross-platform framework adds nothing and 
 | Concern | Choice | Why |
 |---|---|---|
 | Language / UI | Kotlin, Jetpack Compose, Material 3 | The current standard Android toolkit. |
-| SDK levels | `minSdk 26` (Android 8.0), `targetSdk` = latest that Google Play requires | API 26 covers about 97% of active devices and gives `java.time` without desugaring. |
+| SDK levels | `minSdk 26` (Android 8.0), `targetSdk 36` (Android 16), `compileSdk 37` | API 26 covers about 97% of active devices and gives `java.time` without desugaring. compileSdk 37 is required by Compose 1.12 and only affects compilation; runtime behaviour follows targetSdk. |
+| Build | Gradle 9 wrapper, AGP 9 (built-in Kotlin), Kotlin 2.4, KSP, version catalog, convention plugins in `build-logic/` | |
 | App structure | Single activity, Navigation Compose, MVVM (`ViewModel` + `StateFlow`) | Simple, idiomatic, and easy to test. |
 | Dependency injection | Hilt | |
 | Async | Kotlin Coroutines + Flow | Room queries come back as `Flow`, so the UI updates live. |
@@ -169,8 +172,8 @@ Since the app only targets Android, a cross-platform framework adds nothing and 
 | Export / import | Storage Access Framework (`CreateDocument` / `OpenDocument`) | The user picks the location, so no storage permission is needed. |
 | Dates | `java.time.LocalDate`, stored in Room as `epochDay: Long` | Avoids timezone and DST bugs. A "day" is a calendar date, not an instant. |
 | Testing | JUnit 5 + kotlin.test for the domain module; Turbine for Flows; in-memory Room tests; Compose UI tests; Robolectric | |
-| Quality | ktlint, detekt, Android Lint | |
-| CI | GitHub Actions: `./gradlew lint detekt test assembleDebug` | |
+| Quality | ktlint (with Compose rules), Android Lint (warnings are errors), Kover coverage gate on `:core:domain` | detekt was dropped: its stable release doesn't support Kotlin 2.4 yet. |
+| CI | GitHub Actions: `./gradlew ktlintCheck lint test koverVerify assembleDebug`, an APK permission check, and instrumented tests on API 26 and API 36 emulators | |
 
 ### Module layout
 ```
@@ -182,13 +185,14 @@ Since the app only targets Android, a cross-platform framework adds nothing and 
     phases/           #   cycle-day → phase
 :core:data            # Room entities, DAOs, migrations, SQLCipher, Keystore, DataStore, repositories
 :core:ui              # design system: theme, tokens, shared composables
-:feature:onboarding
 :feature:today
 :feature:calendar
-:feature:log          # the daily log bottom sheet
 :feature:insights
 :feature:settings     # incl. export/import, lock, reminders config
-:feature:reminders    # alarm scheduling, receivers, notification channels
+# added in the phase that needs them:
+:feature:onboarding   # Phase 1
+:feature:log          # Phase 2 — the daily log bottom sheet
+:feature:reminders    # Phase 4 — alarm scheduling, receivers, notification channels
 ```
 The key rule: **all cycle maths lives in `:core:domain`, a plain Kotlin JVM module.** Gradle itself stops it from importing Android code, so the logic stays pure, fast to test, and independent of the UI and storage.
 
@@ -202,7 +206,7 @@ The **source of truth is the per-day log.** Periods and cycles are *derived*, no
 // Domain types (in :core:domain). Days are java.time.LocalDate; Room stores them as epochDay.
 
 enum class Flow { SPOTTING, LIGHT, MEDIUM, HEAVY }
-enum class Mucus { DRY, STICKY, CREAMY, WATERY, EGG_WHITE }
+enum class Discharge { DRY, STICKY, CREAMY, WATERY, EGG_WHITE }
 enum class SexActivity { NONE, PROTECTED, UNPROTECTED }
 enum class TestResult { NEGATIVE, POSITIVE }
 
@@ -213,11 +217,9 @@ data class DayLog(
     val energy: Int? = null,            // 1–5
     val sleep: Int? = null,             // 1–5
     val stress: Int? = null,            // 1–5
-    val mucus: Mucus? = null,
+    val discharge: Discharge? = null,
     val sex: SexActivity? = null,
-    val bbtCelsius: Double? = null,
     val weightKg: Double? = null,
-    val lhTest: TestResult? = null,
     val pregnancyTest: TestResult? = null,
     val note: String? = null,
     val updatedAt: Instant,             // for future sync/merge
@@ -253,19 +255,18 @@ data class Medication(
 
 data class MedicationDose(val medicationId: String, val date: LocalDate, val taken: Boolean)
 
-enum class Goal { TRACK, BIRTH_CONTROL, TTC, PREGNANT, PERIMENOPAUSE }
+enum class Goal { TRACK, BIRTH_CONTROL }
 
 data class Settings(                    // stored in DataStore, not Room
     val goal: Goal = Goal.TRACK,
     val defaultCycleLength: Int = 28,
     val defaultPeriodLength: Int = 5,
-    val lutealPhaseLength: Int = 14,    // user-adjustable, or learned from BBT/LH
+    val lutealPhaseLength: Int = 14,    // user-adjustable in advanced settings
     val firstDayOfWeek: DayOfWeek = DayOfWeek.MONDAY, // default from locale
     val hiddenCategories: Set<String> = emptySet(),
     val reminders: ReminderSettings = ReminderSettings(),
     val lockEnabled: Boolean = false,
     val theme: ThemeMode = ThemeMode.SYSTEM,
-    val dynamicColor: Boolean = false,
     val onboardingComplete: Boolean = false,
 )
 
@@ -299,8 +300,8 @@ Weighted average of the last 6 period lengths, falling back to `defaultPeriodLen
 ### 5.3 Ovulation & fertile window
 - `ovulation ≈ nextStart − lutealPhaseLength` (default 14 days)
 - `fertileWindow = [ovulation − 5, ovulation + 1]`
-- Skipped entirely when goal is `birth_control` or `pregnant`.
-- In a later phase, a positive LH test or a sustained BBT rise (3 readings ≥ 0.2 °C above the previous 6) *confirms* ovulation for that cycle and feeds back into a learned luteal length.
+- Skipped entirely in birth control mode.
+- This is an estimate for cycle awareness only. Ovulation is never confirmed from BBT or LH tests, because trying-to-conceive features are out of scope.
 
 ### 5.4 Phases (for the Today screen)
 | Phase | Days |
@@ -317,7 +318,7 @@ If today is past `nextStart + rangeHigh` with no flow logged, the state becomes 
 - Average cycle < 24 or > 38 days
 - Cycle-to-cycle variation (max − min over the last 6) > 9 days
 - Any period lasting > 8 days
-- No period for ≥ 90 days (when not pregnant or on birth control)
+- No period for ≥ 90 days (when not on birth control)
 - Pain level ≥ 7 on multiple period days across 3+ cycles
 
 ### 5.7 Testing strategy
@@ -336,7 +337,7 @@ Table-driven unit tests with fixture histories: perfectly regular 28-day cycles,
 The app supports edge-to-edge display and predictive back, and adapts to tablets and foldables with a `NavigationRail` on wide screens.
 
 1. **Onboarding**: welcome and privacy promise → last period start → typical cycle and period length ("I don't know" allowed) → goal → optional app lock → done.
-2. **Today**: a large cycle ring showing cycle day N of ~M with the current phase highlighted; the headline ("Period in 4 days", "Day 2 of period", "3 days late"); a primary action button that changes with context ("Period started" / "Period ended" / "Log today"); chips for what's already logged today; and a short phase card.
+2. **Today**: a large cycle ring (segments in the phase colours from §6.1) showing cycle day N of ~M with the current phase highlighted; the headline ("Period in 4 days", "Day 2 of period", "3 days late"); a primary action button that changes with context ("Period started" / "Period ended" / "Log today"); chips for what's already logged today; and a short phase card.
 3. **Log sheet** (Material 3 `ModalBottomSheet`, opened from Today or any calendar day): sections for Flow, Symptoms, Mood, Body (pain, energy, sleep, stress), Sex, Discharge, Tests, Meds, and Notes. Sections are collapsible, the user can hide them, and changes save automatically.
 4. **Calendar**: month grid, swipe between months. Legend:
    - Solid fill = logged period
@@ -349,7 +350,31 @@ The app supports edge-to-edge display and predictive back, and adapts to tablets
 5. **Insights**: summary cards (average cycle, average period, variation, confidence), a cycle length chart, the cycle history list, symptom patterns, and health flags.
 6. **Settings**: goal, cycle defaults, reminders, categories shown, app lock, theme, export / import / delete all, privacy explainer, about and disclaimer.
 
-**Visual direction:** calm and warm, not stereotypically pink. Primary terracotta or rose, a teal accent for the fertile window, and neutral warm greys. Every state has a non-colour cue (pattern, icon or label) for colour-blind users.
+### 6.1 Colour theme
+
+The look is calm and warm, not stereotypically pink. Every role is a fixed Material 3 colour scheme defined in `:core:ui`, with a light and a dark variant. Unit tests check every text/background pair for WCAG AA contrast (4.5:1 for text, 3:1 for non-text UI).
+
+| Role | Light | Dark | Used for |
+|---|---|---|---|
+| Primary: **Rosewood** | `#9A3B53` | `#FFB1C1` | Period days, primary actions, menstrual phase |
+| Primary container | `#FFD9E0` | `#7C263D` | Period-day fills, selected chips |
+| Secondary: **Dusty mauve** | `#6E5A5E` | `#DAC1C5` | Secondary actions, less prominent UI |
+| Tertiary: **Deep teal** | `#2E6A67` | `#98D3CE` | Ovulation estimate, ovulatory phase |
+| Tertiary container | `#B4EFEA` | `#10504E` | Fertile window tint |
+| Surface / background | `#FFF8F7` | `#191113` | Warm off-white / warm near-black |
+| On-surface text | `#22191B` | `#EFDFE1` | |
+| Error | `#BA1A1A` | `#FFB4AB` | |
+
+**Cycle phase colours** are four clearly different hues, used on the cycle ring and in Insights:
+
+| Phase | Light | Dark |
+|---|---|---|
+| Menstrual: rosewood | `#9A3B53` | `#FFB1C1` |
+| Follicular: amber | `#8A5100` | `#FFB870` |
+| Ovulatory: teal | `#2E6A67` | `#98D3CE` |
+| Luteal: plum | `#6D4C8C` | `#D7BAF5` |
+
+Every state also has a non-colour cue (a fill pattern, icon or label) for colour-blind users. Predicted periods use a dashed outline, while logged ones use a solid fill.
 
 ---
 
@@ -357,11 +382,12 @@ The app supports edge-to-edge display and predictive back, and adapts to tablets
 
 Each phase ends with a **working, shippable app**. Phases are sized for one developer at a few days to two weeks each.
 
-### Phase 0: Foundation
+### Phase 0: Foundation ✅
 **Goal:** the skeleton everything else builds on.
 - Gradle multi-module project (Kotlin DSL, version catalog `libs.versions.toml`) with the modules from §3; Hilt, Compose and Navigation wired up.
-- ktlint, detekt and Android Lint configured; Kover for coverage.
-- Material 3 theme in `:core:ui`: colour scheme (light and dark), type scale, spacing tokens, plus base composables (primary button, chip, card, section header).
+- ktlint (with Compose rules) and Android Lint configured; Kover coverage gate on `:core:domain`.
+- `INTERNET` permission explicitly removed from the merged manifest, with a CI check on the APK.
+- Material 3 theme in `:core:ui`: the §6.1 colour scheme (light and dark) with contrast tests, cycle phase colours, type scale, spacing tokens, plus base composables (primary button, chip, card, section header).
 - Room on SQLCipher; passphrase generated on first launch and wrapped by an Android Keystore key; schema export on, with a migration test harness.
 - `android:allowBackup="false"` and data-extraction rules that exclude the database and preferences.
 - `:core:domain` scaffold with JUnit 5.
@@ -424,15 +450,14 @@ Each phase ends with a **working, shippable app**. Phases are sized for one deve
 
 **Done when:** an export → delete all → import round trip restores identical data, the lock can't be bypassed via deep links, notifications or the recents screen, and the PDF renders correctly.
 
-### Phase 6: Goals, fertility signals & medications
-**Goal:** support different life stages.
-- TTC mode: BBT logging and chart, cervical mucus, LH tests, and confirmed ovulation feeding back into a learned luteal length.
-- Birth control mode: medication or contraceptive schedule (pill / patch / ring), dose check-off, and reminders.
-- Pregnancy mode (pauses predictions, shows week count) and perimenopause mode (relaxed irregularity flags, extra symptoms).
+### Phase 6: Birth control, medications & patterns
+**Goal:** first-class support for hormonal birth control, plus deeper insights.
+- Birth control mode in full: contraceptive schedule (daily pill including placebo or break weeks, weekly patch, monthly ring), dose check-off on Today, missed-dose prompts, and reminders.
+- Other medications (painkillers, supplements) with optional reminders.
 - Symptom pattern insights ("you often log X around cycle day Y").
 - Custom tags.
 
-**Done when:** each mode changes predictions, the Today screen and reminders as specified, and switching modes never loses data.
+**Done when:** birth control mode changes predictions, the Today screen and reminders as specified, missed doses are surfaced, and switching between the two modes never loses data.
 
 ### Phase 7: Polish & ecosystem
 **Goal:** release quality and nice-to-haves.
@@ -440,11 +465,15 @@ Each phase ends with a **working, shippable app**. Phases are sized for one deve
 - Localization: string resources for everything, per-app language (Android 13+), RTL layout check, locale-based first day of week and units.
 - Educational phase cards.
 - Home-screen widget built with Jetpack Glance, discreet by default.
-- Health Connect read and write, opt-in (`MenstruationPeriodRecord`, `MenstruationFlowRecord`, `CervicalMucusRecord`, `BasalBodyTemperatureRecord`, `OvulationTestRecord`).
+- Health Connect read and write, opt-in (`MenstruationPeriodRecord`, `MenstruationFlowRecord`).
 - Optional discreet launcher icon (`activity-alias`).
 - Baseline Profiles for fast startup; R8 minification and shrinking.
-- Google Play readiness: release signing with Play App Signing, an Android App Bundle, store listing and screenshots, a **Data safety form** (no data collected or shared), the **Health apps declaration**, and a privacy policy URL. Roll out through internal → closed → production tracks.
-- *(Stretch, needs a backend)*: E2E-encrypted sync, partner sharing.
+- **Sideload release pipeline:**
+  - A release keystore created once and stored offline in two places, with the CI signing secrets kept in GitHub encrypted secrets. Losing this key would mean users can never update in place.
+  - Tag-triggered GitHub Actions workflow builds a signed, minified release APK and publishes it to GitHub Releases along with its SHA-256 checksum and the signing certificate fingerprint.
+  - `versionCode` / `versionName` derived from the git tag.
+  - Install guide in the README: allowing "Install unknown apps", verifying the checksum, and updating by installing a newer APK over the old one, which keeps the data.
+  - The app has no internet access, so it can't check for updates. Settings → About shows the installed version and where to look for new ones.
 
 ### Phase summary
 
@@ -456,8 +485,8 @@ Each phase ends with a **working, shippable app**. Phases are sized for one deve
 | 3 | Insights | Confidence-ranged predictions, fertile window, stats, flags |
 | 4 | Reminders | Discreet local notifications |
 | 5 | Privacy & portability | App lock, export/import, clinician PDF |
-| 6 | Modes | TTC, birth control, pregnancy, perimenopause |
-| 7 | Polish | a11y, i18n, Glance widget, Health Connect, Play Store release |
+| 6 | Birth control & patterns | Contraceptive schedules, medications, symptom patterns |
+| 7 | Polish & release | a11y, i18n, Glance widget, Health Connect, signed sideload APK on GitHub Releases |
 
 ---
 
@@ -465,7 +494,7 @@ Each phase ends with a **working, shippable app**. Phases are sized for one deve
 
 | Risk | Mitigation |
 |---|---|
-| Users rely on fertile window predictions as contraception | A persistent disclaimer on the fertile window UI, no "safe days" wording, and no contraception mode. |
+| Users rely on fertile window estimates as contraception | A persistent disclaimer on the fertile window UI, no "safe days" wording, and no contraception mode. |
 | Sensitive data exposure (legal requests, a lost device, a shoulder-surfer) | Local-only storage, SQLCipher, app lock, discreet notifications, `FLAG_SECURE`, Auto Backup off, and no server to subpoena. |
 | Data loss because nothing is in the cloud (Auto Backup is off on purpose) | Prominent backup and export (Phase 5), plus a periodic "back up your data" nudge. |
 | Reminders delayed or killed by OEM battery managers | Inexact alarms plus re-arming in WorkManager, and an in-app guide to battery-optimisation exemptions. |
@@ -473,18 +502,22 @@ Each phase ends with a **working, shippable app**. Phases are sized for one deve
 | Timezone or DST bugs shifting days | `java.time.LocalDate` (stored as `epochDay`) everywhere, no `Instant` maths on stored days, and dedicated tests. |
 | Poor predictions for irregular cycles | Confidence ranges, a Low-confidence label, the exclude-cycle feature, and never presenting a single date as certain. |
 | Medical inaccuracy in flags or education | Base thresholds on FIGO/ACOG guidance, cite sources in-app, and use informational wording only. |
-| Regulations and store policy (GDPR special-category data, FTC Health Breach Notification Rule, Google Play health-app policy) | Collect nothing server-side, keep a clear privacy policy, and fill in the Data safety form and Health apps declaration accurately. Revisit if sync or a backend is ever added. |
+| Regulations (GDPR special-category data, FTC Health Breach Notification Rule) | Collect nothing, transmit nothing (no `INTERNET` permission), and publish a plain privacy statement. |
+| Losing the release signing key | Back the keystore up offline in two places. Without it, users would have to uninstall (losing data unless exported) to move to a newly signed build. |
+| Users installing a tampered APK from an unofficial source | Publish only on GitHub Releases, with a SHA-256 checksum and the signing certificate fingerprint documented in the README. |
+| No automatic updates when sideloading | The About screen shows the installed version, the release page lists changes, and data survives in-place upgrades. |
 
 ---
 
-## 9. Open decisions
+## 9. Decisions
 
-These choices affect the plan. Defaults are in **bold**.
+Confirmed by the product owner:
 
-Decided: **Android only**, as a native Kotlin + Jetpack Compose app.
-
-1. **Distribution:** **Google Play**, or sideloaded APK / F-Droid only? An F-Droid build would also need us to avoid proprietary dependencies.
-2. **Minimum Android version:** **API 26 (Android 8.0)**, or higher to simplify things?
-3. **Sync:** **local-only for now**, or plan a backend for E2E-encrypted sync earlier?
-4. **Initial modes:** **track + birth control in MVP**, or also TTC?
-5. **Visual identity:** **warm terracotta / teal brand palette**, or Material You dynamic colour as the default?
+| # | Decision | Consequence |
+|---|---|---|
+| 1 | **Android only** | Native Kotlin + Jetpack Compose (§3). |
+| 2 | **Device only** | No server, no account, no sync, no `INTERNET` permission. Moving phones means export then import. |
+| 3 | **Two modes only: cycle tracking and hormonal birth control** | No trying-to-conceive features of any kind (no TTC mode, BBT, LH tests or ovulation confirmation). No pregnancy or perimenopause modes. |
+| 4 | **A fixed Cadence colour theme** (§6.1) | No Material You dynamic colour. Cycle colours mean the same thing everywhere. |
+| 5 | **Distributed as a sideloaded APK** | No Play Store, Play Services or Play-only APIs. A signed release APK goes out through GitHub Releases (Phase 7). |
+| 6 | **minSdk 26 (Android 8.0)** | `java.time` without desugaring; Keystore AES-GCM is available. |

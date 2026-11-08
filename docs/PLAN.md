@@ -276,6 +276,8 @@ data class Settings(                    // single-row table in the encrypted dat
 data class CycleAnnotation(val startDate: LocalDate, val excludeFromPredictions: Boolean, val reason: String?)
 ```
 
+**As built (schema v3):** symptoms and moods live in a `day_tag` table (`date`, `tag_id`, `kind`, `severity`) keyed by ids from a built-in catalogue in `:core:domain` (`LogCatalog`); custom tags (Phase 6) will add a definitions table. Discharge, medications and pregnancy tests come in later phases.
+
 **Deriving periods:** consecutive days with flow `LIGHT | MEDIUM | HEAVY` form a period. A gap of ≤ 1 day without flow is bridged. Spotting alone never *starts* a period.
 **Deriving cycles:** a cycle runs from one period's start to the day before the next period's start. The current cycle is open-ended.
 
@@ -348,7 +350,7 @@ The app supports edge-to-edge display and predictive back, and adapts to tablets
    - Dot = ovulation estimate
    - Small dot = has log
 
-   Tapping a day opens the log sheet for that date.
+   Tapping a day opens the log sheet for that date. An "Edit period days" mode switches taps back to toggling period days, for quick backfilling.
 5. **Insights**: summary cards (average cycle, average period, variation, confidence), a cycle length chart, the cycle history list, symptom patterns, and health flags.
 6. **Settings**: goal, cycle defaults, reminders, categories shown, app lock, theme, export / import / delete all, privacy explainer, about and disclaimer.
 
@@ -408,7 +410,7 @@ Each phase ends with a **working, shippable app**. Phases are sized for one deve
 
 **Done when:** a new user can onboard in under 60 seconds, log a period in 1 tap, see the next prediction, and edit history on the calendar. The domain has full unit tests.
 
-### Phase 2: Daily logging
+### Phase 2: Daily logging ✅
 **Goal:** a rich but fast daily check-in.
 - Log sheet with flow intensity, symptoms with severity, mood, pain, energy, sleep, stress, sex, and notes.
 - Built-in tag catalogue; hide or show categories.

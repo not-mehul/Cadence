@@ -7,9 +7,9 @@ A simple, private period-tracking companion app for **Android**, built natively 
 - **Two modes:** cycle tracking and hormonal birth control.
 - **Sideloaded:** distributed as an APK; no Play Store required.
 
-> **Status:** Phases 0 (foundation) and 1 (MVP: onboarding, one-tap period logging, predictions, calendar, settings) are done. See [`docs/PLAN.md`](docs/PLAN.md) for the feature inventory, architecture, data model, prediction engine and phased roadmap.
+> **Status:** Phases 0 (foundation), 1 (MVP: onboarding, one-tap period logging, predictions, calendar, settings) and 2 (daily logging: symptoms, mood, pain, energy, sleep, stress, sex, notes) are done. See [`docs/PLAN.md`](docs/PLAN.md) for the feature inventory, architecture, data model, prediction engine and phased roadmap.
 
-![Phase 1: Today, calendar and onboarding](docs/images/phase1-ui.png)
+![Phase 2: daily log, Today and calendar](docs/images/phase2-ui.png)
 
 ## Project layout
 
@@ -20,7 +20,7 @@ A simple, private period-tracking companion app for **Android**, built natively 
 | `:core:data` | Room on SQLCipher, Keystore-wrapped database key, DAOs, migrations |
 | `:core:ui` | Cadence theme (fixed palette, contrast-tested), cycle ring, stepper, shared composables |
 | `:core:testing` | Fake repositories and test rules shared by feature and app tests |
-| `:feature:*` | Onboarding, Today, Calendar, Insights (Phase 3), Settings |
+| `:feature:*` | Onboarding, Today, Calendar, daily log sheet, Insights (Phase 3), Settings |
 | `build-logic/` | Gradle convention plugins shared by all modules |
 
 ## Building

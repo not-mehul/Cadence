@@ -2,12 +2,12 @@
 
 A simple, private period-tracking companion app for **Android**, built natively with Kotlin and Jetpack Compose.
 
-- **Device only:** no account and no server. The app doesn't even hold the `INTERNET` permission.
+- **Device only:** no account and no server. The app doesn't even hold the `INTERNET` permission; its only permissions are for showing reminders and re-arming them after a reboot.
 - **Encrypted:** data is stored in a SQLCipher database whose key is protected by the Android Keystore.
 - **Two modes:** cycle tracking and hormonal birth control.
 - **Sideloaded:** distributed as an APK; no Play Store required.
 
-> **Status:** Phases 0 (foundation), 1 (MVP: onboarding, one-tap period logging, predictions, calendar, settings) 2 (daily logging: symptoms, mood, pain, energy, sleep, stress, sex, notes) and 3 (confidence-ranged predictions, fertile window, Insights with health flags) are done. See [`docs/PLAN.md`](docs/PLAN.md) for the feature inventory, architecture, data model, prediction engine and phased roadmap.
+> **Status:** Phases 0 (foundation), 1 (MVP: onboarding, one-tap period logging, predictions, calendar, settings) 2 (daily logging: symptoms, mood, pain, energy, sleep, stress, sex, notes) 3 (confidence-ranged predictions, fertile window, Insights with health flags) and 4 (discreet reminders) are done. See [`docs/PLAN.md`](docs/PLAN.md) for the feature inventory, architecture, data model, prediction engine and phased roadmap.
 
 ![Phase 3: Insights, Today and calendar](docs/images/phase3-ui.png)
 
@@ -20,7 +20,7 @@ A simple, private period-tracking companion app for **Android**, built natively 
 | `:core:data` | Room on SQLCipher, Keystore-wrapped database key, DAOs, migrations |
 | `:core:ui` | Cadence theme (fixed palette, contrast-tested), cycle ring, stepper, shared composables |
 | `:core:testing` | Fake repositories and test rules shared by feature and app tests |
-| `:feature:*` | Onboarding, Today, Calendar, daily log sheet, Insights, Settings |
+| `:feature:*` | Onboarding, Today, Calendar, daily log sheet, Insights, Settings, reminders (alarms and notifications) |
 | `build-logic/` | Gradle convention plugins shared by all modules |
 
 ## Building

@@ -15,6 +15,9 @@ package="$("$aapt2" dump packagename "$apk")"
 allowed=(
   # androidx.core's app-private, signature-level permission for non-exported receivers.
   "$package.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION"
+  # Reminders (Phase 4): showing local notifications, and re-arming alarms after a reboot.
+  "android.permission.POST_NOTIFICATIONS"
+  "android.permission.RECEIVE_BOOT_COMPLETED"
 )
 
 mapfile -t requested < <("$aapt2" dump permissions "$apk" | sed -n "s/^uses-permission: name='\([^']*\)'.*/\1/p")

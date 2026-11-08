@@ -6,6 +6,7 @@ import app.cadence.core.data.db.CadenceDatabase
 import app.cadence.core.data.di.DatabaseModule
 import app.cadence.core.data.di.TimeModule
 import app.cadence.core.data.time.DateSource
+import app.cadence.core.data.time.LocalNow
 import app.cadence.core.domain.time.TodayProvider
 import dagger.Module
 import dagger.Provides
@@ -40,6 +41,10 @@ object FixedTimeModule {
 
     @Provides
     fun provideTodayProvider(): TodayProvider = TodayProvider { TODAY }
+
+    /** Noon on [TODAY]. */
+    @Provides
+    fun provideLocalNow(): LocalNow = LocalNow { TODAY.atTime(12, 0) }
 
     @Provides
     fun provideDateSource(): DateSource =

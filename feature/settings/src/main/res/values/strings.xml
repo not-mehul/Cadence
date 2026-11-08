@@ -22,6 +22,30 @@
     </plurals>
     <string name="settings_log_categories_note">Hidden categories don\'t appear in the daily log. Anything you already logged is kept.</string>
 
+    <string name="settings_section_reminders">Reminders</string>
+    <string name="settings_reminder_period">Period coming up</string>
+    <plurals name="settings_reminder_period_detail">
+        <item quantity="one">A reminder %d day before it\'s expected</item>
+        <item quantity="other">A reminder %d days before it\'s expected</item>
+    </plurals>
+    <string name="settings_reminder_days_before">How many days before</string>
+    <plurals name="settings_reminder_days_value">
+        <item quantity="one">%d day</item>
+        <item quantity="other">%d days</item>
+    </plurals>
+    <string name="settings_reminder_late">Period late</string>
+    <string name="settings_reminder_late_detail">A reminder if it\'s later than the likely range</string>
+    <string name="settings_reminder_period_time">Time for period reminders</string>
+    <string name="settings_reminder_daily">Daily check-in</string>
+    <string name="settings_reminder_daily_detail">A nudge to log how you feel</string>
+    <string name="settings_reminder_daily_time">Check-in time</string>
+    <string name="settings_reminder_discreet">Discreet notifications</string>
+    <string name="settings_reminder_discreet_detail">Notifications only say \"Time to check in\", so nothing personal shows on your screen</string>
+    <string name="settings_reminder_notifications_off">Notifications are turned off for Cadence, so reminders can\'t appear.</string>
+    <string name="settings_reminder_open_settings">Turn on notifications</string>
+    <string name="settings_reminder_battery">Some phones pause apps in the background, which can delay reminders.</string>
+    <string name="settings_reminder_battery_action">Battery settings</string>
+
     <string name="settings_section_appearance">Appearance</string>
     <string name="settings_theme">Theme</string>
     <string name="settings_theme_system">Match system</string>

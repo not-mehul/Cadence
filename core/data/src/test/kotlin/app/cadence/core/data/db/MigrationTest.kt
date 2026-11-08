@@ -102,6 +102,27 @@ class MigrationTest {
     }
 
     @Test
+    fun `v4 to v5 adds reminder settings, off and discreet by default`() {
+        helper.createDatabase(TEST_DB, 4).use { db ->
+            db.execSQL(
+                "INSERT INTO settings (id, goal, cycle_length, period_length, luteal_phase_length, theme, " +
+                    "onboarding_complete, hidden_categories) VALUES (0, 'TRACK', 28, 5, 14, 'SYSTEM', 1, '')",
+            )
+        }
+
+        helper.runMigrationsAndValidate(TEST_DB, 5, true, *ALL_MIGRATIONS).use { db ->
+            db
+                .query(
+                    "SELECT period_reminder_enabled, period_reminder_days_before, period_reminder_minute, " +
+                        "late_reminder_enabled, daily_reminder_enabled, daily_reminder_minute, discreet_notifications FROM settings",
+                ).use { c ->
+                    c.moveToFirst()
+                    assertEquals(listOf(0, 2, 540, 0, 0, 1200, 1), (0..6).map { c.getInt(it) })
+                }
+        }
+    }
+
+    @Test
     fun `room opens a database created from the oldest schema`() {
         helper.createDatabase(TEST_DB, 1).close()
 

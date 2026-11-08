@@ -7,12 +7,14 @@ import app.cadence.core.domain.model.CycleDefaults
 import app.cadence.core.domain.model.Goal
 import app.cadence.core.domain.model.ThemePreference
 import app.cadence.core.domain.model.UserSettings
+import app.cadence.core.domain.reminders.ReminderSettings
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.runTest
 import org.junit.After
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
+import java.time.LocalTime
 import kotlin.test.assertEquals
 
 @RunWith(RobolectricTestRunner::class)
@@ -40,6 +42,16 @@ class RoomSettingsRepositoryTest {
                     theme = ThemePreference.DARK,
                     onboardingComplete = true,
                     hiddenCategories = setOf(LogCategory.SEX, LogCategory.STRESS),
+                    reminders =
+                        ReminderSettings(
+                            periodEnabled = true,
+                            periodDaysBefore = 4,
+                            periodTime = LocalTime.of(7, 45),
+                            lateEnabled = true,
+                            dailyEnabled = true,
+                            dailyTime = LocalTime.of(21, 30),
+                            discreet = false,
+                        ),
                 )
             repo.update { wanted }
 

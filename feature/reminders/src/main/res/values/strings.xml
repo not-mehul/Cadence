@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="reminder_channel_period">Period reminders</string>
+    <string name="reminder_channel_period_description">Before your period is expected, and if it\'s running late.</string>
+    <string name="reminder_channel_checkin">Daily check-in</string>
+    <string name="reminder_channel_checkin_description">A daily nudge to log how you feel.</string>
+
+    <!-- Discreet text: used on the lock screen always, and everywhere when discreet notifications are on. -->
+    <string name="reminder_discreet_title">Cadence</string>
+    <string name="reminder_discreet_text">Time to check in</string>
+
+    <string name="reminder_upcoming_title">Period coming up</string>
+    <plurals name="reminder_upcoming_text">
+        <item quantity="one">Your period is likely to start in %d day.</item>
+        <item quantity="other">Your period is likely to start in %d days.</item>
+    </plurals>
+    <string name="reminder_late_title">Period running late</string>
+    <string name="reminder_late_text">It\'s later than expected. Tap to log it when it starts.</string>
+    <string name="reminder_daily_title">Daily check-in</string>
+    <string name="reminder_daily_text">How are you feeling today? Tap to log.</string>
+</resources>

@@ -41,6 +41,7 @@ dependencies {
     implementation(project(":feature:calendar"))
     implementation(project(":feature:insights"))
     implementation(project(":feature:settings"))
+    implementation(project(":feature:reminders"))
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.core.splashscreen)

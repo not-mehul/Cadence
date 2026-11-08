@@ -1,0 +1,253 @@
+{
+  "formatVersion": 1,
+  "database": {
+    "version": 5,
+    "identityHash": "4cbb496fdf07b436c8b0e2bec85be828",
+    "entities": [
+      {
+        "tableName": "day_log",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`date` INTEGER NOT NULL, `flow` TEXT, `note` TEXT, `pain_level` INTEGER, `energy` INTEGER, `sleep` INTEGER, `stress` INTEGER, `sex` TEXT, `updated_at` INTEGER NOT NULL, PRIMARY KEY(`date`))",
+        "fields": [
+          {
+            "fieldPath": "date",
+            "columnName": "date",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "flow",
+            "columnName": "flow",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "note",
+            "columnName": "note",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "painLevel",
+            "columnName": "pain_level",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "energy",
+            "columnName": "energy",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "sleep",
+            "columnName": "sleep",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "stress",
+            "columnName": "stress",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "sex",
+            "columnName": "sex",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "updatedAt",
+            "columnName": "updated_at",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "date"
+          ]
+        }
+      },
+      {
+        "tableName": "settings",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER NOT NULL, `goal` TEXT NOT NULL, `cycle_length` INTEGER NOT NULL, `period_length` INTEGER NOT NULL, `luteal_phase_length` INTEGER NOT NULL, `theme` TEXT NOT NULL, `onboarding_complete` INTEGER NOT NULL, `hidden_categories` TEXT NOT NULL DEFAULT '', `period_reminder_enabled` INTEGER NOT NULL DEFAULT 0, `period_reminder_days_before` INTEGER NOT NULL DEFAULT 2, `period_reminder_minute` INTEGER NOT NULL DEFAULT 540, `late_reminder_enabled` INTEGER NOT NULL DEFAULT 0, `daily_reminder_enabled` INTEGER NOT NULL DEFAULT 0, `daily_reminder_minute` INTEGER NOT NULL DEFAULT 1200, `discreet_notifications` INTEGER NOT NULL DEFAULT 1, PRIMARY KEY(`id`))",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "goal",
+            "columnName": "goal",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "cycleLength",
+            "columnName": "cycle_length",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "periodLength",
+            "columnName": "period_length",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "lutealPhaseLength",
+            "columnName": "luteal_phase_length",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "theme",
+            "columnName": "theme",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "onboardingComplete",
+            "columnName": "onboarding_complete",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "hiddenCategories",
+            "columnName": "hidden_categories",
+            "affinity": "TEXT",
+            "notNull": true,
+            "defaultValue": "''"
+          },
+          {
+            "fieldPath": "periodReminderEnabled",
+            "columnName": "period_reminder_enabled",
+            "affinity": "INTEGER",
+            "notNull": true,
+            "defaultValue": "0"
+          },
+          {
+            "fieldPath": "periodReminderDaysBefore",
+            "columnName": "period_reminder_days_before",
+            "affinity": "INTEGER",
+            "notNull": true,
+            "defaultValue": "2"
+          },
+          {
+            "fieldPath": "periodReminderMinute",
+            "columnName": "period_reminder_minute",
+            "affinity": "INTEGER",
+            "notNull": true,
+            "defaultValue": "540"
+          },
+          {
+            "fieldPath": "lateReminderEnabled",
+            "columnName": "late_reminder_enabled",
+            "affinity": "INTEGER",
+            "notNull": true,
+            "defaultValue": "0"
+          },
+          {
+            "fieldPath": "dailyReminderEnabled",
+            "columnName": "daily_reminder_enabled",
+            "affinity": "INTEGER",
+            "notNull": true,
+            "defaultValue": "0"
+          },
+          {
+            "fieldPath": "dailyReminderMinute",
+            "columnName": "daily_reminder_minute",
+            "affinity": "INTEGER",
+            "notNull": true,
+            "defaultValue": "1200"
+          },
+          {
+            "fieldPath": "discreetNotifications",
+            "columnName": "discreet_notifications",
+            "affinity": "INTEGER",
+            "notNull": true,
+            "defaultValue": "1"
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "id"
+          ]
+        }
+      },
+      {
+        "tableName": "day_tag",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`date` INTEGER NOT NULL, `tag_id` TEXT NOT NULL, `kind` TEXT NOT NULL, `severity` INTEGER, PRIMARY KEY(`date`, `tag_id`))",
+        "fields": [
+          {
+            "fieldPath": "date",
+            "columnName": "date",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "tagId",
+            "columnName": "tag_id",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "kind",
+            "columnName": "kind",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "severity",
+            "columnName": "severity",
+            "affinity": "INTEGER"
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "date",
+            "tag_id"
+          ]
+        },
+        "indices": [
+          {
+            "name": "index_day_tag_date",
+            "unique": false,
+            "columnNames": [
+              "date"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_day_tag_date` ON `${TABLE_NAME}` (`date`)"
+          }
+        ]
+      },
+      {
+        "tableName": "cycle_annotation",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`cycle_start` INTEGER NOT NULL, `exclude_from_predictions` INTEGER NOT NULL, PRIMARY KEY(`cycle_start`))",
+        "fields": [
+          {
+            "fieldPath": "cycleStart",
+            "columnName": "cycle_start",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "excludeFromPredictions",
+            "columnName": "exclude_from_predictions",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "cycle_start"
+          ]
+        }
+      }
+    ],
+    "setupQueries": [
+      "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '4cbb496fdf07b436c8b0e2bec85be828')"
+    ]
+  }
+}

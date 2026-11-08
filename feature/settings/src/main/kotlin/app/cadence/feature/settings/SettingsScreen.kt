@@ -1,5 +1,15 @@
 package app.cadence.feature.settings
 
+import android.Manifest
+import android.content.ActivityNotFoundException
+import android.content.Context
+import android.content.Intent
+import android.content.pm.PackageManager
+import android.os.Build
+import android.os.PowerManager
+import android.provider.Settings
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.StringRes
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -26,6 +36,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -35,12 +46,16 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
+import androidx.core.app.NotificationManagerCompat
+import androidx.core.content.ContextCompat
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import androidx.lifecycle.compose.LifecycleResumeEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import app.cadence.core.domain.log.LogCategory
 import app.cadence.core.domain.model.Goal
 import app.cadence.core.domain.model.ThemePreference
 import app.cadence.core.domain.model.UserSettings
+import app.cadence.core.domain.reminders.ReminderSettings
 import app.cadence.core.ui.components.DayCountStepper
 import app.cadence.core.ui.components.SectionHeader
 import app.cadence.core.ui.log.LogLabels
@@ -53,6 +68,18 @@ fun SettingsScreen(
     viewModel: SettingsViewModel = hiltViewModel(),
 ) {
     val settings by viewModel.settings.collectAsStateWithLifecycle()
+    val context = LocalContext.current
+    var status by remember { mutableStateOf(readReminderStatus(context)) }
+    LifecycleResumeEffect(Unit) {
+        // Permission or battery settings may have changed in system settings.
+        status = readReminderStatus(context)
+        onPauseOrDispose {}
+    }
+    val permissionLauncher =
+        rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) {
+            status =
+                readReminderStatus(context)
+        }
     val current = settings
     if (current == null) {
         Box(modifier.fillMaxSize())
@@ -60,6 +87,7 @@ fun SettingsScreen(
     }
     SettingsContent(
         settings = current,
+        reminderStatus = status,
         actions =
             SettingsActions(
                 onCycleLength = viewModel::setCycleLength,
@@ -67,6 +95,24 @@ fun SettingsScreen(
                 onGoal = viewModel::setGoal,
                 onTheme = viewModel::setTheme,
                 onHiddenCategories = viewModel::setHiddenCategories,
+                onReminders = viewModel::setReminders,
+                onRequestNotificationPermission = {
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                        permissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+                    }
+                },
+                onOpenNotificationSettings = {
+                    context.openSettings(
+                        Intent(
+                            Settings.ACTION_APP_NOTIFICATION_SETTINGS,
+                        ).putExtra(Settings.EXTRA_APP_PACKAGE, context.packageName),
+                    )
+                },
+                onOpenBatterySettings = {
+                    context.openSettings(
+                        Intent(Settings.ACTION_IGNORE_BATTERY_OPTIMIZATION_SETTINGS),
+                    )
+                },
                 onDeleteAll = viewModel::deleteAllData,
             ),
         modifier = modifier,
@@ -80,7 +126,31 @@ class SettingsActions(
     val onTheme: (ThemePreference) -> Unit,
     val onHiddenCategories: (Set<LogCategory>) -> Unit,
     val onDeleteAll: () -> Unit,
+    val onReminders: (ReminderSettings) -> Unit = {},
+    val onRequestNotificationPermission: () -> Unit = {},
+    val onOpenNotificationSettings: () -> Unit = {},
+    val onOpenBatterySettings: () -> Unit = {},
 )
+
+private fun readReminderStatus(context: Context): ReminderStatus {
+    val permitted =
+        Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU ||
+            ContextCompat.checkSelfPermission(context, Manifest.permission.POST_NOTIFICATIONS) ==
+            PackageManager.PERMISSION_GRANTED
+    val power = context.getSystemService(PowerManager::class.java)
+    return ReminderStatus(
+        notificationsAllowed = permitted && NotificationManagerCompat.from(context).areNotificationsEnabled(),
+        batteryRestricted = !power.isIgnoringBatteryOptimizations(context.packageName),
+    )
+}
+
+private fun Context.openSettings(intent: Intent) {
+    try {
+        startActivity(intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
+    } catch (_: ActivityNotFoundException) {
+        // Some phones don't have this screen; nothing more we can do.
+    }
+}
 
 private enum class SettingsDialog { NONE, CYCLE_LENGTH, PERIOD_LENGTH, MODE, THEME, CATEGORIES, DELETE }
 
@@ -89,6 +159,7 @@ fun SettingsContent(
     settings: UserSettings,
     actions: SettingsActions,
     modifier: Modifier = Modifier,
+    reminderStatus: ReminderStatus = ReminderStatus(),
 ) {
     var dialog by rememberSaveable { mutableStateOf(SettingsDialog.NONE) }
     val defaults = settings.cycleDefaults
@@ -122,6 +193,9 @@ fun SettingsContent(
             value = pluralStringResource(R.plurals.settings_log_categories_value, hideable.size, shown, hideable.size),
             onClick = { dialog = SettingsDialog.CATEGORIES },
         )
+
+        Divider()
+        RemindersSection(settings.reminders, reminderStatus, actions)
 
         Divider()
         SectionHeader(stringResource(R.string.settings_section_appearance), Modifier.padding(horizontal = gutter))
@@ -299,7 +373,7 @@ private fun Note(text: String) {
 private fun Divider() = HorizontalDivider(Modifier.padding(vertical = CadenceTheme.spacing.sm))
 
 @Composable
-private fun StepperDialog(
+internal fun StepperDialog(
     title: String,
     label: String,
     initial: Int,

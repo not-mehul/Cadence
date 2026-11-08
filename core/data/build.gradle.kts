@@ -42,8 +42,9 @@ dependencies {
     androidTestImplementation(libs.kotlin.test)
 }
 
-// Room writes the exported schema while compiling (KSP); unit tests read it as assets.
-// Make the asset merge wait for it, so a schema change works on the first test run.
+// Room's KSP step writes the exported schema and `copyRoomSchemas` copies it into schemas/,
+// which unit tests read as assets. Make the asset merge wait, so a schema change passes on
+// the first test run.
 tasks.matching { it.name.matches(Regex("merge.*UnitTestAssets")) }.configureEach {
-    dependsOn(tasks.matching { it.name.matches(Regex("ksp.*Kotlin")) && !it.name.contains("Test") })
+    dependsOn(tasks.matching { it.name == "copyRoomSchemas" })
 }

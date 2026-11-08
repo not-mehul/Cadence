@@ -9,6 +9,7 @@ import app.cadence.core.domain.model.CycleDefaults
 import app.cadence.core.domain.model.Goal
 import app.cadence.core.domain.model.ThemePreference
 import app.cadence.core.domain.model.UserSettings
+import app.cadence.core.domain.reminders.ReminderSettings
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -39,6 +40,8 @@ class SettingsViewModel
             update {
                 it.copy(hiddenCategories = hidden.filter { c -> c.canBeHidden }.toSet())
             }
+
+        fun setReminders(reminders: ReminderSettings) = update { it.copy(reminders = reminders) }
 
         /** Erases everything; the app then returns to onboarding. */
         fun deleteAllData() {

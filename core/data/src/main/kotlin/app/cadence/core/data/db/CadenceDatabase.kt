@@ -16,6 +16,8 @@ import androidx.room.TypeConverters
         AutoMigration(from = 2, to = 3),
         // v4 (Phase 3): cycles excluded from predictions.
         AutoMigration(from = 3, to = 4),
+        // v5 (Phase 4): reminder settings.
+        AutoMigration(from = 4, to = 5),
     ],
 )
 @TypeConverters(Converters::class)
@@ -29,7 +31,7 @@ abstract class CadenceDatabase : RoomDatabase() {
     abstract fun cycleAnnotationDao(): CycleAnnotationDao
 
     companion object {
-        const val VERSION = 4
+        const val VERSION = 5
         const val FILE_NAME = "cadence.db"
     }
 }

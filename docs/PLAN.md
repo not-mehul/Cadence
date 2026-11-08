@@ -428,7 +428,7 @@ Each phase ends with a **working, shippable app**. Phases are sized for one deve
 
 **Done when:** prediction fixtures cover all edge cases in §5.7, Insights renders correctly with 0, 1 and many cycles, and flag wording has been reviewed.
 
-### Phase 4: Reminders & notifications
+### Phase 4: Reminders & notifications ✅
 **Goal:** the app reaches out at the right moments without giving anything away.
 - Local notifications for upcoming period, late period, and a daily log reminder at a chosen time.
 - Discreet notification text on by default.
@@ -441,6 +441,8 @@ Each phase ends with a **working, shippable app**. Phases are sized for one deve
 - An in-app hint for OEMs with aggressive battery management (Xiaomi, Samsung, etc.), linking to the battery-optimisation setting.
 
 **Done when:** reminders fire correctly after a reboot, a timezone change, an app update, Doze, and edits to period history, and no sensitive words appear on the lock screen by default.
+
+**As built:** WorkManager wasn't needed. Each alarm re-arms the next one when it fires, a data/settings observer re-plans on every change, and a receiver re-arms after boot, app update, and time or timezone changes. Alarms are inexact (`setAndAllowWhileIdle`), so a reminder can arrive a few minutes late under Doze. Reminder planning is a pure function in `:core:domain` (`ReminderPlanner`).
 
 ### Phase 5: Privacy hardening & data portability
 **Goal:** the user fully controls and can move their data.

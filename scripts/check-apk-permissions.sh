@@ -18,6 +18,10 @@ allowed=(
   # Reminders (Phase 4): showing local notifications, and re-arming alarms after a reboot.
   "android.permission.POST_NOTIFICATIONS"
   "android.permission.RECEIVE_BOOT_COMPLETED"
+  # App lock (Phase 5): androidx.biometric asks for these to show the system's fingerprint,
+  # face or screen-lock prompt (USE_FINGERPRINT on Android 8.x). Neither gives access to any data.
+  "android.permission.USE_BIOMETRIC"
+  "android.permission.USE_FINGERPRINT"
 )
 
 mapfile -t requested < <("$aapt2" dump permissions "$apk" | sed -n "s/^uses-permission: name='\([^']*\)'.*/\1/p")

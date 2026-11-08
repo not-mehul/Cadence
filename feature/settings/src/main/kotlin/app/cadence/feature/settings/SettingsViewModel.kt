@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import app.cadence.core.data.repository.DataEraser
 import app.cadence.core.data.repository.SettingsRepository
+import app.cadence.core.data.security.AppLock
 import app.cadence.core.domain.log.LogCategory
 import app.cadence.core.domain.model.CycleDefaults
 import app.cadence.core.domain.model.Goal
@@ -23,6 +24,7 @@ class SettingsViewModel
     constructor(
         private val settingsRepository: SettingsRepository,
         private val dataEraser: DataEraser,
+        private val appLock: AppLock,
     ) : ViewModel() {
         /** Null while loading. */
         val settings: StateFlow<UserSettings?> =
@@ -42,6 +44,18 @@ class SettingsViewModel
             }
 
         fun setReminders(reminders: ReminderSettings) = update { it.copy(reminders = reminders) }
+
+        /** Call only after the user has authenticated. */
+        fun setLockEnabled(enabled: Boolean) {
+            // They just proved who they are, so don't lock them out of the screen they're on.
+            if (enabled) appLock.unlock()
+            update { it.copy(security = it.security.copy(lockEnabled = enabled)) }
+        }
+
+        fun setLockTimeout(minutes: Int) = update { it.copy(security = it.security.copy(lockTimeoutMinutes = minutes)) }
+
+        fun setBlockScreenshots(block: Boolean) =
+            update { it.copy(security = it.security.copy(blockScreenshots = block)) }
 
         /** Erases everything; the app then returns to onboarding. */
         fun deleteAllData() {

@@ -190,10 +190,11 @@ Since the app only targets Android, a cross-platform framework adds nothing and 
 :feature:today
 :feature:calendar
 :feature:insights
-:feature:settings     # incl. export/import, lock, reminders config
+:feature:settings     # incl. lock, privacy explainer, reminders config
 # added in the phase that needs them:
 :feature:log          # Phase 2 — the daily log bottom sheet
 :feature:reminders    # Phase 4 — alarm scheduling, receivers, notification channels
+:feature:backup       # Phase 5 — JSON backup/restore, CSV export, clinician PDF
 ```
 The key rule: **all cycle maths lives in `:core:domain`, a plain Kotlin JVM module.** Gradle itself stops it from importing Android code, so the logic stays pure, fast to test, and independent of the UI and storage.
 
@@ -444,7 +445,7 @@ Each phase ends with a **working, shippable app**. Phases are sized for one deve
 
 **As built:** WorkManager wasn't needed. Each alarm re-arms the next one when it fires, a data/settings observer re-plans on every change, and a receiver re-arms after boot, app update, and time or timezone changes. Alarms are inexact (`setAndAllowWhileIdle`), so a reminder can arrive a few minutes late under Doze. Reminder planning is a pure function in `:core:domain` (`ReminderPlanner`).
 
-### Phase 5: Privacy hardening & data portability
+### Phase 5: Privacy hardening & data portability ✅
 **Goal:** the user fully controls and can move their data.
 - App lock: `BiometricPrompt` (with device-credential fallback) or an app PIN; auto-lock after N minutes in the background, handled with a `ProcessLifecycleOwner` observer.
 - `FLAG_SECURE` on the activity, so there are no screenshots, screen recordings or recents previews (on by default, can be turned off).
@@ -455,6 +456,15 @@ Each phase ends with a **working, shippable app**. Phases are sized for one deve
 - Privacy explainer screen.
 
 **Done when:** an export → delete all → import round trip restores identical data, the lock can't be bypassed via deep links, notifications or the recents screen, and the PDF renders correctly.
+
+**As built:**
+- **App lock** uses the phone's own fingerprint, face or screen lock (`BIOMETRIC_WEAK or DEVICE_CREDENTIAL`) instead of a separate app PIN. A second PIN would be one more secret to forget, with no way to reset it on a device-only app. Turning the lock on or off needs the same check. If the phone has no screen lock, Settings says to set one up first. The lock is off by default. It re-locks as soon as the app leaves the foreground, or after 1 or 5 minutes away. While locked, `MainActivity` composes only the lock screen, so a notification tap, or any other way into the activity, shows the lock screen first. `FLAG_SECURE` is set before the first frame and is on by default.
+- **Backups** are versioned JSON (`cadence-backup`, version 1), saved and opened through the Storage Access Framework. Import is validated before anything changes, then runs in one transaction, as either *replace* or *merge* (backup days win). A password (8+ characters) encrypts the file with AES-256-GCM, using a key derived by PBKDF2-HMAC-SHA256 with 600,000 iterations. App lock and screenshot settings belong to the phone, so they are never exported or overwritten. Onboarding offers "Restore from a backup" for moving to a new phone.
+- **CSV** export has one row per logged day (RFC 4180, symptoms as `id:severity`).
+- **The clinician PDF** is drawn with `PdfDocument` on A4: summary, the last 12 cycles, the top 8 symptoms over 6 months, average pain on period days, and FIGO flags. It is saved through the Storage Access Framework instead of the share sheet, because sharing would need a `FileProvider` and a cache copy of health data, and the user can share the saved file from their file manager anyway.
+- **Recovery:** if the database can't be opened (for example, the Keystore key was wiped), Cadence offers "Start over" instead of crashing. That erases the unreadable data and restarts the app, after which the user can restore a backup.
+- **Permissions:** `androidx.biometric` adds `USE_BIOMETRIC` and `USE_FINGERPRINT` (Android 8.x). Both are normal permissions that only allow showing the system prompt, and they are now on the APK allowlist. There is still no network permission.
+- **Tests:** an export → erase → import round trip gives an identical snapshot. The PDF is rendered page by page on a device with `PdfRenderer`, in the emulator CI job. An E2E test shows that while locked, nothing but the lock screen is composed.
 
 ### Phase 6: Birth control, medications & patterns
 **Goal:** first-class support for hormonal birth control, plus deeper insights.

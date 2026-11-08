@@ -31,37 +31,15 @@ class RoomDayEntryRepository
             flow {
                 val db = database.get()
                 val log = db.dayLogDao().observeRange(date, date).map { it.firstOrNull() }
-                emitAll(combine(log, db.dayTagDao().observe(date)) { row, tags -> toEntry(date, row, tags) })
+                emitAll(
+                    combine(log, db.dayTagDao().observe(date)) { row, tags -> DayEntryRows.toEntry(date, row, tags) },
+                )
             }.flowOn(Dispatchers.IO)
 
         override suspend fun save(entry: DayEntry) =
             withContext(Dispatchers.IO) {
                 val db = database.get()
-                db.withTransaction {
-                    val row =
-                        DayLogEntity(
-                            date = entry.date,
-                            flow = entry.flow,
-                            note = entry.note,
-                            painLevel = entry.painLevel,
-                            energy = entry.energy,
-                            sleep = entry.sleep,
-                            stress = entry.stress,
-                            sex = entry.sex,
-                            updatedAt = Instant.now(clock),
-                        )
-                    if (row == DayLogEntity(date = entry.date, updatedAt = row.updatedAt)) {
-                        db.dayLogDao().delete(entry.date)
-                    } else {
-                        db.dayLogDao().upsert(row)
-                    }
-                    db.dayTagDao().deleteFor(entry.date)
-                    db.dayTagDao().insertAll(
-                        entry.symptoms.map { (id, severity) ->
-                            DayTagEntity(entry.date, id, TagKind.SYMPTOM, severity.ordinal + 1)
-                        } + entry.moods.map { DayTagEntity(entry.date, it, TagKind.MOOD) },
-                    )
-                }
+                db.withTransaction { DayEntryRows.write(db, entry, Instant.now(clock)) }
             }
 
         override val painByDay: Flow<Map<LocalDate, Int>> =
@@ -76,27 +54,4 @@ class RoomDayEntryRepository
             flow { emitAll(database.get().dayTagDao().observeDatesWithDetails(from, to)) }
                 .map { it.toSet() }
                 .flowOn(Dispatchers.IO)
-
-        private fun toEntry(
-            date: LocalDate,
-            row: DayLogEntity?,
-            tags: List<DayTagEntity>,
-        ) = DayEntry(
-            date = date,
-            flow = row?.flow,
-            symptoms =
-                tags
-                    .filter { it.kind == TagKind.SYMPTOM }
-                    .associate {
-                        it.tagId to
-                            Severity.entries[((it.severity ?: 1) - 1).coerceIn(0, Severity.entries.lastIndex)]
-                    },
-            moods = tags.filter { it.kind == TagKind.MOOD }.map { it.tagId }.toSet(),
-            painLevel = row?.painLevel,
-            energy = row?.energy,
-            sleep = row?.sleep,
-            stress = row?.stress,
-            sex = row?.sex,
-            note = row?.note,
-        )
     }

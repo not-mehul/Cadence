@@ -1,6 +1,8 @@
 package app.cadence.feature.settings
 
+import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.v2.createComposeRule
+import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
@@ -8,6 +10,7 @@ import app.cadence.core.domain.log.LogCategory
 import app.cadence.core.domain.model.Goal
 import app.cadence.core.domain.model.ThemePreference
 import app.cadence.core.domain.model.UserSettings
+import app.cadence.core.domain.security.SecuritySettings
 import app.cadence.core.ui.theme.CadenceTheme
 import org.junit.Rule
 import org.junit.Test
@@ -26,11 +29,15 @@ class SettingsContentTest {
     private var cycleLength: Int? = null
     private var hidden: Set<LogCategory>? = null
 
-    private fun show() {
+    private var lockChange: Boolean? = null
+    private var lockTimeout: Int? = null
+    private var blockScreenshots: Boolean? = null
+
+    private fun show(settings: UserSettings = UserSettings(onboardingComplete = true)) {
         compose.setContent {
             CadenceTheme {
                 SettingsContent(
-                    settings = UserSettings(onboardingComplete = true),
+                    settings = settings,
                     actions =
                         SettingsActions(
                             onCycleLength = { cycleLength = it },
@@ -39,6 +46,9 @@ class SettingsContentTest {
                             onTheme = { theme = it },
                             onHiddenCategories = { hidden = it },
                             onDeleteAll = { deleted++ },
+                            onLockChange = { lockChange = it },
+                            onLockTimeout = { lockTimeout = it },
+                            onBlockScreenshots = { blockScreenshots = it },
                         ),
                 )
             }
@@ -96,5 +106,43 @@ class SettingsContentTest {
         compose.onNodeWithText("Save").performClick()
 
         assertEquals(setOf(LogCategory.SEX, LogCategory.STRESS), hidden)
+    }
+
+    @Test
+    fun `app lock switch asks to turn the lock on, and lock again appears only when it is on`() {
+        show()
+
+        assertEquals(0, compose.onAllNodesWithText("Lock again").fetchSemanticsNodes().size)
+        compose.onNodeWithText("App lock").performScrollTo().performClick()
+        assertEquals(true, lockChange)
+    }
+
+    @Test
+    fun `lock timeout and screenshot blocking are adjustable`() {
+        show(UserSettings(onboardingComplete = true, security = SecuritySettings(lockEnabled = true)))
+
+        compose.onNodeWithText("App lock").performScrollTo().performClick()
+        assertEquals(false, lockChange)
+
+        compose.onNodeWithText("Lock again").performScrollTo().performClick()
+        compose.onNodeWithText("After 5 minutes away").performClick()
+        assertEquals(5, lockTimeout)
+
+        compose.onNodeWithText("Block screenshots").performScrollTo().performClick()
+        assertEquals(false, blockScreenshots)
+    }
+
+    @Test
+    fun `privacy explainer describes how data is protected`() {
+        show()
+
+        compose.onNodeWithText("How Cadence protects your data").performScrollTo().performClick()
+        compose
+            .onNodeWithText(
+                "Cadence doesn't have permission to use the internet",
+                substring = true,
+            ).assertIsDisplayed()
+        compose.onNodeWithText("OK").performClick()
+        assertEquals(0, compose.onAllNodesWithText("OK").fetchSemanticsNodes().size)
     }
 }

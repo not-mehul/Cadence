@@ -9,6 +9,7 @@ import app.cadence.core.domain.model.Goal
 import app.cadence.core.domain.model.ThemePreference
 import app.cadence.core.domain.model.UserSettings
 import app.cadence.core.domain.reminders.ReminderSettings
+import app.cadence.core.domain.security.SecuritySettings
 import java.time.LocalTime
 
 /**
@@ -50,6 +51,13 @@ data class SettingsEntity(
     val dailyReminderMinute: Int = 1200,
     @ColumnInfo(name = "discreet_notifications", defaultValue = "1")
     val discreetNotifications: Boolean = true,
+    // Security, added in schema v6.
+    @ColumnInfo(name = "lock_enabled", defaultValue = "0")
+    val lockEnabled: Boolean = false,
+    @ColumnInfo(name = "lock_timeout_minutes", defaultValue = "0")
+    val lockTimeoutMinutes: Int = 0,
+    @ColumnInfo(name = "block_screenshots", defaultValue = "1")
+    val blockScreenshots: Boolean = true,
 ) {
     fun toModel(): UserSettings =
         UserSettings(
@@ -68,6 +76,12 @@ data class SettingsEntity(
                     dailyEnabled = dailyReminderEnabled,
                     dailyTime = minuteToTime(dailyReminderMinute),
                     discreet = discreetNotifications,
+                ),
+            security =
+                SecuritySettings(
+                    lockEnabled = lockEnabled,
+                    lockTimeoutMinutes = lockTimeoutMinutes.takeIf { it in SecuritySettings.LOCK_TIMEOUT_OPTIONS } ?: 0,
+                    blockScreenshots = blockScreenshots,
                 ),
         )
 
@@ -90,6 +104,9 @@ data class SettingsEntity(
                 dailyReminderEnabled = settings.reminders.dailyEnabled,
                 dailyReminderMinute = timeToMinute(settings.reminders.dailyTime),
                 discreetNotifications = settings.reminders.discreet,
+                lockEnabled = settings.security.lockEnabled,
+                lockTimeoutMinutes = settings.security.lockTimeoutMinutes,
+                blockScreenshots = settings.security.blockScreenshots,
             )
 
         private fun timeToMinute(time: LocalTime) = time.hour * 60 + time.minute

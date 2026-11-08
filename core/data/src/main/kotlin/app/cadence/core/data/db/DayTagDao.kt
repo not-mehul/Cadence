@@ -14,6 +14,12 @@ interface DayTagDao {
     @Insert
     suspend fun insertAll(tags: List<DayTagEntity>)
 
+    @Query("SELECT * FROM day_tag ORDER BY date")
+    suspend fun getAll(): List<DayTagEntity>
+
+    @Query("DELETE FROM day_tag")
+    suspend fun deleteAll()
+
     @Query("DELETE FROM day_tag WHERE date = :date")
     suspend fun deleteFor(date: LocalDate)
 

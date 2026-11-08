@@ -171,7 +171,7 @@ internal fun RemindersSection(
 }
 
 @Composable
-private fun SwitchRow(
+internal fun SwitchRow(
     title: String,
     detail: String,
     checked: Boolean,

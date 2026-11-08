@@ -2,6 +2,7 @@ package app.cadence.core.domain.model
 
 import app.cadence.core.domain.log.LogCategory
 import app.cadence.core.domain.reminders.ReminderSettings
+import app.cadence.core.domain.security.SecuritySettings
 
 enum class ThemePreference { SYSTEM, LIGHT, DARK }
 
@@ -15,6 +16,7 @@ data class UserSettings(
     /** Log sections the user chose not to see. Flow can't be hidden. */
     val hiddenCategories: Set<LogCategory> = emptySet(),
     val reminders: ReminderSettings = ReminderSettings(),
+    val security: SecuritySettings = SecuritySettings(),
 ) {
     companion object {
         /** Days from ovulation to the next period. Fairly constant between people, unlike cycle length. */

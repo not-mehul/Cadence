@@ -4,6 +4,7 @@ import android.content.Context
 import app.cadence.core.data.db.CadenceDatabase
 import app.cadence.core.data.db.CadenceDatabaseFactory
 import app.cadence.core.data.security.DatabasePassphraseStore
+import app.cadence.core.data.security.DatabaseRecovery
 import app.cadence.core.data.security.KeystoreKeyWrapper
 import dagger.Module
 import dagger.Provides
@@ -17,8 +18,6 @@ import javax.inject.Singleton
 @Module
 @InstallIn(SingletonComponent::class)
 object DatabaseModule {
-    private const val KEY_FILE_NAME = "cadence_db.key"
-
     @Provides
     @Singleton
     fun providePassphraseStore(
@@ -26,7 +25,7 @@ object DatabaseModule {
     ): DatabasePassphraseStore =
         DatabasePassphraseStore(
             // noBackupFilesDir is excluded from every Android backup mechanism.
-            file = File(context.noBackupFilesDir, KEY_FILE_NAME),
+            file = File(context.noBackupFilesDir, DatabaseRecovery.KEY_FILE_NAME),
             wrapper = KeystoreKeyWrapper(),
         )
 

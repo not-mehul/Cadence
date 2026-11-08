@@ -46,6 +46,10 @@ object LogLabels {
     @Composable
     fun symptom(id: String): String = symptoms[id]?.let { stringResource(it) } ?: id
 
+    /** For non-Compose callers such as the PDF report. Null for an unknown id. */
+    @StringRes
+    fun symptomRes(id: String): Int? = symptoms[id]
+
     @Composable
     fun mood(id: String): String = moods[id]?.let { stringResource(it) } ?: id
 

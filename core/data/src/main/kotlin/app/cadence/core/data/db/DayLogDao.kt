@@ -44,6 +44,9 @@ interface DayLogDao {
     @Query("SELECT * FROM day_log ORDER BY date")
     fun observeAll(): Flow<List<DayLogEntity>>
 
+    @Query("SELECT * FROM day_log ORDER BY date")
+    suspend fun getAllRows(): List<DayLogEntity>
+
     @Query("SELECT date, flow FROM day_log WHERE flow IS NOT NULL ORDER BY date")
     fun observeFlowDays(): Flow<List<FlowDay>>
 

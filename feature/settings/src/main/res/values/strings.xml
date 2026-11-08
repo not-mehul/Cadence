@@ -54,6 +54,29 @@
 
     <string name="settings_section_privacy">Privacy and data</string>
     <string name="settings_privacy_statement">Everything you log stays on this phone, in an encrypted database. Cadence has no internet access, no account and no analytics.</string>
+    <string name="settings_lock">App lock</string>
+    <string name="settings_lock_detail">Ask for your fingerprint, face or screen lock to open Cadence</string>
+    <string name="settings_lock_prompt">Confirm it\'s you</string>
+    <string name="settings_lock_timeout">Lock again</string>
+    <string name="settings_lock_immediately">As soon as I leave the app</string>
+    <string name="settings_lock_1_minute">After 1 minute away</string>
+    <string name="settings_lock_5_minutes">After 5 minutes away</string>
+    <string name="settings_lock_unavailable_title">Set up a screen lock first</string>
+    <string name="settings_lock_unavailable_body">App lock uses your phone\'s fingerprint, face or screen lock. Set one up in your phone\'s settings, then try again.</string>
+    <string name="settings_block_screenshots">Block screenshots</string>
+    <string name="settings_block_screenshots_detail">Also hides Cadence in the recent apps preview</string>
+    <string name="settings_privacy_explainer">How Cadence protects your data</string>
+    <string name="settings_privacy_explainer_detail">What\'s stored, where, and who can see it</string>
+    <string name="settings_ok">OK</string>
+    <string name="privacy_point_device">Everything you log stays on this phone. There\'s no account and no server, so nothing is sent anywhere.</string>
+    <string name="privacy_point_encrypted">Your data is stored in an encrypted database. The key is held by your phone\'s secure hardware and never leaves it.</string>
+    <string name="privacy_point_no_internet">Cadence doesn\'t have permission to use the internet at all, so it can\'t share your data even by mistake. There are no ads or analytics.</string>
+    <string name="privacy_point_no_backup">Cadence is excluded from Android\'s cloud backup and phone-to-phone transfer. To move to a new phone, export a backup file and restore it there.</string>
+    <string name="privacy_point_lock">App lock asks for your fingerprint, face or screen lock. Screenshots and the recent apps preview are blocked unless you turn that off.</string>
+    <string name="privacy_point_notifications">Reminders are discreet by default: they only say \"Time to check in\", and the lock screen never shows more.</string>
+    <string name="privacy_point_exports">Backups, spreadsheets and reports are files you choose where to save. A backup without a password can be read by anyone who has the file.</string>
+    <string name="privacy_point_delete">Delete all data erases everything Cadence has stored on this phone.</string>
+
     <string name="settings_delete_all">Delete all data</string>
     <string name="settings_delete_all_detail">Erase every period and setting on this phone</string>
     <string name="settings_delete_title">Delete all data?</string>

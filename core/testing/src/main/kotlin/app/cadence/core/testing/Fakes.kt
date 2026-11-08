@@ -1,5 +1,8 @@
 package app.cadence.core.testing
 
+import app.cadence.core.data.backup.BackupData
+import app.cadence.core.data.backup.BackupRepository
+import app.cadence.core.data.backup.ImportMode
 import app.cadence.core.data.repository.CycleAnnotationRepository
 import app.cadence.core.data.repository.DataEraser
 import app.cadence.core.data.repository.DayEntryRepository
@@ -105,5 +108,26 @@ class FakeCycleAnnotationRepository : CycleAnnotationRepository {
         excluded: Boolean,
     ) {
         excludedStarts.update { if (excluded) it + cycleStart else it - cycleStart }
+    }
+}
+
+/** Holds one in-memory snapshot; [restore] records what it was given. */
+class FakeBackupRepository(
+    var data: BackupData = BackupData(UserSettings(onboardingComplete = true), emptyList(), emptySet()),
+) : BackupRepository {
+    val restored = mutableListOf<Pair<BackupData, ImportMode>>()
+
+    /** When set, [restore] throws it, like a database failure. */
+    var failure: RuntimeException? = null
+
+    override suspend fun snapshot(): BackupData = data
+
+    override suspend fun restore(
+        data: BackupData,
+        mode: ImportMode,
+    ) {
+        failure?.let { throw it }
+        restored += data to mode
+        this.data = data
     }
 }

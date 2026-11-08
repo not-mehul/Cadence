@@ -8,6 +8,7 @@ import android.content.pm.PackageManager
 import android.os.Build
 import android.os.PowerManager
 import android.provider.Settings
+import androidx.activity.compose.LocalActivity
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.StringRes
@@ -48,6 +49,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.core.app.NotificationManagerCompat
 import androidx.core.content.ContextCompat
+import androidx.fragment.app.FragmentActivity
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.LifecycleResumeEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -56,10 +58,13 @@ import app.cadence.core.domain.model.Goal
 import app.cadence.core.domain.model.ThemePreference
 import app.cadence.core.domain.model.UserSettings
 import app.cadence.core.domain.reminders.ReminderSettings
+import app.cadence.core.domain.security.SecuritySettings
 import app.cadence.core.ui.components.DayCountStepper
 import app.cadence.core.ui.components.SectionHeader
 import app.cadence.core.ui.log.LogLabels
+import app.cadence.core.ui.security.DeviceAuth
 import app.cadence.core.ui.theme.CadenceTheme
+import app.cadence.feature.backup.BackupSettingsRows
 import app.cadence.core.ui.R as UiR
 
 @Composable
@@ -69,12 +74,15 @@ fun SettingsScreen(
 ) {
     val settings by viewModel.settings.collectAsStateWithLifecycle()
     val context = LocalContext.current
+    val currentActivity = LocalActivity.current
     var status by remember { mutableStateOf(readReminderStatus(context)) }
     LifecycleResumeEffect(Unit) {
         // Permission or battery settings may have changed in system settings.
         status = readReminderStatus(context)
         onPauseOrDispose {}
     }
+    var noScreenLock by remember { mutableStateOf(false) }
+    val lockPromptTitle = stringResource(R.string.settings_lock_prompt)
     val permissionLauncher =
         rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) {
             status =
@@ -114,9 +122,38 @@ fun SettingsScreen(
                     )
                 },
                 onDeleteAll = viewModel::deleteAllData,
+                onLockChange = { enable ->
+                    val activity = currentActivity as? FragmentActivity
+                    if (activity == null || !DeviceAuth.isAvailable(context)) {
+                        noScreenLock = true
+                    } else {
+                        // Confirm it's really the owner, both to turn the lock on and to turn it off.
+                        DeviceAuth.authenticate(
+                            activity,
+                            lockPromptTitle,
+                            null,
+                            onSuccess = { viewModel.setLockEnabled(enable) },
+                        )
+                    }
+                },
+                onLockTimeout = viewModel::setLockTimeout,
+                onBlockScreenshots = viewModel::setBlockScreenshots,
             ),
         modifier = modifier,
+        backupRows = { BackupSettingsRows() },
     )
+    if (noScreenLock) {
+        AlertDialog(
+            onDismissRequest = { noScreenLock = false },
+            title = { Text(stringResource(R.string.settings_lock_unavailable_title)) },
+            text = { Text(stringResource(R.string.settings_lock_unavailable_body)) },
+            confirmButton = {
+                TextButton(
+                    onClick = { noScreenLock = false },
+                ) { Text(stringResource(R.string.settings_ok)) }
+            },
+        )
+    }
 }
 
 class SettingsActions(
@@ -130,6 +167,9 @@ class SettingsActions(
     val onRequestNotificationPermission: () -> Unit = {},
     val onOpenNotificationSettings: () -> Unit = {},
     val onOpenBatterySettings: () -> Unit = {},
+    val onLockChange: (Boolean) -> Unit = {},
+    val onLockTimeout: (Int) -> Unit = {},
+    val onBlockScreenshots: (Boolean) -> Unit = {},
 )
 
 private fun readReminderStatus(context: Context): ReminderStatus {
@@ -152,7 +192,17 @@ private fun Context.openSettings(intent: Intent) {
     }
 }
 
-private enum class SettingsDialog { NONE, CYCLE_LENGTH, PERIOD_LENGTH, MODE, THEME, CATEGORIES, DELETE }
+private enum class SettingsDialog {
+    NONE,
+    CYCLE_LENGTH,
+    PERIOD_LENGTH,
+    MODE,
+    THEME,
+    CATEGORIES,
+    LOCK_TIMEOUT,
+    PRIVACY,
+    DELETE,
+}
 
 @Composable
 fun SettingsContent(
@@ -160,6 +210,7 @@ fun SettingsContent(
     actions: SettingsActions,
     modifier: Modifier = Modifier,
     reminderStatus: ReminderStatus = ReminderStatus(),
+    backupRows: @Composable () -> Unit = {},
 ) {
     var dialog by rememberSaveable { mutableStateOf(SettingsDialog.NONE) }
     val defaults = settings.cycleDefaults
@@ -208,6 +259,32 @@ fun SettingsContent(
         Divider()
         SectionHeader(stringResource(R.string.settings_section_privacy), Modifier.padding(horizontal = gutter))
         Note(stringResource(R.string.settings_privacy_statement))
+        val security = settings.security
+        SwitchRow(
+            title = stringResource(R.string.settings_lock),
+            detail = stringResource(R.string.settings_lock_detail),
+            checked = security.lockEnabled,
+            onCheckedChange = actions.onLockChange,
+        )
+        if (security.lockEnabled) {
+            SettingRow(
+                title = stringResource(R.string.settings_lock_timeout),
+                value = stringResource(lockTimeoutLabel(security.lockTimeoutMinutes)),
+                onClick = { dialog = SettingsDialog.LOCK_TIMEOUT },
+            )
+        }
+        SwitchRow(
+            title = stringResource(R.string.settings_block_screenshots),
+            detail = stringResource(R.string.settings_block_screenshots_detail),
+            checked = security.blockScreenshots,
+            onCheckedChange = actions.onBlockScreenshots,
+        )
+        SettingRow(
+            title = stringResource(R.string.settings_privacy_explainer),
+            value = stringResource(R.string.settings_privacy_explainer_detail),
+            onClick = { dialog = SettingsDialog.PRIVACY },
+        )
+        backupRows()
         SettingRow(
             title = stringResource(R.string.settings_delete_all),
             value = stringResource(R.string.settings_delete_all_detail),
@@ -292,6 +369,25 @@ fun SettingsContent(
                 },
                 onDismiss = close,
             )
+        }
+
+        SettingsDialog.LOCK_TIMEOUT -> {
+            ChoiceDialog(
+                title = stringResource(R.string.settings_lock_timeout),
+                options = SecuritySettings.LOCK_TIMEOUT_OPTIONS,
+                selected = settings.security.lockTimeoutMinutes,
+                label = { stringResource(lockTimeoutLabel(it)) },
+                detail = { null },
+                onSelect = {
+                    actions.onLockTimeout(it)
+                    close()
+                },
+                onDismiss = close,
+            )
+        }
+
+        SettingsDialog.PRIVACY -> {
+            PrivacyExplainerDialog(onDismiss = close)
         }
 
         SettingsDialog.DELETE -> {
@@ -494,5 +590,42 @@ private fun CategoriesDialog(
             }
         },
         dismissButton = { TextButton(onClick = onDismiss) { Text(stringResource(R.string.settings_cancel)) } },
+    )
+}
+
+@StringRes
+private fun lockTimeoutLabel(minutes: Int) =
+    when (minutes) {
+        0 -> R.string.settings_lock_immediately
+        1 -> R.string.settings_lock_1_minute
+        else -> R.string.settings_lock_5_minutes
+    }
+
+/** What Cadence does to protect data, in plain language (docs/PLAN.md Phase 5). */
+@Composable
+private fun PrivacyExplainerDialog(onDismiss: () -> Unit) {
+    val points =
+        listOf(
+            R.string.privacy_point_device,
+            R.string.privacy_point_encrypted,
+            R.string.privacy_point_no_internet,
+            R.string.privacy_point_no_backup,
+            R.string.privacy_point_lock,
+            R.string.privacy_point_notifications,
+            R.string.privacy_point_exports,
+            R.string.privacy_point_delete,
+        )
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text(stringResource(R.string.settings_privacy_explainer)) },
+        text = {
+            Column(
+                Modifier.verticalScroll(rememberScrollState()),
+                verticalArrangement = Arrangement.spacedBy(CadenceTheme.spacing.md),
+            ) {
+                points.forEach { Text(stringResource(it), style = MaterialTheme.typography.bodyMedium) }
+            }
+        },
+        confirmButton = { TextButton(onClick = onDismiss) { Text(stringResource(R.string.settings_ok)) } },
     )
 }

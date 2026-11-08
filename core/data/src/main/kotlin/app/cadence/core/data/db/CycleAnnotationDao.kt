@@ -11,6 +11,12 @@ interface CycleAnnotationDao {
     @Query("SELECT cycle_start FROM cycle_annotation WHERE exclude_from_predictions = 1")
     fun observeExcludedStarts(): Flow<List<LocalDate>>
 
+    @Query("SELECT cycle_start FROM cycle_annotation WHERE exclude_from_predictions = 1")
+    suspend fun getExcludedStarts(): List<LocalDate>
+
+    @Query("DELETE FROM cycle_annotation")
+    suspend fun deleteAll()
+
     @Upsert
     suspend fun upsert(annotation: CycleAnnotationEntity)
 

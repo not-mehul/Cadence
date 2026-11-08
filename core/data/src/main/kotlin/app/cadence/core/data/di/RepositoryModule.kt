@@ -1,5 +1,7 @@
 package app.cadence.core.data.di
 
+import app.cadence.core.data.backup.BackupRepository
+import app.cadence.core.data.backup.RoomBackupRepository
 import app.cadence.core.data.repository.CycleAnnotationRepository
 import app.cadence.core.data.repository.DataEraser
 import app.cadence.core.data.repository.DayEntryRepository
@@ -34,6 +36,9 @@ abstract class RepositoryModule {
     @Binds
     @Singleton
     abstract fun bindCycleAnnotationRepository(impl: RoomCycleAnnotationRepository): CycleAnnotationRepository
+
+    @Binds
+    abstract fun bindBackupRepository(impl: RoomBackupRepository): BackupRepository
 
     @Binds
     abstract fun bindDataEraser(impl: RoomDataEraser): DataEraser

@@ -18,6 +18,8 @@ import androidx.room.TypeConverters
         AutoMigration(from = 3, to = 4),
         // v5 (Phase 4): reminder settings.
         AutoMigration(from = 4, to = 5),
+        // v6 (Phase 5): app lock and screenshot blocking.
+        AutoMigration(from = 5, to = 6),
     ],
 )
 @TypeConverters(Converters::class)
@@ -31,7 +33,7 @@ abstract class CadenceDatabase : RoomDatabase() {
     abstract fun cycleAnnotationDao(): CycleAnnotationDao
 
     companion object {
-        const val VERSION = 5
+        const val VERSION = 6
         const val FILE_NAME = "cadence.db"
     }
 }

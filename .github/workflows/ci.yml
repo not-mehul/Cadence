@@ -99,7 +99,7 @@ jobs:
           disk-size: 2048M
           emulator-boot-timeout: 900
           emulator-options: -no-window -gpu swiftshader_indirect -no-snapshot -noaudio -no-boot-anim -camera-back none
-          script: ./gradlew :core:data:connectedDebugAndroidTest
+          script: ./gradlew :core:data:connectedDebugAndroidTest :feature:backup:connectedDebugAndroidTest
 
       - name: Upload reports
         if: failure()

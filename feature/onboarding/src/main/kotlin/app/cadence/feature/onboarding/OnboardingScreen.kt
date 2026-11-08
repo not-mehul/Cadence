@@ -57,6 +57,7 @@ import app.cadence.core.ui.components.DayCountStepper
 import app.cadence.core.ui.components.PrimaryButton
 import app.cadence.core.ui.components.RingSegment
 import app.cadence.core.ui.theme.CadenceTheme
+import app.cadence.feature.backup.RestoreFromBackupButton
 import java.time.Instant
 import java.time.LocalDate
 import java.time.ZoneOffset
@@ -85,6 +86,7 @@ fun OnboardingScreen(
                 onFinish = viewModel::finish,
             ),
         modifier = modifier,
+        restoreButton = { RestoreFromBackupButton() },
     )
 }
 
@@ -107,6 +109,7 @@ fun OnboardingContent(
     state: OnboardingState,
     actions: OnboardingActions,
     modifier: Modifier = Modifier,
+    restoreButton: @Composable () -> Unit = {},
 ) {
     val spacing = CadenceTheme.spacing
     val steps = OnboardingStep.entries
@@ -180,7 +183,7 @@ fun OnboardingContent(
                     }
                 }
             }
-            BottomActions(state, actions)
+            BottomActions(state, actions, restoreButton)
         }
     }
 }
@@ -189,6 +192,7 @@ fun OnboardingContent(
 private fun BottomActions(
     state: OnboardingState,
     actions: OnboardingActions,
+    restoreButton: @Composable () -> Unit,
 ) {
     val spacing = CadenceTheme.spacing
     Column(
@@ -200,6 +204,8 @@ private fun BottomActions(
         when (state.step) {
             OnboardingStep.WELCOME -> {
                 PrimaryButton(stringResource(R.string.onboarding_get_started), actions.onNext, modifier)
+                // Moving phones: bring the old data back instead of starting fresh.
+                restoreButton()
             }
 
             OnboardingStep.LAST_PERIOD -> {

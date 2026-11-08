@@ -4,4 +4,10 @@
     <style name="Theme.Cadence" parent="android:Theme.Material.Light.NoActionBar">
         <item name="android:windowBackground">@color/cadence_window_background</item>
     </style>
+
+    <!-- Launch theme: shows the app icon on the Cadence background while settings load. -->
+    <style name="Theme.Cadence.Starting" parent="Theme.SplashScreen">
+        <item name="windowSplashScreenBackground">@color/cadence_window_background</item>
+        <item name="postSplashScreenTheme">@style/Theme.Cadence</item>
+    </style>
 </resources>

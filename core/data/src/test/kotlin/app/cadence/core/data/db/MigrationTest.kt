@@ -9,6 +9,7 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
+import kotlin.test.assertEquals
 
 /**
  * Guards the committed schema files and the migration chain. Runs on the JVM with
@@ -30,6 +31,26 @@ class MigrationTest {
         helper.createDatabase(TEST_DB, 1).close()
 
         helper.runMigrationsAndValidate(TEST_DB, CadenceDatabase.VERSION, true, *ALL_MIGRATIONS).close()
+    }
+
+    @Test
+    fun `v1 to v2 keeps logged days and adds an empty settings table`() {
+        helper.createDatabase(TEST_DB, 1).use { db ->
+            db.execSQL("INSERT INTO day_log (date, flow, note, updated_at) VALUES (20500, 'HEAVY', 'kept', 1000)")
+        }
+
+        helper.runMigrationsAndValidate(TEST_DB, 2, true, *ALL_MIGRATIONS).use { db ->
+            db.query("SELECT date, flow, note FROM day_log").use { c ->
+                c.moveToFirst()
+                assertEquals(20500, c.getLong(0))
+                assertEquals("HEAVY", c.getString(1))
+                assertEquals("kept", c.getString(2))
+            }
+            db.query("SELECT count(*) FROM settings").use { c ->
+                c.moveToFirst()
+                assertEquals(0, c.getInt(0))
+            }
+        }
     }
 
     @Test

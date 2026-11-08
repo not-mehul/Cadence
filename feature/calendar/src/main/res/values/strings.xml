@@ -1,5 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="calendar_title">Calendar</string>
-    <string name="calendar_placeholder">Your logged and predicted periods will appear on a monthly calendar here.</string>
+    <string name="calendar_previous_month">Previous month</string>
+    <string name="calendar_next_month">Next month</string>
+    <string name="calendar_jump_today">Today</string>
+    <string name="calendar_hint">Tap a day to add or remove a period day.</string>
+    <string name="calendar_legend_period">Period</string>
+    <string name="calendar_legend_predicted">Predicted period</string>
+    <string name="calendar_legend_today">Today</string>
+    <string name="calendar_state_period">Period day</string>
+    <string name="calendar_state_not_period">Not a period day</string>
+    <string name="calendar_desc_predicted">predicted period</string>
+    <string name="calendar_desc_today">today</string>
 </resources>

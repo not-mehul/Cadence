@@ -163,7 +163,7 @@ Since the app only targets Android, a cross-platform framework adds nothing and 
 | Async | Kotlin Coroutines + Flow | Room queries come back as `Flow`, so the UI updates live. |
 | Storage | Room on SQLCipher (`net.zetetic:sqlcipher-android` through `SupportOpenHelperFactory`) | Typed queries, versioned migrations, encrypted at rest. |
 | Encryption key | A random 256-bit database passphrase, wrapped by an AES-GCM key held in the **Android Keystore** and stored in DataStore | The Keystore key never leaves secure hardware. `EncryptedSharedPreferences` is deprecated, so we don't use it. |
-| Settings | Jetpack DataStore (Proto or Preferences) | |
+| Settings | A single-row `settings` table in the encrypted Room database | Not plain DataStore: "uses hormonal birth control" is sensitive, so it gets the same encryption as everything else. |
 | Notifications | `AlarmManager` (`setAndAllowWhileIdle`) for timed reminders, plus `WorkManager` for the daily rescheduling pass | Everything is local, with no push server. The app re-arms alarms on boot, on time or timezone changes, and after app updates. |
 | App lock | `androidx.biometric` (`BiometricPrompt`, with device credential as the fallback) plus an optional app PIN | |
 | Calendar UI | `com.kizitonwose.calendar:compose`, or a custom `LazyVerticalGrid` | |
@@ -185,12 +185,13 @@ Since the app only targets Android, a cross-platform framework adds nothing and 
     phases/           #   cycle-day → phase
 :core:data            # Room entities, DAOs, migrations, SQLCipher, Keystore, DataStore, repositories
 :core:ui              # design system: theme, tokens, shared composables
+:core:testing         # fakes and test rules shared by feature and app tests
+:feature:onboarding
 :feature:today
 :feature:calendar
 :feature:insights
 :feature:settings     # incl. export/import, lock, reminders config
 # added in the phase that needs them:
-:feature:onboarding   # Phase 1
 :feature:log          # Phase 2 — the daily log bottom sheet
 :feature:reminders    # Phase 4 — alarm scheduling, receivers, notification channels
 ```
@@ -222,7 +223,7 @@ data class DayLog(
     val weightKg: Double? = null,
     val pregnancyTest: TestResult? = null,
     val note: String? = null,
-    val updatedAt: Instant,             // for future sync/merge
+    val updatedAt: Instant,             // when the row last changed
 )
 
 enum class TagKind { SYMPTOM, MOOD, CUSTOM }
@@ -257,7 +258,7 @@ data class MedicationDose(val medicationId: String, val date: LocalDate, val tak
 
 enum class Goal { TRACK, BIRTH_CONTROL }
 
-data class Settings(                    // stored in DataStore, not Room
+data class Settings(                    // single-row table in the encrypted database
     val goal: Goal = Goal.TRACK,
     val defaultCycleLength: Int = 28,
     val defaultPeriodLength: Int = 5,
@@ -338,6 +339,7 @@ The app supports edge-to-edge display and predictive back, and adapts to tablets
 
 1. **Onboarding**: welcome and privacy promise → last period start → typical cycle and period length ("I don't know" allowed) → goal → optional app lock → done.
 2. **Today**: a large cycle ring (segments in the phase colours from §6.1) showing cycle day N of ~M with the current phase highlighted; the headline ("Period in 4 days", "Day 2 of period", "3 days late"); a primary action button that changes with context ("Period started" / "Period ended" / "Log today"); chips for what's already logged today; and a short phase card.
+   **One-tap logging (as built in Phase 1):** "Period started" logs today plus the predicted remaining days, so a period is complete even if the user never comes back, and offers Undo. While a period is on, the button becomes "Period ended" (today or yesterday), which trims the extra days. For two days after a period's last logged day, "Still on your period? Log today" extends it.
 3. **Log sheet** (Material 3 `ModalBottomSheet`, opened from Today or any calendar day): sections for Flow, Symptoms, Mood, Body (pain, energy, sleep, stress), Sex, Discharge, Tests, Meds, and Notes. Sections are collapsible, the user can hide them, and changes save automatically.
 4. **Calendar**: month grid, swipe between months. Legend:
    - Solid fill = logged period
@@ -396,7 +398,7 @@ Each phase ends with a **working, shippable app**. Phases are sized for one deve
 
 **Done when:** the debug APK installs and runs on an API 26 emulator and a current API emulator, CI is green, the database file is unreadable without the key, and a migration test passes.
 
-### Phase 1: MVP (log periods, see predictions)
+### Phase 1: MVP (log periods, see predictions) ✅
 **Goal:** the smallest app that is actually useful.
 - Onboarding: last period date, typical lengths, goal (track / birth control).
 - Today screen: cycle day, phase, next-period countdown, and a contextual "Period started / ended" button.

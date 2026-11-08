@@ -2,7 +2,7 @@ package app.cadence.core.data.db
 
 import androidx.room.Room
 import androidx.test.core.app.ApplicationProvider
-import app.cadence.core.domain.model.Flow
+import app.cadence.core.domain.model.MenstrualFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.runTest
 import org.junit.After
@@ -38,10 +38,10 @@ class DayLogDaoTest {
     fun `upsert inserts then replaces the same day`() =
         runTest {
             val day = LocalDate.of(2026, 11, 1)
-            dao.upsert(DayLogEntity(day, Flow.MEDIUM, updatedAt = now))
-            dao.upsert(DayLogEntity(day, Flow.HEAVY, note = "cramps", updatedAt = now))
+            dao.upsert(DayLogEntity(day, MenstrualFlow.MEDIUM, updatedAt = now))
+            dao.upsert(DayLogEntity(day, MenstrualFlow.HEAVY, note = "cramps", updatedAt = now))
 
-            assertEquals(DayLogEntity(day, Flow.HEAVY, "cramps", now), dao.get(day))
+            assertEquals(DayLogEntity(day, MenstrualFlow.HEAVY, "cramps", now), dao.get(day))
             assertEquals(1, dao.observeAll().first().size)
         }
 
@@ -49,7 +49,7 @@ class DayLogDaoTest {
     fun `range query is inclusive and ordered by date`() =
         runTest {
             listOf(5, 1, 3, 9).forEach { d ->
-                dao.upsert(DayLogEntity(LocalDate.of(2026, 11, d), Flow.LIGHT, updatedAt = now))
+                dao.upsert(DayLogEntity(LocalDate.of(2026, 11, d), MenstrualFlow.LIGHT, updatedAt = now))
             }
 
             val days = dao.observeRange(LocalDate.of(2026, 11, 1), LocalDate.of(2026, 11, 5)).first().map { it.date }
@@ -61,7 +61,7 @@ class DayLogDaoTest {
     fun `dates across a DST change and leap day are stored exactly`() =
         runTest {
             val days = listOf(LocalDate.of(2028, 2, 29), LocalDate.of(2026, 3, 29), LocalDate.of(2026, 10, 25))
-            days.forEach { dao.upsert(DayLogEntity(it, Flow.SPOTTING, updatedAt = now)) }
+            days.forEach { dao.upsert(DayLogEntity(it, MenstrualFlow.SPOTTING, updatedAt = now)) }
 
             assertEquals(days.sorted(), dao.observeAll().first().map { it.date })
         }
@@ -71,8 +71,8 @@ class DayLogDaoTest {
         runTest {
             val a = LocalDate.of(2026, 11, 1)
             val b = LocalDate.of(2026, 11, 2)
-            dao.upsert(DayLogEntity(a, Flow.LIGHT, updatedAt = now))
-            dao.upsert(DayLogEntity(b, Flow.LIGHT, updatedAt = now))
+            dao.upsert(DayLogEntity(a, MenstrualFlow.LIGHT, updatedAt = now))
+            dao.upsert(DayLogEntity(b, MenstrualFlow.LIGHT, updatedAt = now))
 
             dao.delete(a)
             assertNull(dao.get(a))

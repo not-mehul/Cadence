@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="onboarding_progress">Step %1$d of %2$d</string>
+    <string name="onboarding_back">Back</string>
+    <string name="onboarding_next">Next</string>
+    <string name="onboarding_finish">Finish</string>
+
+    <string name="onboarding_welcome_title">Welcome to Cadence</string>
+    <string name="onboarding_welcome_body">Track your period and see when the next one is likely to start.</string>
+    <string name="onboarding_welcome_private_title">Private by design</string>
+    <string name="onboarding_welcome_private_body">Everything stays on this phone, encrypted. Cadence has no internet access, no account and no ads.</string>
+    <string name="onboarding_welcome_disclaimer">Cadence gives estimates, not medical advice, and can\'t be used as contraception.</string>
+    <string name="onboarding_get_started">Get started</string>
+
+    <string name="onboarding_last_period_title">When did your last period start?</string>
+    <string name="onboarding_last_period_body">Pick the first day of bleeding. An estimate is fine.</string>
+    <string name="onboarding_last_period_skip">I don\'t remember</string>
+
+    <string name="onboarding_cycle_title">How long is your cycle, usually?</string>
+    <string name="onboarding_cycle_body">Count from the first day of one period to the first day of the next. Most cycles are 24 to 38 days.</string>
+    <string name="onboarding_cycle_label">cycle length</string>
+
+    <string name="onboarding_period_title">How many days does your period usually last?</string>
+    <string name="onboarding_period_body">Most periods last 2 to 8 days.</string>
+    <string name="onboarding_period_label">period length</string>
+
+    <string name="onboarding_not_sure">Not sure</string>
+
+    <string name="onboarding_goal_title">Do you use hormonal birth control?</string>
+    <string name="onboarding_goal_body">For example the pill, patch, ring, implant, injection or a hormonal IUD. You can change this later in Settings.</string>
+    <string name="onboarding_goal_track">No, track my natural cycle</string>
+    <string name="onboarding_goal_track_detail">See your cycle phases and estimated ovulation.</string>
+    <string name="onboarding_goal_birth_control">Yes, I use hormonal birth control</string>
+    <string name="onboarding_goal_birth_control_detail">Ovulation estimates are hidden because they don\'t apply.</string>
+</resources>

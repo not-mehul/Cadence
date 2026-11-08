@@ -2,6 +2,11 @@ import com.android.build.api.dsl.ApplicationExtension
 import com.android.build.api.dsl.LibraryExtension
 import org.gradle.api.JavaVersion
 import org.gradle.api.Project
+import org.gradle.api.file.FileCollection
+import org.gradle.api.tasks.InputFiles
+import org.gradle.api.tasks.PathSensitive
+import org.gradle.api.tasks.PathSensitivity
+import org.gradle.process.CommandLineArgumentProvider
 import org.gradle.api.tasks.testing.Test
 import org.gradle.kotlin.dsl.withType
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
@@ -81,11 +86,20 @@ private fun Project.configureLint(lint: com.android.build.api.dsl.Lint) {
 }
 
 private fun Project.configureAndroidTests() {
-    // Optional: where Robolectric downloads its Android runtime jars from (default: Maven Central).
-    // Set `cadence.robolectric.repoUrl` in ~/.gradle/gradle.properties to use a mirror.
-    val robolectricRepoUrl = providers.gradleProperty("cadence.robolectric.repoUrl").orNull
+    // Robolectric normally downloads its Android runtime jar from Maven Central while tests
+    // run, which fails under rate limiting. Resolve it through Gradle instead (cached, mirrored,
+    // retried) and run Robolectric offline against it.
+    val robolectricRuntime =
+        configurations.create("robolectricRuntime") {
+            isTransitive = false
+            isCanBeConsumed = false
+        }
+    dependencies.add(robolectricRuntime.name, libs.lib("robolectric-androidAll"))
+
     tasks.withType<Test>().configureEach {
-        robolectricRepoUrl?.let { systemProperty("robolectric.dependency.repo.url", it) }
+        jvmArgumentProviders.add(RobolectricOfflineArgs(robolectricRuntime))
+        // Placeholder feature modules have no tests yet; that's expected, not a misconfiguration.
+        failOnNoDiscoveredTests.set(false)
         // Robolectric needs headroom; keep test logs readable in CI.
         maxHeapSize = "2g"
         testLogging {
@@ -93,4 +107,17 @@ private fun Project.configureAndroidTests() {
             exceptionFormat = org.gradle.api.tasks.testing.logging.TestExceptionFormat.FULL
         }
     }
+}
+
+/** Points Robolectric at the runtime jar Gradle resolved, and stops it downloading anything. */
+private class RobolectricOfflineArgs(
+    @get:InputFiles
+    @get:PathSensitive(PathSensitivity.NAME_ONLY)
+    val runtimeJars: FileCollection,
+) : CommandLineArgumentProvider {
+    override fun asArguments(): Iterable<String> =
+        listOf(
+            "-Drobolectric.offline=true",
+            "-Drobolectric.dependency.dir=${runtimeJars.singleFile.parentFile.absolutePath}",
+        )
 }

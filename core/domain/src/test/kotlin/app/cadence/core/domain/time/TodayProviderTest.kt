@@ -21,4 +21,12 @@ class TodayProviderTest {
         val tokyo = TodayProvider.fromClock(Clock.fixed(instant, ZoneId.of("Asia/Tokyo")))
         assertEquals(LocalDate.of(2026, 11, 9), tokyo.today())
     }
+
+    @Test
+    fun `system provider returns the current date`() {
+        val before = LocalDate.now()
+        val today = TodayProvider.System.today()
+        val after = LocalDate.now()
+        kotlin.test.assertTrue(today == before || today == after)
+    }
 }

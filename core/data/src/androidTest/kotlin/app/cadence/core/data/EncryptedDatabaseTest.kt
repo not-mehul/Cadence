@@ -9,7 +9,7 @@ import app.cadence.core.data.db.CadenceDatabaseFactory
 import app.cadence.core.data.db.DayLogEntity
 import app.cadence.core.data.security.DatabasePassphraseStore
 import app.cadence.core.data.security.KeystoreKeyWrapper
-import app.cadence.core.domain.model.Flow
+import app.cadence.core.domain.model.MenstrualFlow
 import kotlinx.coroutines.runBlocking
 import org.junit.After
 import org.junit.Before
@@ -49,7 +49,7 @@ class EncryptedDatabaseTest {
     @Test
     fun databaseIsUnreadableWithoutTheKeyAndReadableWithIt() {
         val day = LocalDate.of(2026, 11, 8)
-        val entity = DayLogEntity(day, Flow.MEDIUM, "test", Instant.ofEpochMilli(1_000))
+        val entity = DayLogEntity(day, MenstrualFlow.MEDIUM, "test", Instant.ofEpochMilli(1_000))
 
         CadenceDatabaseFactory.create(context, passphrase(), dbName).run {
             runBlocking { dayLogDao().upsert(entity) }

@@ -1,5 +1,37 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="settings_title">Settings</string>
-    <string name="settings_placeholder">Cycle defaults, reminders, privacy and data controls will appear here.</string>
+
+    <string name="settings_section_cycle">Your cycle</string>
+    <string name="settings_cycle_length">Typical cycle length</string>
+    <string name="settings_period_length">Typical period length</string>
+    <string name="settings_cycle_defaults_note">Used for predictions until you have logged two cycles.</string>
+    <string name="settings_cycle_length_label">cycle length</string>
+    <string name="settings_period_length_label">period length</string>
+    <string name="settings_mode">Mode</string>
+    <string name="settings_mode_track">Tracking my natural cycle</string>
+    <string name="settings_mode_track_detail">Shows cycle phases and estimated ovulation.</string>
+    <string name="settings_mode_birth_control">Using hormonal birth control</string>
+    <string name="settings_mode_birth_control_detail">Hides ovulation estimates and phases, which don\'t apply.</string>
+
+    <string name="settings_section_appearance">Appearance</string>
+    <string name="settings_theme">Theme</string>
+    <string name="settings_theme_system">Match system</string>
+    <string name="settings_theme_light">Light</string>
+    <string name="settings_theme_dark">Dark</string>
+
+    <string name="settings_section_privacy">Privacy and data</string>
+    <string name="settings_privacy_statement">Everything you log stays on this phone, in an encrypted database. Cadence has no internet access, no account and no analytics.</string>
+    <string name="settings_delete_all">Delete all data</string>
+    <string name="settings_delete_all_detail">Erase every period and setting on this phone</string>
+    <string name="settings_delete_title">Delete all data?</string>
+    <string name="settings_delete_body">This permanently erases every period and setting stored by Cadence on this phone. It can\'t be undone.</string>
+    <string name="settings_delete_confirm">Delete everything</string>
+
+    <string name="settings_section_about">About</string>
+    <string name="settings_version">Version %1$s</string>
+    <string name="settings_disclaimer">Cadence is not a medical device and must not be used as contraception. Predictions are estimates. Talk to a clinician about any health concerns.</string>
+
+    <string name="settings_save">Save</string>
+    <string name="settings_cancel">Cancel</string>
 </resources>

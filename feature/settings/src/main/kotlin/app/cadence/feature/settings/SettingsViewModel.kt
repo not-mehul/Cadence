@@ -1,0 +1,58 @@
+package app.cadence.feature.settings
+
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import app.cadence.core.data.repository.DataEraser
+import app.cadence.core.data.repository.SettingsRepository
+import app.cadence.core.domain.model.CycleDefaults
+import app.cadence.core.domain.model.Goal
+import app.cadence.core.domain.model.ThemePreference
+import app.cadence.core.domain.model.UserSettings
+import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.launch
+import javax.inject.Inject
+
+@HiltViewModel
+class SettingsViewModel
+    @Inject
+    constructor(
+        private val settingsRepository: SettingsRepository,
+        private val dataEraser: DataEraser,
+    ) : ViewModel() {
+        /** Null while loading. */
+        val settings: StateFlow<UserSettings?> =
+            settingsRepository.settings.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), null)
+
+        fun setCycleLength(days: Int) = update { it.copy(cycleDefaults = it.cycleDefaults.copy(cycleLength = days)) }
+
+        fun setPeriodLength(days: Int) = update { it.copy(cycleDefaults = it.cycleDefaults.copy(periodLength = days)) }
+
+        fun setGoal(goal: Goal) = update { it.copy(goal = goal) }
+
+        fun setTheme(theme: ThemePreference) = update { it.copy(theme = theme) }
+
+        /** Erases everything; the app then returns to onboarding. */
+        fun deleteAllData() {
+            viewModelScope.launch { dataEraser.eraseAll() }
+        }
+
+        private fun update(transform: (UserSettings) -> UserSettings) {
+            viewModelScope.launch { settingsRepository.update(transform) }
+        }
+
+        companion object {
+            /** Allowed cycle lengths given the current period length (a period must be shorter than its cycle). */
+            fun cycleLengthRange(defaults: CycleDefaults): IntRange {
+                val min = maxOf(CycleDefaults.CYCLE_LENGTH_RANGE.first, defaults.periodLength + 1)
+                return min..CycleDefaults.CYCLE_LENGTH_RANGE.last
+            }
+
+            fun periodLengthRange(defaults: CycleDefaults): IntRange {
+                val max = minOf(CycleDefaults.PERIOD_LENGTH_RANGE.last, defaults.cycleLength - 1)
+                return CycleDefaults.PERIOD_LENGTH_RANGE.first..max
+            }
+        }
+    }

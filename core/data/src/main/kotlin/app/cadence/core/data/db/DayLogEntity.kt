@@ -3,7 +3,7 @@ package app.cadence.core.data.db
 import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.PrimaryKey
-import app.cadence.core.domain.model.Flow
+import app.cadence.core.domain.model.MenstrualFlow
 import java.time.Instant
 import java.time.LocalDate
 
@@ -19,7 +19,7 @@ data class DayLogEntity(
     @ColumnInfo(name = "date")
     val date: LocalDate,
     @ColumnInfo(name = "flow")
-    val flow: Flow? = null,
+    val flow: MenstrualFlow? = null,
     @ColumnInfo(name = "note")
     val note: String? = null,
     @ColumnInfo(name = "updated_at")

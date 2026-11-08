@@ -3,7 +3,6 @@ package app.cadence.core.data.di
 import android.content.Context
 import app.cadence.core.data.db.CadenceDatabase
 import app.cadence.core.data.db.CadenceDatabaseFactory
-import app.cadence.core.data.db.DayLogDao
 import app.cadence.core.data.security.DatabasePassphraseStore
 import app.cadence.core.data.security.KeystoreKeyWrapper
 import dagger.Module
@@ -14,9 +13,10 @@ import dagger.hilt.components.SingletonComponent
 import java.io.File
 import javax.inject.Singleton
 
+/** The encrypted database. Tests replace this module with an in-memory database. */
 @Module
 @InstallIn(SingletonComponent::class)
-object DataModule {
+object DatabaseModule {
     private const val KEY_FILE_NAME = "cadence_db.key"
 
     @Provides
@@ -43,7 +43,4 @@ object DataModule {
             passphrase.fill(0)
         }
     }
-
-    @Provides
-    fun provideDayLogDao(database: CadenceDatabase): DayLogDao = database.dayLogDao()
 }

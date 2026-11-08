@@ -13,5 +13,8 @@ fun interface TodayProvider {
 
     companion object {
         fun fromClock(clock: Clock): TodayProvider = TodayProvider { LocalDate.now(clock) }
+
+        /** Reads the device's current timezone on every call, so a timezone change is picked up. */
+        val System: TodayProvider = TodayProvider { LocalDate.now() }
     }
 }

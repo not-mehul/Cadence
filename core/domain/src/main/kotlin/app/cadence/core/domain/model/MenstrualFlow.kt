@@ -1,7 +1,7 @@
 package app.cadence.core.domain.model
 
 /** Menstrual flow logged for a single day. */
-enum class Flow {
+enum class MenstrualFlow {
     SPOTTING,
     LIGHT,
     MEDIUM,

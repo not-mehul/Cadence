@@ -1,5 +1,60 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="today_title">Today</string>
-    <string name="today_placeholder">Your cycle day, current phase and next period will appear here.</string>
+
+    <!-- Headlines -->
+    <string name="today_headline_no_data">Log your period to get started</string>
+    <string name="today_headline_on_period">Day %1$d of your period</string>
+    <string name="today_headline_expected_today">Period expected today</string>
+    <plurals name="today_headline_period_in">
+        <item quantity="one">Period in %d day</item>
+        <item quantity="other">Period in %d days</item>
+    </plurals>
+    <plurals name="today_headline_late">
+        <item quantity="one">Period %d day late</item>
+        <item quantity="other">Period %d days late</item>
+    </plurals>
+
+    <!-- Supporting text -->
+    <string name="today_no_data_body">Tap Period started on the first day of your period. You can also add earlier periods on the calendar.</string>
+    <string name="today_next_expected">Next period expected %1$s</string>
+    <string name="today_was_expected">It was expected %1$s</string>
+    <string name="today_basis_typical">Based on your typical cycle. Predictions get more personal as you log periods.</string>
+    <plurals name="today_basis_history">
+        <item quantity="one">Based on your last %d cycle</item>
+        <item quantity="other">Based on your last %d cycles</item>
+    </plurals>
+
+    <!-- Ring -->
+    <string name="today_ring_day_label">Cycle day</string>
+    <string name="today_ring_of_about">of about %1$d</string>
+    <string name="today_ring_description">Cycle day %1$d of about %2$d.</string>
+    <string name="today_ring_description_phase">Cycle day %1$d of about %2$d. %3$s.</string>
+
+    <!-- Actions -->
+    <string name="today_action_start">Period started</string>
+    <string name="today_action_end">Period ended</string>
+    <string name="today_action_extend">Still on your period? Log today</string>
+    <string name="today_logged">Period logged</string>
+    <string name="today_undo">Undo</string>
+    <string name="today_end_title">When did your period end?</string>
+    <string name="today_end_today">Today</string>
+    <string name="today_end_yesterday">Yesterday</string>
+    <string name="today_cancel">Cancel</string>
+
+    <!-- Phase cards -->
+    <string name="phase_menstrual">Menstrual phase</string>
+    <string name="phase_menstrual_body">Hormone levels are at their lowest and energy may dip. Rest, warmth and gentle movement can help with cramps.</string>
+    <string name="phase_follicular">Follicular phase</string>
+    <string name="phase_follicular_body">Estrogen rises as your body prepares to release an egg. Many people notice their energy and mood lifting.</string>
+    <string name="phase_ovulatory">Ovulatory phase (estimate)</string>
+    <string name="phase_ovulatory_body">Around your estimated ovulation. Some people notice clearer, stretchier discharge or a twinge on one side. This is an estimate and can\'t be used to prevent pregnancy.</string>
+    <string name="phase_luteal">Luteal phase</string>
+    <string name="phase_luteal_body">Progesterone rises after ovulation. In the days before your period you might notice bloating, tender breasts or mood changes.</string>
+    <string name="phase_birth_control">Hormonal birth control</string>
+    <string name="phase_birth_control_body">Most hormonal birth control prevents ovulation, so Cadence doesn\'t show cycle phases or ovulation estimates. You can still log bleeding and see when to expect it.</string>
+    <string name="phase_late">Running late</string>
+    <string name="phase_late_body">Cycles vary for many reasons, including stress, illness, travel and changes in weight or exercise. If you might be pregnant, a test can tell you for sure.</string>
+    <string name="phase_welcome">How Cadence works</string>
+    <string name="phase_welcome_body">Each time you log a period, Cadence learns your rhythm. After two cycles, predictions are based on your own history.</string>
 </resources>

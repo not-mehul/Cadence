@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Mirrors core:ui Palette so the window and splash match the Compose theme. -->
+    <color name="cadence_window_background">#FFFFF8F7</color>
+    <color name="ic_launcher_background">#FF9A3B53</color>
+    <color name="ic_launcher_track">#FFC98A99</color>
+    <color name="ic_launcher_ring">#FFFFFFFF</color>
+    <color name="ic_launcher_marker">#FFFFD9E0</color>
+</resources>

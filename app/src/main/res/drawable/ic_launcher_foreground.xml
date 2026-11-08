@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Cadence mark: the cycle (track), progress through it (arc) and today (marker). -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <path
+        android:pathData="M54,30a24,24 0,1 1,0 48a24,24 0,1 1,0 -48"
+        android:strokeWidth="7"
+        android:strokeColor="@color/ic_launcher_track" />
+    <path
+        android:pathData="M54,30A24,24 0,0 1,74.78 66"
+        android:strokeWidth="7"
+        android:strokeColor="@color/ic_launcher_ring"
+        android:strokeLineCap="round" />
+    <path
+        android:fillColor="@color/ic_launcher_marker"
+        android:pathData="M74.78,66m-8,0a8,8 0,1 1,16 0a8,8 0,1 1,-16 0" />
+</vector>

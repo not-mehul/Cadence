@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="insights_title">Insights</string>
+    <string name="insights_placeholder">Cycle averages, trends and patterns will appear here once you have logged a few cycles.</string>
+</resources>

@@ -56,7 +56,7 @@ class ReminderSettingsTest {
     @Test
     fun `reminders are off and discreet by default`() {
         show()
-        compose.onNodeWithText("Discreet notifications").performScrollTo().assertExists()
+        compose.onNodeWithText("Discreet notifications and widget").performScrollTo().assertExists()
         compose.onNodeWithText("How many days before").assertDoesNotExist()
         compose.onNodeWithText("Check-in time").assertDoesNotExist()
     }
@@ -91,7 +91,7 @@ class ReminderSettingsTest {
     @Test
     fun `turning discreet off`() {
         show()
-        compose.onNodeWithText("Discreet notifications").performScrollTo().performClick()
+        compose.onNodeWithText("Discreet notifications and widget").performScrollTo().performClick()
         assertEquals(false, saved?.discreet)
     }
 

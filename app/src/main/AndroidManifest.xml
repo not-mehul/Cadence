@@ -35,13 +35,40 @@
 
         <activity
             android:name=".MainActivity"
-            android:exported="true"
+            android:exported="false"
             android:theme="@style/Theme.Cadence.Starting"
-            android:windowSoftInputMode="adjustResize">
+            android:windowSoftInputMode="adjustResize" />
+
+        <!--
+          Launcher entries: Cadence's own icon, or a discreet one ("Planner", a plain notepad).
+          Exactly one is enabled; Settings → App icon switches them (docs/PLAN.md Phase 7).
+          The names are used by feature:settings (AppIcons), so keep them in sync.
+        -->
+        <activity-alias
+            android:name=".LauncherDefault"
+            android:enabled="true"
+            android:exported="true"
+            android:icon="@mipmap/ic_launcher"
+            android:label="@string/app_name"
+            android:roundIcon="@mipmap/ic_launcher_round"
+            android:targetActivity=".MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
-        </activity>
+        </activity-alias>
+        <activity-alias
+            android:name=".LauncherDiscreet"
+            android:enabled="false"
+            android:exported="true"
+            android:icon="@mipmap/ic_launcher_discreet"
+            android:label="@string/app_name_discreet"
+            android:roundIcon="@mipmap/ic_launcher_discreet"
+            android:targetActivity=".MainActivity">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity-alias>
     </application>
 </manifest>

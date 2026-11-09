@@ -18,6 +18,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.selection.selectable
@@ -67,6 +68,7 @@ import app.cadence.core.ui.log.LogLabels
 import app.cadence.core.ui.security.DeviceAuth
 import app.cadence.core.ui.theme.CadenceTheme
 import app.cadence.feature.backup.BackupSettingsRows
+import app.cadence.feature.healthconnect.HealthConnectSettingsRows
 import java.time.LocalDate
 import app.cadence.core.ui.R as UiR
 
@@ -78,6 +80,7 @@ fun SettingsScreen(
     val settings by viewModel.settings.collectAsStateWithLifecycle()
     val tracking by viewModel.tracking.collectAsStateWithLifecycle()
     val context = LocalContext.current
+    var appIcon by remember { mutableStateOf(AppIcons.current(context)) }
     val currentActivity = LocalActivity.current
     var status by remember { mutableStateOf(readReminderStatus(context)) }
     LifecycleResumeEffect(Unit) {
@@ -149,10 +152,16 @@ fun SettingsScreen(
                 onCreateTag = viewModel::createTag,
                 onRenameTag = viewModel::renameTag,
                 onDeleteTag = viewModel::deleteTag,
+                onAppIcon = { icon ->
+                    AppIcons.set(context, icon)
+                    appIcon = icon
+                },
             ),
         modifier = modifier,
         backupRows = { BackupSettingsRows() },
+        healthConnectRows = { HealthConnectSettingsRows() },
         tracking = currentTracking,
+        appIcon = appIcon,
     )
     if (noScreenLock) {
         AlertDialog(
@@ -189,6 +198,7 @@ class SettingsActions(
     val onCreateTag: (String) -> Unit = {},
     val onRenameTag: (Long, String) -> Unit = { _, _ -> },
     val onDeleteTag: (Long) -> Unit = {},
+    val onAppIcon: (AppIcon) -> Unit = {},
 )
 
 private fun readReminderStatus(context: Context): ReminderStatus {
@@ -219,6 +229,7 @@ private enum class SettingsDialog {
     THEME,
     CATEGORIES,
     LOCK_TIMEOUT,
+    APP_ICON,
     PRIVACY,
     DELETE,
 }
@@ -231,6 +242,8 @@ fun SettingsContent(
     reminderStatus: ReminderStatus = ReminderStatus(),
     backupRows: @Composable () -> Unit = {},
     tracking: TrackingSettingsState = TrackingSettingsState(LocalDate.now()),
+    appIcon: AppIcon = AppIcon.STANDARD,
+    healthConnectRows: @Composable () -> Unit = {},
 ) {
     var dialog by rememberSaveable { mutableStateOf(SettingsDialog.NONE) }
     val defaults = settings.cycleDefaults
@@ -282,6 +295,11 @@ fun SettingsContent(
             value = stringResource(themeLabel(settings.theme)),
             onClick = { dialog = SettingsDialog.THEME },
         )
+        SettingRow(
+            title = stringResource(R.string.settings_app_icon),
+            value = stringResource(appIconLabel(appIcon)),
+            onClick = { dialog = SettingsDialog.APP_ICON },
+        )
 
         Divider()
         SectionHeader(stringResource(R.string.settings_section_privacy), Modifier.padding(horizontal = gutter))
@@ -312,6 +330,7 @@ fun SettingsContent(
             onClick = { dialog = SettingsDialog.PRIVACY },
         )
         backupRows()
+        healthConnectRows()
         SettingRow(
             title = stringResource(R.string.settings_delete_all),
             value = stringResource(R.string.settings_delete_all_detail),
@@ -320,9 +339,7 @@ fun SettingsContent(
         )
 
         Divider()
-        SectionHeader(stringResource(R.string.settings_section_about), Modifier.padding(horizontal = gutter))
-        Note(stringResource(R.string.settings_version, appVersion()))
-        Note(stringResource(R.string.settings_disclaimer))
+        AboutSection()
     }
 
     val close = { dialog = SettingsDialog.NONE }
@@ -413,6 +430,21 @@ fun SettingsContent(
             )
         }
 
+        SettingsDialog.APP_ICON -> {
+            ChoiceDialog(
+                title = stringResource(R.string.settings_app_icon),
+                options = AppIcon.entries,
+                selected = appIcon,
+                label = { stringResource(appIconLabel(it)) },
+                detail = { stringResource(appIconDetail(it)) },
+                onSelect = {
+                    actions.onAppIcon(it)
+                    close()
+                },
+                onDismiss = close,
+            )
+        }
+
         SettingsDialog.PRIVACY -> {
             PrivacyExplainerDialog(onDismiss = close)
         }
@@ -451,21 +483,26 @@ private fun goalDetail(goal: Goal) =
     }
 
 @StringRes
+private fun appIconLabel(icon: AppIcon) =
+    when (icon) {
+        AppIcon.STANDARD -> R.string.settings_app_icon_standard
+        AppIcon.DISCREET -> R.string.settings_app_icon_discreet
+    }
+
+@StringRes
+private fun appIconDetail(icon: AppIcon) =
+    when (icon) {
+        AppIcon.STANDARD -> R.string.settings_app_icon_standard_detail
+        AppIcon.DISCREET -> R.string.settings_app_icon_discreet_detail
+    }
+
+@StringRes
 private fun themeLabel(theme: ThemePreference) =
     when (theme) {
         ThemePreference.SYSTEM -> R.string.settings_theme_system
         ThemePreference.LIGHT -> R.string.settings_theme_light
         ThemePreference.DARK -> R.string.settings_theme_dark
     }
-
-@Composable
-private fun appVersion(): String {
-    val context = LocalContext.current
-    return context.packageManager
-        .getPackageInfo(context.packageName, 0)
-        .versionName
-        .orEmpty()
-}
 
 @Composable
 internal fun SettingRow(
@@ -543,6 +580,7 @@ private fun <T> ChoiceDialog(
                         modifier =
                             Modifier
                                 .fillMaxWidth()
+                                .heightIn(min = CadenceTheme.spacing.minTouchTarget)
                                 .selectable(
                                     selected = option == selected,
                                     onClick = { onSelect(option) },
@@ -595,6 +633,7 @@ private fun CategoriesDialog(
                         modifier =
                             Modifier
                                 .fillMaxWidth()
+                                .heightIn(min = CadenceTheme.spacing.minTouchTarget)
                                 .toggleable(
                                     value = checked,
                                     role = Role.Checkbox,
@@ -639,6 +678,8 @@ private fun PrivacyExplainerDialog(onDismiss: () -> Unit) {
             R.string.privacy_point_no_backup,
             R.string.privacy_point_lock,
             R.string.privacy_point_notifications,
+            R.string.privacy_point_widget,
+            R.string.privacy_point_health_connect,
             R.string.privacy_point_exports,
             R.string.privacy_point_delete,
         )

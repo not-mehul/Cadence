@@ -263,9 +263,26 @@ private fun PhaseCard(
     goal: app.cadence.core.domain.model.Goal,
 ) {
     val (title, body) = phaseCopy(snapshot, goal)
+    val details = phaseDetails(title)
+    var expanded by rememberSaveable(title) { mutableStateOf(false) }
     CadenceCard {
         CadenceCardTitle(stringResource(title))
         Spacer(Modifier.height(CadenceTheme.spacing.xs))
         Text(stringResource(body), style = MaterialTheme.typography.bodyMedium)
+        if (details != null) {
+            if (expanded) {
+                Spacer(Modifier.height(CadenceTheme.spacing.sm))
+                Text(stringResource(details.first), style = MaterialTheme.typography.bodyMedium)
+                Spacer(Modifier.height(CadenceTheme.spacing.xs))
+                Text(
+                    stringResource(details.second),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            }
+            TextButton(onClick = { expanded = !expanded }) {
+                Text(stringResource(if (expanded) R.string.phase_show_less else R.string.phase_learn_more))
+            }
+        }
     }
 }

@@ -178,8 +178,8 @@ class TodayViewModel
             val tagLabels: Map<Long, String>,
         )
 
-        internal companion object {
-            const val STOP_TIMEOUT_MS = 5_000L
+        companion object {
+            internal const val STOP_TIMEOUT_MS = 5_000L
 
             fun birthControlToday(
                 schedule: ContraceptiveSchedule,

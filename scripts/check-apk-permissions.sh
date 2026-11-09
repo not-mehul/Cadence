@@ -22,6 +22,10 @@ allowed=(
   # face or screen-lock prompt (USE_FINGERPRINT on Android 8.x). Neither gives access to any data.
   "android.permission.USE_BIOMETRIC"
   "android.permission.USE_FINGERPRINT"
+  # Health Connect (Phase 7): opt-in, asked for only when the user turns sharing on. Runtime
+  # permissions granted in Health Connect; they cover period and flow records and nothing else.
+  "android.permission.health.READ_MENSTRUATION"
+  "android.permission.health.WRITE_MENSTRUATION"
 )
 
 mapfile -t requested < <("$aapt2" dump permissions "$apk" | sed -n "s/^uses-permission: name='\([^']*\)'.*/\1/p")

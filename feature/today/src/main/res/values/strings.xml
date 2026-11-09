@@ -105,4 +105,16 @@
     <string name="today_bc_setup_title">Using a pill, patch or ring?</string>
     <string name="today_bc_setup_body">Add it in Settings to check off doses, get reminders, and see when your break-week bleed is likely.</string>
     <string name="today_bc_setup_action">Set up in Settings</string>
+    <!-- Phase 7: educational cards. Conservative, well-established facts only, with their source. -->
+    <string name="phase_learn_more">Learn more</string>
+    <string name="phase_show_less">Show less</string>
+    <string name="phase_menstrual_more">A period usually lasts 2 to 7 days, and most people lose only a few tablespoons of blood. Bleeding for more than 7 days, or needing a new pad or tampon every hour or two, is worth mentioning to a doctor.</string>
+    <string name="phase_follicular_more">This phase starts on the first day of your period, as follicles in the ovaries begin to mature. It\'s the part of the cycle whose length varies most, which is why cycles differ from person to person and month to month.</string>
+    <string name="phase_ovulatory_more">An egg lives for about a day after it\'s released, but sperm can survive for several days, so the most fertile days are the ones just before ovulation. Ovulation can move from cycle to cycle, which is why Cadence\'s date is only an estimate.</string>
+    <string name="phase_luteal_more">This phase is the most consistent, usually around 12 to 14 days. Premenstrual symptoms typically ease once your period starts. If they affect your daily life, a doctor can help.</string>
+    <string name="phase_birth_control_more">Combined pills, patches and rings work mainly by stopping ovulation. The bleed during a break is a withdrawal bleed, caused by the drop in hormones, rather than a true period. Many people can safely skip breaks, but check with your clinician or pharmacist before changing how you take yours.</string>
+    <string name="phase_source_periods">Source: NHS, \"Periods\" and \"Heavy periods\".</string>
+    <string name="phase_source_fertility">Source: NHS, \"Periods and fertility in the menstrual cycle\".</string>
+    <string name="phase_source_pms">Source: NHS, \"Periods and fertility in the menstrual cycle\" and \"PMS (premenstrual syndrome)\".</string>
+    <string name="phase_source_contraception">Source: NHS, \"Combined pill\", \"Contraceptive patch\" and \"Vaginal ring\".</string>
 </resources>

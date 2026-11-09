@@ -486,7 +486,7 @@ Each phase ends with a **working, shippable app**. Phases are sized for one deve
 - **Data:** schema v7 adds the schedule columns to settings, plus `contraceptive_dose`, `medication`, `medication_dose` and `custom_tag`, all by auto-migration with a test. Backups are format version 2 and still read version 1. Merging a backup matches tags and medications by name. The CSV adds tags, birth control and medication columns. The clinician report adds the birth control layout, missed doses in the last 90 days, medications, and patterns.
 - **Tests:** end to end through the real app (pill schedule, check-offs, switching to tracking and back with nothing lost), domain logic at 100% coverage, repositories, backup round trip with all Phase 6 data, reminders, and UI.
 
-### Phase 7: Polish & ecosystem
+### Phase 7: Polish & ecosystem ✅
 **Goal:** release quality and nice-to-haves.
 - Accessibility audit (TalkBack, Switch Access, font scaling up to 200%, contrast, Accessibility Scanner) and fixes.
 - Localization: string resources for everything, per-app language (Android 13+), RTL layout check, locale-based first day of week and units.
@@ -501,6 +501,40 @@ Each phase ends with a **working, shippable app**. Phases are sized for one deve
   - `versionCode` / `versionName` derived from the git tag.
   - Install guide in the README: allowing "Install unknown apps", verifying the checksum, and updating by installing a newer APK over the old one, which keeps the data.
   - The app has no internet access, so it can't check for updates. Settings → About shows the installed version and where to look for new ones.
+
+**As built:**
+- **Release pipeline:**
+  - Pushing a tag such as `v1.2.3` runs `.github/workflows/release.yml`. It runs lint and the unit tests, then builds a minified, resource-shrunk APK signed with the release key from repository secrets. It checks the APK's permissions and publishes it to GitHub Releases with its SHA-256 checksum and the signing certificate's fingerprint.
+  - The version comes from the tag (`versionCode` = 10203 for 1.2.3).
+  - Creating and backing up the key is a one-time manual step, covered in [`docs/RELEASING.md`](RELEASING.md). The key is never created in CI.
+  - Settings → About shows the version, the signing certificate fingerprint (to compare with the release notes), and where updates are published.
+  - CI's emulator jobs install the minified release APK (signed with the debug key) and check that it reaches its first screen, which needs Hilt, Room, SQLCipher's native code and the Keystore all to survive R8.
+- **Startup profiles:** `profileinstaller` (pulled in by Compose) installs the libraries' Baseline Profiles on sideloaded installs. An app-specific profile needs a Macrobenchmark run on a device and is left for later.
+- **Accessibility:**
+  - Accessibility Test Framework checks (touch targets, labels, text contrast, duplicate clickables) run on every main screen and every onboarding step, in light and dark themes, as instrumented tests on the CI emulators. Under Robolectric the checks silently pass (a deliberately broken button wasn't caught), so they can't run as unit tests.
+  - The audit found rows built from a checkbox, radio button or switch that were only about 40dp tall. They now have a 48dp minimum, and calendar days are tappable across the whole cell.
+  - At 200% text on a 360dp phone, Today, Calendar, Insights, Settings and onboarding were checked by eye and are covered by layout tests.
+  - TalkBack, Switch Access and Accessibility Scanner still need a pass on a real phone. That's manual by nature and should happen before a 1.0 tag.
+- **Localization:**
+  - All text is in string resources.
+  - The per-app language list (Android 13+) is generated from the translations that exist; English is the only one so far.
+  - Debug builds include the pseudolocales en-XA and ar-XB.
+  - Right-to-left layouts are covered by tests.
+  - Weeks start on the locale's first day, and dates and times use the locale's formats.
+  - No translations ship yet: health wording needs a careful human translator, not machine translation.
+- **Educational cards:** each phase card on Today, and the birth control card, has a "Learn more" with a few well-established facts and the NHS page they come from. There are no links, since the app has no internet access.
+- **Widget:**
+  - It's a plain `AppWidgetProvider` rather than Jetpack Glance. Glance runs on WorkManager, which would add wake-lock, foreground-service and other permissions for what is two lines of text.
+  - It follows the "Discreet notifications and widget" setting. By default it shows only "Day N" and the date. With discreet mode off it shows "Period in 9 days" or "Break in 3 days". While app lock is on it shows nothing.
+  - It refreshes when data changes and hourly, for the change of day.
+- **Discreet icon:** two launcher activity-aliases. Settings → App icon switches between Cadence's icon and a plain notepad called "Planner". `MainActivity` itself is no longer exported.
+- **Health Connect:**
+  - Opt-in, from Settings. Only the menstruation read and write permissions are requested.
+  - While permitted, Cadence mirrors its period days and flow there, using client record ids derived from the date, so edits and cleared days are mirrored too.
+  - "Copy periods from other apps" fills only days with nothing logged in Cadence.
+  - Spotting isn't shared, since it would need a third permission. Turning sharing off revokes the permissions.
+  - Health Connect's required rationale screen explains that apps allowed there can read the data.
+  - The mirroring logic is tested against an in-memory store. The real adapter is thin and still needs checking on a phone with Health Connect.
 
 ### Phase summary
 

@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="hc_title">Health Connect</string>
+    <string name="hc_needs_update">Update the Health Connect app to share your period days with it.</string>
+    <string name="hc_share">Share with Health Connect</string>
+    <string name="hc_share_detail">Keeps your period days and flow in Health Connect, on this phone. Apps you allow there can read them, and some may upload them.</string>
+    <string name="hc_import">Copy periods from other apps</string>
+    <string name="hc_import_detail">Adds period days other apps saved in Health Connect, on days you haven\'t logged here</string>
+    <string name="hc_not_permitted">Health Connect sharing stays off: Cadence needs permission to read and write menstruation data.</string>
+    <string name="hc_failed">Health Connect couldn\'t be reached just now. Try again in a moment.</string>
+    <string name="hc_imported_none">Nothing new to copy: there were no period days from other apps on days you haven\'t logged.</string>
+    <plurals name="hc_imported">
+        <item quantity="one">Copied %d period day from Health Connect.</item>
+        <item quantity="other">Copied %d period days from Health Connect.</item>
+    </plurals>
+    <string name="hc_ok">OK</string>
+
+    <string name="hc_rationale_title">Cadence and Health Connect</string>
+    <string name="hc_rationale_what">If you turn on sharing in Cadence\'s settings, Cadence writes the days you logged a period, and how heavy the flow was, to Health Connect on this phone. Cadence reads menstruation data only when you ask it to copy periods from other apps.</string>
+    <string name="hc_rationale_others">Health Connect keeps data on your phone. Any app you allow in Health Connect can read it, and some apps may upload it, so only allow apps you trust. Cadence itself has no internet access.</string>
+    <string name="hc_rationale_off">Turning sharing off in Cadence removes its access. Data it already shared stays in Health Connect until you delete it there.</string>
+</resources>

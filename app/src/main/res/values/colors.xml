@@ -6,4 +6,6 @@
     <color name="ic_launcher_track">#FFC98A99</color>
     <color name="ic_launcher_ring">#FFFFFFFF</color>
     <color name="ic_launcher_marker">#FFFFD9E0</color>
+    <!-- The optional discreet icon: a neutral slate, unlike Cadence's own colours. -->
+    <color name="ic_launcher_discreet_background">#FF5B6B7A</color>
 </resources>

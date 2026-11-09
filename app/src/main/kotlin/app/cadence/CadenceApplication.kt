@@ -8,8 +8,10 @@ import androidx.lifecycle.ProcessLifecycleOwner
 import app.cadence.core.data.repository.SettingsRepository
 import app.cadence.core.data.security.AppLock
 import app.cadence.core.domain.security.SecuritySettings
+import app.cadence.feature.healthconnect.HealthConnectSync
 import app.cadence.feature.reminders.ReminderChannels
 import app.cadence.feature.reminders.ReminderSync
+import app.cadence.feature.widget.WidgetSync
 import dagger.hilt.android.HiltAndroidApp
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -28,6 +30,12 @@ class CadenceApplication : Application() {
     lateinit var appLock: AppLock
 
     @Inject
+    lateinit var widgetSync: WidgetSync
+
+    @Inject
+    lateinit var healthConnect: HealthConnectSync
+
+    @Inject
     lateinit var settings: SettingsRepository
 
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
@@ -41,6 +49,10 @@ class CadenceApplication : Application() {
         ReminderChannels.ensure(this)
         // Keeps reminder alarms in step with logged data and settings.
         reminderSync.start()
+        // Keeps any home-screen widgets up to date while the app runs.
+        widgetSync.start()
+        // Mirrors period days to Health Connect, only if the user turned that on (granted access).
+        healthConnect.start()
         settings.settings
             .onEach { security = it.security }
             .catch { /* Unreadable data is handled on screen; keep the safe default. */ }

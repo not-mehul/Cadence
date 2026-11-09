@@ -156,8 +156,9 @@ private fun DayCell(
         modifier =
             Modifier
                 .fillMaxSize()
-                .padding(3.dp)
+                // The whole cell is tappable; the gap between days is drawn inside it.
                 .then(interaction)
+                .padding(3.dp)
                 .semantics {
                     contentDescription = description
                     stateDescription = state

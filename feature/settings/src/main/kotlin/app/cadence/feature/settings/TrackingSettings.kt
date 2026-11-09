@@ -4,6 +4,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.selection.selectable
@@ -558,6 +559,7 @@ private fun RadioRow(
         modifier =
             Modifier
                 .fillMaxWidth()
+                .heightIn(min = CadenceTheme.spacing.minTouchTarget)
                 .selectable(selected = selected, onClick = onSelect, role = Role.RadioButton)
                 .padding(vertical = CadenceTheme.spacing.xs),
     ) {
@@ -581,6 +583,7 @@ private fun LabeledSwitch(
         modifier =
             Modifier
                 .fillMaxWidth()
+                .heightIn(min = CadenceTheme.spacing.minTouchTarget)
                 .toggleable(value = checked, role = Role.Switch, onValueChange = onCheckedChange)
                 .padding(vertical = CadenceTheme.spacing.xs),
     ) {

@@ -160,3 +160,46 @@ class TodayBirthControlTest {
         assertEquals(listOf(2L to true, 1L to false), taken)
     }
 }
+
+@RunWith(RobolectricTestRunner::class)
+@Config(qualifiers = "en-rGB-w411dp-h1600dp")
+class PhaseCardTest {
+    @get:Rule
+    val compose = createComposeRule()
+
+    @Test
+    fun `phase cards expand to a sourced explanation`() {
+        val day = LocalDate.of(2026, 3, 20)
+        val settings = UserSettings(goal = Goal.BIRTH_CONTROL, onboardingComplete = true)
+        val state =
+            TodayUiState.Ready(
+                CycleSnapshot.compute(
+                    mapOf(LocalDate.of(2026, 3, 1) to app.cadence.core.domain.model.MenstrualFlow.MEDIUM),
+                    settings,
+                    day,
+                ),
+                Goal.BIRTH_CONTROL,
+                5,
+                DayEntry(day),
+            )
+        compose.setContent { CadenceTheme { TodayContent(state, {}, {}, {}, {}) } }
+
+        compose.onNodeWithText("Learn more").performScrollTo().performClick()
+        compose.onNodeWithText("withdrawal bleed", substring = true).performScrollTo().assertIsDisplayed()
+        compose.onNodeWithText("Source: NHS", substring = true).assertIsDisplayed()
+        compose.onNodeWithText("Show less").performScrollTo().performClick()
+        assertEquals(0, compose.onAllNodesWithText("Source: NHS", substring = true).fetchSemanticsNodes().size)
+    }
+
+    @Test
+    fun `every phase has details, but not the status cards`() {
+        listOf(
+            R.string.phase_menstrual,
+            R.string.phase_follicular,
+            R.string.phase_ovulatory,
+            R.string.phase_luteal,
+            R.string.phase_birth_control,
+        ).forEach { assertEquals(true, phaseDetails(it) != null) }
+        assertEquals(null, phaseDetails(R.string.phase_late))
+    }
+}

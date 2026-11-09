@@ -29,11 +29,13 @@ jobs:
       - name: Install Android SDK platform
         run: yes | "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" "platforms;android-37.0" "build-tools;36.0.0" > /dev/null
 
-      - name: Lint, unit tests, coverage gate, debug APK
-        run: ./gradlew ktlintCheck lint testDebugUnitTest :core:domain:test :core:domain:koverVerify assembleDebug --continue
+      - name: Lint, unit tests, coverage gate, debug and minified release APKs
+        run: ./gradlew ktlintCheck lint testDebugUnitTest :core:domain:test :core:domain:koverVerify assembleDebug :app:assembleRelease -Pcadence.signWithDebugKey=true --continue
 
-      - name: APK requests no network permissions
-        run: scripts/check-apk-permissions.sh app/build/outputs/apk/debug/app-debug.apk
+      - name: APKs request no network permissions
+        run: |
+          scripts/check-apk-permissions.sh app/build/outputs/apk/debug/app-debug.apk
+          scripts/check-apk-permissions.sh app/build/outputs/apk/release/app-release.apk
 
       - name: Upload debug APK
         uses: actions/upload-artifact@v4
@@ -86,8 +88,9 @@ jobs:
           sudo udevadm control --reload-rules
           sudo udevadm trigger --name-match=kvm
 
-      - name: Build test APKs
-        run: ./gradlew :core:data:assembleDebugAndroidTest
+      - name: Build test APKs and a minified release APK
+        # The release APK is signed with the debug key, just so it can be installed for the smoke test.
+        run: ./gradlew :core:data:assembleDebugAndroidTest :feature:backup:assembleDebugAndroidTest :app:assembleDebugAndroidTest :app:assembleRelease -Pcadence.signWithDebugKey=true
 
       - name: Run device tests
         uses: reactivecircus/android-emulator-runner@v2
@@ -99,7 +102,9 @@ jobs:
           disk-size: 2048M
           emulator-boot-timeout: 900
           emulator-options: -no-window -gpu swiftshader_indirect -no-snapshot -noaudio -no-boot-anim -camera-back none
-          script: ./gradlew :core:data:connectedDebugAndroidTest :feature:backup:connectedDebugAndroidTest
+          script: |
+            ./gradlew :core:data:connectedDebugAndroidTest :feature:backup:connectedDebugAndroidTest :app:connectedDebugAndroidTest
+            scripts/smoke-test-release.sh app/build/outputs/apk/release/app-release.apk
 
       - name: Upload reports
         if: failure()

@@ -150,6 +150,20 @@ internal fun phaseCopy(
     }
 }
 
+/**
+ * A little more about a phase, and where it comes from (docs/PLAN.md §2.10: short, factual,
+ * sourced). Keyed by the card's title; null when there's nothing more to say.
+ */
+internal fun phaseDetails(title: Int): Pair<Int, Int>? =
+    when (title) {
+        R.string.phase_menstrual -> R.string.phase_menstrual_more to R.string.phase_source_periods
+        R.string.phase_follicular -> R.string.phase_follicular_more to R.string.phase_source_fertility
+        R.string.phase_ovulatory -> R.string.phase_ovulatory_more to R.string.phase_source_fertility
+        R.string.phase_luteal -> R.string.phase_luteal_more to R.string.phase_source_pms
+        R.string.phase_birth_control -> R.string.phase_birth_control_more to R.string.phase_source_contraception
+        else -> null
+    }
+
 /** Ring segments for each phase, clamped so they never overlap. */
 internal fun ringSegments(
     timeline: CycleTimeline,

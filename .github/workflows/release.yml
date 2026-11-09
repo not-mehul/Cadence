@@ -1,0 +1,106 @@
+name: Release
+
+# Pushing a tag like v1.2.3 builds a signed, minified APK and publishes it to GitHub Releases
+# with its SHA-256 checksum and the signing certificate's fingerprint (docs/PLAN.md Phase 7).
+# Needs these repository secrets (see README "Making a release"):
+#   CADENCE_KEYSTORE_BASE64, CADENCE_KEYSTORE_PASSWORD, CADENCE_KEY_ALIAS, CADENCE_KEY_PASSWORD
+on:
+  push:
+    tags:
+      - "v*.*.*"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  release:
+    name: Signed release APK
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Check the tag and the signing secrets
+        id: version
+        env:
+          KEYSTORE: ${{ secrets.CADENCE_KEYSTORE_BASE64 }}
+          STORE_PASSWORD: ${{ secrets.CADENCE_KEYSTORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.CADENCE_KEY_ALIAS }}
+          KEY_PASSWORD: ${{ secrets.CADENCE_KEY_PASSWORD }}
+        run: |
+          version="${GITHUB_REF_NAME#v}"
+          if ! [[ "$version" =~ ^[0-9]{1,2}\.[0-9]{1,2}\.[0-9]{1,2}$ ]]; then
+            echo "::error::Tags must look like v1.2.3 (each part below 100), got $GITHUB_REF_NAME"
+            exit 1
+          fi
+          for name in KEYSTORE STORE_PASSWORD KEY_ALIAS KEY_PASSWORD; do
+            if [[ -z "${!name}" ]]; then
+              echo "::error::The release signing secrets aren't set up. See README, \"Making a release\"."
+              exit 1
+            fi
+          done
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+
+      - uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: 21
+
+      - uses: gradle/actions/setup-gradle@v4
+        with:
+          # Releases never write to the build cache that ordinary CI runs read.
+          cache-read-only: true
+
+      - name: Install Android SDK platform
+        run: yes | "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" "platforms;android-37.0" "build-tools;36.0.0" > /dev/null
+
+      - name: Restore the keystore
+        env:
+          KEYSTORE: ${{ secrets.CADENCE_KEYSTORE_BASE64 }}
+        run: echo "$KEYSTORE" | base64 --decode > "$RUNNER_TEMP/cadence-release.jks"
+
+      - name: Test and build the signed release
+        env:
+          CADENCE_KEYSTORE_FILE: ${{ runner.temp }}/cadence-release.jks
+          CADENCE_KEYSTORE_PASSWORD: ${{ secrets.CADENCE_KEYSTORE_PASSWORD }}
+          CADENCE_KEY_ALIAS: ${{ secrets.CADENCE_KEY_ALIAS }}
+          CADENCE_KEY_PASSWORD: ${{ secrets.CADENCE_KEY_PASSWORD }}
+        run: ./gradlew lint testDebugUnitTest :core:domain:koverVerify :app:assembleRelease -Pcadence.version=${{ steps.version.outputs.version }}
+
+      - name: Remove the keystore
+        if: always()
+        run: rm -f "$RUNNER_TEMP/cadence-release.jks"
+
+      - name: Check, checksum and describe the APK
+        id: apk
+        run: |
+          version="${{ steps.version.outputs.version }}"
+          apk="cadence-$version.apk"
+          cp app/build/outputs/apk/release/app-release.apk "$apk"
+          scripts/check-apk-permissions.sh "$apk"
+          apksigner="$(find "$ANDROID_HOME/build-tools" -name apksigner -type f | sort -V | tail -1)"
+          "$apksigner" verify --verbose --print-certs "$apk" | tee signing.txt
+          fingerprint="$(sed -n 's/^Signer #1 certificate SHA-256 digest: //p' signing.txt)"
+          sha256sum "$apk" > "$apk.sha256"
+          {
+            echo "## Cadence $version"
+            echo
+            echo "Install by downloading **$apk** on your phone and opening it (see the README for help)."
+            echo "Installing over an earlier version keeps your data."
+            echo
+            echo "**SHA-256 of the APK:** \`$(cut -d' ' -f1 "$apk.sha256")\`"
+            echo
+            echo "**Signing certificate SHA-256:** \`$fingerprint\`"
+            echo
+            echo "Every release is signed with the same certificate, and Cadence shows its fingerprint in Settings, under About."
+          } > notes.md
+          echo "file=$apk" >> "$GITHUB_OUTPUT"
+
+      - name: Publish to GitHub Releases
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh release create "$GITHUB_REF_NAME" "${{ steps.apk.outputs.file }}" "${{ steps.apk.outputs.file }}.sha256" --title "Cadence ${{ steps.version.outputs.version }}" --notes-file notes.md --verify-tag

@@ -5,13 +5,48 @@ plugins {
     alias(libs.plugins.kotlin.serialization)
 }
 
+// The version comes from the release tag (v1.2.3 -> -Pcadence.version=1.2.3, see .github/workflows/release.yml).
+// Local and CI builds without one are the development version.
+val cadenceVersion: String = providers.gradleProperty("cadence.version").getOrElse("0.7.0")
+
+// Release signing (docs/PLAN.md Phase 7). The keystore lives outside the repository; CI gets it from secrets.
+val keystoreFile: String? = providers.environmentVariable("CADENCE_KEYSTORE_FILE").orNull
+
+// For checking a minified build on a device without the release key (CI smoke test): sign with the debug key.
+val signWithDebugKey: Boolean =
+    providers
+        .gradleProperty("cadence.signWithDebugKey")
+        .map {
+            it.toBoolean()
+        }.getOrElse(false)
+
 android {
     namespace = "app.cadence"
 
     defaultConfig {
         applicationId = "app.cadence"
-        versionCode = 1
-        versionName = "0.1.0"
+        versionName = cadenceVersion
+        versionCode = versionCodeOf(cadenceVersion)
+    }
+
+    signingConfigs {
+        if (keystoreFile != null) {
+            create("release") {
+                storeFile = file(keystoreFile)
+                storePassword = providers.environmentVariable("CADENCE_KEYSTORE_PASSWORD").get()
+                keyAlias = providers.environmentVariable("CADENCE_KEY_ALIAS").get()
+                keyPassword = providers.environmentVariable("CADENCE_KEY_PASSWORD").get()
+                enableV1Signing = true
+                enableV2Signing = true
+                enableV3Signing = true
+            }
+        }
+    }
+
+    androidResources {
+        // Lists the app's languages for the per-app language setting (Android 13+), from the
+        // translations that exist. English is the only one so far.
+        generateLocaleConfig = true
     }
 
     buildTypes {
@@ -19,10 +54,22 @@ android {
             // Lets a debug build sit next to a release build on the same phone.
             applicationIdSuffix = ".debug"
             versionNameSuffix = "-debug"
+            // en-XA (accented, longer) and ar-XB (right-to-left) for checking layouts are ready to translate.
+            isPseudoLocalesEnabled = true
         }
         release {
-            // R8 and release signing arrive with the sideload pipeline in Phase 7.
-            isMinifyEnabled = false
+            isMinifyEnabled = true
+            isShrinkResources = true
+            proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
+            signingConfig =
+                when {
+                    keystoreFile != null -> signingConfigs.getByName("release")
+
+                    signWithDebugKey -> signingConfigs.getByName("debug")
+
+                    // Unsigned: can't be installed, which is the point without the real key.
+                    else -> null
+                }
         }
     }
 
@@ -42,6 +89,8 @@ dependencies {
     implementation(project(":feature:insights"))
     implementation(project(":feature:settings"))
     implementation(project(":feature:reminders"))
+    implementation(project(":feature:widget"))
+    implementation(project(":feature:healthconnect"))
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.core.splashscreen)
@@ -65,4 +114,27 @@ dependencies {
     testImplementation(project(":core:testing"))
     kspTest(libs.hilt.compiler)
     debugImplementation(libs.androidx.compose.ui.test.manifest)
+
+    // Accessibility checks on every screen; they need a real device (docs/PLAN.md Phase 7).
+    androidTestImplementation(libs.androidx.test.ext.junit)
+    androidTestImplementation(libs.androidx.test.runner)
+    androidTestImplementation(libs.androidx.compose.ui.test.junit4)
+    androidTestImplementation(libs.androidx.compose.ui.test.junit4.accessibility)
+}
+
+/** 1.2.3 -> 10203. Each part must stay below 100, which leaves room for years of releases. */
+fun versionCodeOf(version: String): Int {
+    val parts =
+        Regex("""(\d+)\.(\d+)\.(\d+)""")
+            .matchEntire(version)
+            ?.groupValues
+            ?.drop(1)
+            ?.map(String::toInt)
+    require(
+        parts != null &&
+            parts.all {
+                it < 100
+            },
+    ) { "Version must be MAJOR.MINOR.PATCH with each part below 100, was $version" }
+    return parts[0] * 10_000 + parts[1] * 100 + parts[2]
 }

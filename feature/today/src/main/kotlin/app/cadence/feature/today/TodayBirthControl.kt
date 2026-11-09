@@ -4,6 +4,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.selection.toggleable
 import androidx.compose.material3.Checkbox
@@ -218,6 +219,7 @@ internal fun MedicationsCard(
                 modifier =
                     Modifier
                         .fillMaxWidth()
+                        .heightIn(min = CadenceTheme.spacing.minTouchTarget)
                         .toggleable(
                             value = taken,
                             role = Role.Checkbox,

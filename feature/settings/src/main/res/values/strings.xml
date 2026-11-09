@@ -39,8 +39,8 @@
     <string name="settings_reminder_daily">Daily check-in</string>
     <string name="settings_reminder_daily_detail">A nudge to log how you feel</string>
     <string name="settings_reminder_daily_time">Check-in time</string>
-    <string name="settings_reminder_discreet">Discreet notifications</string>
-    <string name="settings_reminder_discreet_detail">Notifications only say \"Time to check in\", so nothing personal shows on your screen</string>
+    <string name="settings_reminder_discreet">Discreet notifications and widget</string>
+    <string name="settings_reminder_discreet_detail">Notifications only say \"Time to check in\", and the home-screen widget only shows the day, so nothing personal shows on your screen</string>
     <string name="settings_reminder_notifications_off">Notifications are turned off for Cadence, so reminders can\'t appear.</string>
     <string name="settings_reminder_open_settings">Turn on notifications</string>
     <string name="settings_reminder_battery">Some phones pause apps in the background, which can delay reminders.</string>
@@ -74,6 +74,8 @@
     <string name="privacy_point_no_backup">Cadence is excluded from Android\'s cloud backup and phone-to-phone transfer. To move to a new phone, export a backup file and restore it there.</string>
     <string name="privacy_point_lock">App lock asks for your fingerprint, face or screen lock. Screenshots and the recent apps preview are blocked unless you turn that off.</string>
     <string name="privacy_point_notifications">Reminders are discreet by default: they only say \"Time to check in\", and the lock screen never shows more.</string>
+    <string name="privacy_point_widget">The home-screen widget only shows the day number unless you turn off discreet mode, and shows nothing while app lock is on. You can also switch to a plain \"Planner\" icon.</string>
+    <string name="privacy_point_health_connect">Health Connect sharing is off unless you turn it on. When it\'s on, Cadence copies your period days to Health Connect on this phone, where apps you allow there can read them.</string>
     <string name="privacy_point_exports">Backups, spreadsheets and reports are files you choose where to save. A backup without a password can be read by anyone who has the file.</string>
     <string name="privacy_point_delete">Delete all data erases everything Cadence has stored on this phone.</string>
 
@@ -85,6 +87,10 @@
 
     <string name="settings_section_about">About</string>
     <string name="settings_version">Version %1$s</string>
+    <string name="settings_updates">Cadence can\'t check for updates: it has no internet access. New versions are published on GitHub. To update, install the new APK over this one; your data is kept.</string>
+    <string name="settings_updates_open">Open the releases page</string>
+    <string name="settings_releases_url" translatable="false">https://github.com/not-mehul/Cadence/releases</string>
+    <string name="settings_certificate">Signing certificate (SHA-256). Releases list the same fingerprint, so you can check an APK is genuine:</string>
     <string name="settings_disclaimer">Cadence is not a medical device and must not be used as contraception. Predictions are estimates. Talk to a clinician about any health concerns.</string>
 
     <string name="settings_save">Save</string>
@@ -140,4 +146,9 @@
     <string name="settings_tags_delete_body">It\'s removed from every day you logged it.</string>
     <string name="settings_delete">Delete</string>
     <string name="settings_done">Done</string>
+    <string name="settings_app_icon">App icon</string>
+    <string name="settings_app_icon_standard">Cadence</string>
+    <string name="settings_app_icon_standard_detail">The usual icon and name</string>
+    <string name="settings_app_icon_discreet">Discreet: \"Planner\"</string>
+    <string name="settings_app_icon_discreet_detail">A plain notepad icon named Planner. Your home screen may take a moment to update, and you may need to add the icon to it again.</string>
 </resources>

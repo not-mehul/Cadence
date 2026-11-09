@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- From the Cadence palette (core:ui Palette); text meets WCAG AA on the background. -->
+    <color name="widget_background">#FFFFF0F2</color>
+    <color name="widget_text">#FF221A1C</color>
+    <color name="widget_text_secondary">#FF524346</color>
+</resources>

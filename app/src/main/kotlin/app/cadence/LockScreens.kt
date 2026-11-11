@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.MaterialShapes
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -31,10 +32,9 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.fragment.app.FragmentActivity
-import app.cadence.core.ui.components.CadenceEmblem
-import app.cadence.core.ui.components.CycleRing
 import app.cadence.core.ui.components.PrimaryButton
-import app.cadence.core.ui.components.RingSegment
+import app.cadence.core.ui.expressive.Buddy
+import app.cadence.core.ui.expressive.BuddyFace
 import app.cadence.core.ui.security.DeviceAuth
 import app.cadence.core.ui.theme.CadenceTheme
 
@@ -107,7 +107,13 @@ private fun CenteredMessage(
             verticalArrangement = Arrangement.spacedBy(spacing.lg, Alignment.CenterVertically),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
-            CadenceEmblem(Modifier.size(160.dp))
+            Buddy(
+                body = CadenceTheme.cycleColors.lutealTint,
+                face = MaterialTheme.colorScheme.onSurface,
+                shape = MaterialShapes.Puffy,
+                expression = BuddyFace.SLEEPY,
+                size = 148.dp,
+            )
             Text(
                 title,
                 style = MaterialTheme.typography.headlineSmall,

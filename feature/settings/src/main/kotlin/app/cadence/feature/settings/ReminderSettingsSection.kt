@@ -1,13 +1,12 @@
 package app.cadence.feature.settings
 
 import android.text.format.DateFormat
+import androidx.annotation.DrawableRes
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.selection.toggleable
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.ListItem
-import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
@@ -20,18 +19,18 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import app.cadence.core.domain.reminders.ReminderSettings
-import app.cadence.core.ui.components.SectionHeader
+import app.cadence.core.ui.components.CadenceListItem
 import app.cadence.core.ui.format.currentLocale
 import app.cadence.core.ui.theme.CadenceTheme
 import java.time.LocalTime
 import java.time.format.DateTimeFormatter
 import java.time.format.FormatStyle
+import app.cadence.core.ui.R as UiR
 
 /** What the system allows, refreshed whenever Settings comes back into view. */
 data class ReminderStatus(
@@ -73,6 +72,7 @@ internal fun RemindersSection(
             PeriodReminderRows(reminders, timeFormat, ::change) { dialog = it }
         }
         SwitchRow(
+            icon = UiR.drawable.ms_notifications,
             title = stringResource(R.string.settings_reminder_daily),
             detail = stringResource(R.string.settings_reminder_daily_detail),
             checked = reminders.dailyEnabled,
@@ -80,12 +80,14 @@ internal fun RemindersSection(
         )
         if (reminders.dailyEnabled) {
             ValueRow(
+                icon = UiR.drawable.ms_alarm,
                 title = stringResource(R.string.settings_reminder_daily_time),
                 value = timeFormat.format(reminders.dailyTime),
                 onClick = { dialog = ReminderDialog.DAILY_TIME },
             )
         }
         SwitchRow(
+            icon = UiR.drawable.ms_visibility_off,
             title = stringResource(R.string.settings_reminder_discreet),
             detail = stringResource(R.string.settings_reminder_discreet_detail),
             checked = reminders.discreet,
@@ -152,12 +154,13 @@ internal fun SwitchRow(
     detail: String,
     checked: Boolean,
     onCheckedChange: (Boolean) -> Unit,
+    @DrawableRes icon: Int? = null,
 ) {
-    ListItem(
-        headlineContent = { Text(title) },
-        supportingContent = { Text(detail) },
-        trailingContent = { Switch(checked = checked, onCheckedChange = null) },
-        colors = ListItemDefaults.colors(containerColor = Color.Transparent),
+    CadenceListItem(
+        headline = { Text(title) },
+        supporting = { Text(detail) },
+        icon = icon,
+        trailing = { Switch(checked = checked, onCheckedChange = null) },
         modifier = Modifier.toggleable(value = checked, role = Role.Switch, onValueChange = onCheckedChange),
     )
 }
@@ -167,13 +170,14 @@ internal fun ValueRow(
     title: String,
     value: String,
     onClick: () -> Unit,
+    @DrawableRes icon: Int? = null,
 ) {
-    ListItem(
-        headlineContent = { Text(title) },
-        trailingContent = {
+    CadenceListItem(
+        headline = { Text(title) },
+        icon = icon,
+        trailing = {
             Text(value, style = MaterialTheme.typography.bodyLarge, color = MaterialTheme.colorScheme.primary)
         },
-        colors = ListItemDefaults.colors(containerColor = Color.Transparent),
         modifier = Modifier.toggleable(value = false, role = Role.Button, onValueChange = { onClick() }),
     )
 }
@@ -232,6 +236,7 @@ private fun PeriodReminderRows(
 ) {
     Column {
         SwitchRow(
+            icon = UiR.drawable.ms_water_drop,
             title = stringResource(R.string.settings_reminder_period),
             detail =
                 pluralStringResource(
@@ -244,6 +249,7 @@ private fun PeriodReminderRows(
         )
         if (reminders.periodEnabled) {
             ValueRow(
+                icon = UiR.drawable.ms_alarm,
                 title = stringResource(R.string.settings_reminder_days_before),
                 value =
                     pluralStringResource(
@@ -255,6 +261,7 @@ private fun PeriodReminderRows(
             )
         }
         SwitchRow(
+            icon = UiR.drawable.ms_event_busy,
             title = stringResource(R.string.settings_reminder_late),
             detail = stringResource(R.string.settings_reminder_late_detail),
             checked = reminders.lateEnabled,
@@ -262,6 +269,7 @@ private fun PeriodReminderRows(
         )
         if (reminders.periodEnabled || reminders.lateEnabled) {
             ValueRow(
+                icon = UiR.drawable.ms_alarm,
                 title = stringResource(R.string.settings_reminder_period_time),
                 value = timeFormat.format(reminders.periodTime),
                 onClick = { open(ReminderDialog.PERIOD_TIME) },

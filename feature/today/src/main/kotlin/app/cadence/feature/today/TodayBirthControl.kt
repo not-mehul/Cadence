@@ -7,9 +7,12 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.selection.toggleable
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.FilledTonalButton
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -20,8 +23,6 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
-import androidx.compose.ui.semantics.heading
-import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextAlign
 import app.cadence.core.domain.contraception.ContraceptiveSchedule
 import app.cadence.core.domain.contraception.DoseStatus
@@ -131,7 +132,10 @@ internal fun DoseCard(
                         style = MaterialTheme.typography.bodyLarge,
                         modifier = Modifier.weight(1f),
                     )
-                    TextButton(onClick = { onRecord(today, null) }) { Text(stringResource(R.string.today_undo)) }
+                    TextButton(onClick = { onRecord(today, null) }, shapes = ButtonDefaults.shapes()) {
+                        ButtonIcon(UiR.drawable.ms_undo)
+                        Text(stringResource(R.string.today_undo))
+                    }
                 }
             }
 
@@ -142,7 +146,11 @@ internal fun DoseCard(
                         style = MaterialTheme.typography.bodyLarge,
                         modifier = Modifier.weight(1f),
                     )
-                    FilledTonalButton(onClick = { onRecord(today, DoseStatus.TAKEN) }) {
+                    FilledTonalButton(
+                        onClick = { onRecord(today, DoseStatus.TAKEN) },
+                        shapes = ButtonDefaults.shapes(),
+                    ) {
+                        ButtonIcon(UiR.drawable.ms_check)
                         Text(stringResource(R.string.today_dose_mark_done))
                     }
                 }
@@ -183,10 +191,15 @@ internal fun MissedDosesCard(
                     style = MaterialTheme.typography.bodyMedium,
                 )
                 Row(horizontalArrangement = Arrangement.spacedBy(CadenceTheme.spacing.sm)) {
-                    FilledTonalButton(onClick = { onRecord(dose.date, DoseStatus.TAKEN) }) {
+                    FilledTonalButton(
+                        onClick = { onRecord(dose.date, DoseStatus.TAKEN) },
+                        shapes = ButtonDefaults.shapes(),
+                    ) {
+                        ButtonIcon(UiR.drawable.ms_check)
                         Text(stringResource(R.string.today_missed_taken))
                     }
-                    TextButton(onClick = { onRecord(dose.date, DoseStatus.MISSED) }) {
+                    TextButton(onClick = { onRecord(dose.date, DoseStatus.MISSED) }, shapes = ButtonDefaults.shapes()) {
+                        ButtonIcon(UiR.drawable.ms_close)
                         Text(stringResource(R.string.today_missed_missed))
                     }
                 }
@@ -248,7 +261,10 @@ internal fun SetUpBirthControlCard(
     CadenceCard(modifier) {
         CardTitle(stringResource(R.string.today_bc_setup_title), UiR.drawable.ic_pill)
         Text(stringResource(R.string.today_bc_setup_body), style = MaterialTheme.typography.bodyMedium)
-        TextButton(onClick = onOpenSettings) { Text(stringResource(R.string.today_bc_setup_action)) }
+        TextButton(onClick = onOpenSettings, shapes = ButtonDefaults.shapes()) {
+            ButtonIcon(UiR.drawable.ms_settings)
+            Text(stringResource(R.string.today_bc_setup_action))
+        }
     }
 }
 
@@ -262,5 +278,17 @@ private fun CardTitle(
         icon = painterResource(icon),
         accent = MaterialTheme.colorScheme.secondary,
         accentContainer = MaterialTheme.colorScheme.secondaryContainer,
+    )
+}
+
+/** A decorative icon before a button's label. */
+@Composable
+internal fun ButtonIcon(
+    @DrawableRes icon: Int,
+) {
+    Icon(
+        painterResource(icon),
+        contentDescription = null,
+        modifier = Modifier.padding(end = ButtonDefaults.IconSpacing).size(ButtonDefaults.IconSize),
     )
 }

@@ -1,5 +1,6 @@
 package app.cadence.core.ui.log
 
+import androidx.annotation.DrawableRes
 import androidx.annotation.StringRes
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.res.stringResource
@@ -107,45 +108,70 @@ object LogLabels {
             LogCategory.MEDICATIONS -> R.string.category_medications
         }
 
-    /** Short labels summarising a day, in log-sheet order. Used on Today. [tagLabels] names custom tags. */
+    /**
+     * Short items summarising a day, in log-sheet order, each with its icon. Used on Today and the
+     * calendar. [tagLabels] names custom tags; [includeNote] adds a "Note" item when there is one.
+     */
     @Composable
     fun summary(
         entry: DayEntry,
         tagLabels: Map<Long, String> = emptyMap(),
-    ): List<String> =
+        includeNote: Boolean = true,
+    ): List<LogSummaryItem> =
         buildList {
-            entry.flow?.let { add(stringResource(R.string.flow_summary, stringResource(flow(it)))) }
+            entry.flow?.let {
+                add(LogSummaryItem(stringResource(R.string.flow_summary, stringResource(flow(it))), flow = it))
+            }
             LogCatalog.symptoms.filter { it in entry.symptoms }.forEach { id ->
                 val severity = stringResource(severity(entry.symptoms.getValue(id)))
-                add(stringResource(R.string.symptom_with_severity, symptom(id), severity))
+                add(
+                    LogSummaryItem(
+                        stringResource(R.string.symptom_with_severity, symptom(id), severity),
+                        LogIcons.symptom(id),
+                    ),
+                )
             }
-            LogCatalog.moods.filter { it in entry.moods }.forEach { add(mood(it)) }
+            LogCatalog.moods.filter { it in entry.moods }.forEach { add(LogSummaryItem(mood(it), LogIcons.mood(it))) }
+            val tagIcon = LogIcons.category(LogCategory.TAGS)
             entry.tags
                 .mapNotNull(tagLabels::get)
                 .sortedBy { it.lowercase() }
-                .forEach(::add)
-            entry.painLevel?.let { add(stringResource(R.string.summary_pain, it)) }
-            entry.energy?.let {
-                add(
-                    stringResource(R.string.summary_rating, stringResource(R.string.category_energy), it),
-                )
+                .forEach { add(LogSummaryItem(it, tagIcon)) }
+            entry.painLevel?.let {
+                add(LogSummaryItem(stringResource(R.string.summary_pain, it), LogIcons.category(LogCategory.PAIN)))
             }
-            entry.sleep?.let {
-                add(
-                    stringResource(R.string.summary_rating, stringResource(R.string.category_sleep), it),
-                )
+            listOf(
+                Triple(entry.energy, LogCategory.ENERGY, R.string.category_energy),
+                Triple(entry.sleep, LogCategory.SLEEP, R.string.category_sleep),
+                Triple(entry.stress, LogCategory.STRESS, R.string.category_stress),
+            ).forEach { (value, category, name) ->
+                value?.let {
+                    add(
+                        LogSummaryItem(
+                            stringResource(R.string.summary_rating, stringResource(name), it),
+                            LogIcons.category(category),
+                        ),
+                    )
+                }
             }
-            entry.stress?.let {
-                add(
-                    stringResource(R.string.summary_rating, stringResource(R.string.category_stress), it),
-                )
+            entry.sex?.let { sex ->
+                val label =
+                    when (sex) {
+                        SexActivity.NONE -> R.string.sex_none
+                        SexActivity.PROTECTED -> R.string.sex_summary_protected
+                        SexActivity.UNPROTECTED -> R.string.sex_summary_unprotected
+                    }
+                add(LogSummaryItem(stringResource(label), LogIcons.sex(sex)))
             }
-            when (entry.sex) {
-                SexActivity.NONE -> add(stringResource(R.string.sex_none))
-                SexActivity.PROTECTED -> add(stringResource(R.string.sex_summary_protected))
-                SexActivity.UNPROTECTED -> add(stringResource(R.string.sex_summary_unprotected))
-                null -> Unit
+            if (includeNote && !entry.note.isNullOrBlank()) {
+                add(LogSummaryItem(stringResource(R.string.summary_note), LogIcons.category(LogCategory.NOTES)))
             }
-            if (!entry.note.isNullOrBlank()) add(stringResource(R.string.summary_note))
         }
 }
+
+/** One thing logged on a day. A [flow] item shows a drop filled to that level instead of [icon]. */
+data class LogSummaryItem(
+    val label: String,
+    @param:DrawableRes val icon: Int = R.drawable.ms_water_drop,
+    val flow: MenstrualFlow? = null,
+)

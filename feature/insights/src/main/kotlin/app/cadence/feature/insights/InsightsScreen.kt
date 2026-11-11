@@ -30,8 +30,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
-import androidx.compose.ui.semantics.heading
-import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import app.cadence.core.domain.cycles.Confidence
@@ -41,6 +40,7 @@ import app.cadence.core.domain.patterns.PatternTiming
 import app.cadence.core.domain.patterns.SymptomPattern
 import app.cadence.core.ui.components.CadenceCard
 import app.cadence.core.ui.components.CardHeader
+import app.cadence.core.ui.components.IconDisc
 import app.cadence.core.ui.components.ScreenTitle
 import app.cadence.core.ui.format.DateSkeletons
 import app.cadence.core.ui.format.rememberDateFormatter
@@ -131,6 +131,7 @@ private fun SummaryTiles(state: InsightsUiState.Ready) {
             horizontalArrangement = Arrangement.spacedBy(CadenceTheme.spacing.md),
         ) {
             StatTile(
+                icon = UiR.drawable.ms_event_repeat,
                 label = stringResource(R.string.insights_average_cycle),
                 value = stats.averageCycleLength?.let { days(it.roundToInt()) } ?: none,
                 detail =
@@ -142,6 +143,7 @@ private fun SummaryTiles(state: InsightsUiState.Ready) {
                 modifier = Modifier.weight(1f),
             )
             StatTile(
+                icon = UiR.drawable.ms_water_drop,
                 label = stringResource(R.string.insights_average_period),
                 value = stats.averagePeriodLength?.let { days(it.roundToInt()) } ?: none,
                 detail = null,
@@ -153,12 +155,14 @@ private fun SummaryTiles(state: InsightsUiState.Ready) {
             horizontalArrangement = Arrangement.spacedBy(CadenceTheme.spacing.md),
         ) {
             StatTile(
+                icon = UiR.drawable.ms_straighten,
                 label = stringResource(R.string.insights_variation),
                 value = stats.variation?.let { days(it) } ?: none,
                 detail = stats.variation?.let { stringResource(R.string.insights_shortest_to_longest) },
                 modifier = Modifier.weight(1f),
             )
             StatTile(
+                icon = UiR.drawable.ms_target,
                 label = stringResource(R.string.insights_prediction),
                 value = prediction?.let { stringResource(confidenceLabel(it.confidence)) } ?: none,
                 detail =
@@ -185,12 +189,20 @@ private fun confidenceLabel(confidence: Confidence): Int =
 
 @Composable
 private fun StatTile(
+    @DrawableRes icon: Int,
     label: String,
     value: String,
     detail: String?,
     modifier: Modifier = Modifier,
 ) {
     CadenceCard(modifier.fillMaxHeight()) {
+        IconDisc(
+            painterResource(icon),
+            tint = MaterialTheme.colorScheme.primary,
+            container = MaterialTheme.colorScheme.primaryContainer,
+            size = 36.dp,
+            modifier = Modifier.padding(bottom = CadenceTheme.spacing.sm),
+        )
         Text(label, style = MaterialTheme.typography.labelLarge, color = MaterialTheme.colorScheme.onSurfaceVariant)
         Text(value, style = MaterialTheme.typography.headlineSmall, color = MaterialTheme.colorScheme.primary)
         if (detail != null) {

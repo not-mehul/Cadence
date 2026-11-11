@@ -1,15 +1,12 @@
 package app.cadence.core.ui.components
 
-import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
-import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -18,21 +15,16 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.Stroke
-import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
-import app.cadence.core.ui.R
+import app.cadence.core.ui.expressive.sparkles
 import app.cadence.core.ui.theme.CadenceTheme
 import kotlin.math.max
-import kotlin.math.min
 
 /**
  * Cadence's motif: quiet concentric ripples, like a rhythm spreading out. Drawn from
@@ -57,6 +49,8 @@ fun DrawScope.drawRipples(
 
 private const val RIPPLE_ALPHA = 0.16f
 
+private const val SPARKLE_ALPHA = 0.32f
+
 /**
  * The panel at the top of a screen: a soft wash of [style]'s tint fading into the card
  * surface, with the ripple motif behind the content.
@@ -73,7 +67,8 @@ fun HeroCard(
             .fillMaxWidth()
             .clip(MaterialTheme.shapes.extraLarge)
             .background(Brush.verticalGradient(0f to style.tint, 1f to lerpTowards(style.tint, base)))
-            .drawBehind { drawRipples(style.color) },
+            .drawBehind { drawRipples(style.color) }
+            .sparkles(style.color, alpha = SPARKLE_ALPHA),
     ) {
         Column(
             modifier =
@@ -95,48 +90,6 @@ private fun lerpTowards(
 ): Color =
     androidx.compose.ui.graphics
         .lerp(from, to, 0.66f)
-
-/**
- * The Cadence emblem: the cycle as four arcs, one per phase, around a drop. Shown where
- * there's no cycle data to draw yet (welcome, lock, first run). Decorative.
- */
-@Composable
-fun CadenceEmblem(modifier: Modifier = Modifier) {
-    val c = CadenceTheme.cycleColors
-    val arcs = listOf(c.menstrualPhase, c.follicularPhase, c.ovulatoryPhase, c.lutealPhase)
-    val ripple = MaterialTheme.colorScheme.primary
-    Box(modifier.aspectRatio(1f).clearAndSetSemantics {}, contentAlignment = Alignment.Center) {
-        Canvas(Modifier.matchParentSize()) {
-            drawRipples(ripple, centerFraction = Offset(0.5f, 0.5f), rings = 3)
-            val side = min(size.width, size.height)
-            val stroke = side * 0.075f
-            val diameter = side * 0.62f
-            val topLeft = Offset((size.width - diameter) / 2, (size.height - diameter) / 2)
-            // Unequal arcs, like the phases themselves; rounded ends give the emblem its softness.
-            val sweeps = listOf(64f, 100f, 76f, 120f)
-            var start = -90f
-            arcs.forEachIndexed { i, color ->
-                val gap = 16f
-                drawArc(
-                    color,
-                    start + gap / 2,
-                    sweeps[i] - gap,
-                    false,
-                    topLeft,
-                    Size(diameter, diameter),
-                    style = Stroke(stroke, cap = StrokeCap.Round),
-                )
-                start += sweeps[i]
-            }
-        }
-        Icon(
-            painterResource(R.drawable.ic_phase_menstrual),
-            contentDescription = null,
-            tint = c.menstrualPhase,
-            modifier = Modifier.fillMaxWidth(0.2f).aspectRatio(1f),
-        )
-    }
-}
 
 /** A screen's large title, in the display typeface. */
 @Composable

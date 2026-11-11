@@ -87,7 +87,7 @@ class DayLogTrackingTest {
         compose.onNodeWithText("Travel").performScrollTo().performClick()
         assertEquals(setOf(3L), entry.tags)
 
-        compose.onNodeWithText("+ New tag").performScrollTo().performClick()
+        compose.onNodeWithText("New tag").performScrollTo().performClick()
         compose.onNode(hasSetTextAction() and hasText("Tag")).performTextInput("Gym")
         compose.onNodeWithText("Add").performClick()
         assertEquals(listOf("Gym"), created)

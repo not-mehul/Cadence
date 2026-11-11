@@ -5,7 +5,6 @@
     <string name="calendar_next_month">Следующий месяц</string>
     <string name="calendar_jump_today">Сегодня</string>
     <string name="calendar_hint">Нажмите на день, чтобы добавить или убрать день месячных.</string>
-    <string name="calendar_hint_log">Нажмите на день, чтобы посмотреть или изменить записи.</string>
     <string name="calendar_edit_periods">Изменить дни месячных</string>
     <string name="calendar_legend_logged">Есть записи</string>
     <string name="calendar_legend_fertile">Фертильное окно (оценка)</string>
@@ -14,7 +13,6 @@
     <string name="calendar_desc_ovulation">примерная овуляция</string>
     <string name="calendar_fertile_disclaimer">Фертильное окно и овуляция рассчитаны приблизительно. На них нельзя полагаться для предохранения от беременности.</string>
     <string name="calendar_desc_has_log">есть записи</string>
-    <string name="calendar_open_log">Открыть записи</string>
     <string name="calendar_legend_period">Месячные</string>
     <string name="calendar_legend_predicted">Прогноз месячных</string>
     <string name="calendar_legend_today">Сегодня</string>
@@ -22,4 +20,16 @@
     <string name="calendar_state_not_period">Не день месячных</string>
     <string name="calendar_desc_predicted">прогноз месячных</string>
     <string name="calendar_desc_today">сегодня</string>
+    <string name="calendar_cycle_day">День цикла: %1$d</string>
+    <string name="calendar_cycle_day_estimate">День цикла: %1$d (оценка)</string>
+    <string name="calendar_pack_day">День упаковки: %1$d</string>
+    <string name="calendar_nothing_logged">За этот день пока ничего не отмечено.</string>
+    <string name="calendar_future_day">Этот день ещё не наступил. Добавить записи можно будет, когда он придёт.</string>
+    <string name="calendar_add_details">Добавить записи</string>
+    <string name="calendar_edit_details">Изменить записи</string>
+    <string name="calendar_period_started">Месячные начались</string>
+    <string name="calendar_period_ended">Месячные закончились</string>
+    <string name="calendar_not_period">Не день месячных</string>
+    <string name="calendar_period_logged">Месячные отмечены: %1$s – %2$s</string>
+    <string name="calendar_undo">Отменить</string>
 </resources>

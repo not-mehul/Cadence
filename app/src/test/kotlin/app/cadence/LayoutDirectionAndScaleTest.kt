@@ -14,6 +14,7 @@ import app.cadence.core.domain.model.Goal
 import app.cadence.core.domain.model.MenstrualFlow
 import app.cadence.core.domain.model.UserSettings
 import app.cadence.core.ui.theme.CadenceTheme
+import app.cadence.feature.calendar.CalendarActions
 import app.cadence.feature.calendar.CalendarContent
 import app.cadence.feature.calendar.CalendarUiState
 import app.cadence.feature.insights.CurrentCycle
@@ -75,7 +76,7 @@ class LayoutDirectionAndScaleTest {
     private fun calendar() =
         show {
             val p = CyclePredictor.predict(CycleHistory.from(flows), settings.cycleDefaults, today)
-            CalendarContent(CalendarUiState.Ready(today, flows, p, emptySet(), 14), {}, {})
+            CalendarContent(CalendarUiState.Ready(today, flows, p, emptySet(), 14), CalendarActions())
         }
 
     private fun insights() =

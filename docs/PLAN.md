@@ -393,6 +393,22 @@ The first seven phases left the app correct but plain: stock Material components
 - **An emblem** (the four phase arcs around a drop) appears on the welcome screen, the lock screen and Today before anything is logged.
 - **Calendar** sits in a card with a serif month title, and day cells are at least 48dp wide on a 360dp phone.
 
+### 6.3 Material 3 Expressive refresh (as built)
+
+A second pass to make the app cute and friendly while staying clean:
+
+- **Material 3 Expressive:** Material 3 1.5 (`MaterialExpressiveTheme`, expressive spring motion, buttons whose corners squish when pressed, rounder shapes). 1.5 is a release candidate; the Compose BOM still pins 1.4, which has none of this. The version is set in `libs.versions.toml` and the experimental API is opted into in the Compose convention plugin.
+- **Icons instead of text where they help:** Material Symbols Rounded throughout (Apache 2.0, credited in About): every symptom, mood, flow level, log section, settings row, Insights tile and main button has one, and the navigation bar fills the selected tab's icon. Icons sit beside their labels rather than replacing them, so nothing depends on guessing what an icon means. Flow is a drop that fills up from spotting to heavy.
+- **Shapes with a meaning:** each phase has a Material shape (heart, flower, sun, cloud; a pill on birth control). Card icons sit on cookie-shaped badges, the selected calendar day grows from a circle into a scalloped cookie, and the ovulation estimate is a sun.
+- **The buddy:** a small mascot made of the phase's shape with a face. It sits beside the greeting on Today in the current phase's colours, stands in for the ring before anything is logged, greets new users as a family of four phase buddies, dozes on the lock screen, and keeps empty calendar days company. Sparkles decorate the hero.
+- **Motion stays calm and testable:** the buddy bounces in, grows from a circle into its shape, and blinks twice, then stops. Nothing loops, and decorative motion is skipped when the system's animations are off.
+
+### 6.4 Calendar (as built)
+
+- **Colours:** logged period days are peach with a deeper peach ring (the ring meets 3:1 against the card; numbers are dark brown, 9:1). Predicted days are soft pink with a dashed pink edge, so logged and predicted differ by both colour and line style. Fertile days are teal; the ovulation estimate is a teal sun.
+- **Tap a day to see it:** the day is selected and a card below the month shows its date, where it sits ("Period · Cycle day 3", "Predicted period · Cycle day 2 (estimate)", or the pack day on birth control), and everything logged as icon chips plus the note. From there: add or edit details (opens the log sheet), and, for days up to today, period actions.
+- **Periods in the past:** "Period started" on any past day logs the expected number of days from there, the same way the button on Today does: the average of logged periods once there are some, otherwise the typical length from settings. Predictions, fertile windows and cycle days are recomputed from the new history, and a snackbar offers undo for exactly the days that were added. On a period day, "Period ended" clears the days after it and "Not a period day" removes that one day. "Edit period days" still toggles single days for quick backfilling.
+
 ---
 
 ## 7. Phased delivery plan

@@ -68,7 +68,8 @@ class ContrastTest {
         s: ColorScheme,
     ) {
         listOf(
-            "period" to c.period,
+            // The peach fill is soft on purpose; its ring is what has to stand out.
+            "periodOutline" to c.periodOutline,
             "predictedPeriod" to c.predictedPeriod,
             "ovulation" to c.ovulation,
             "menstrualPhase" to c.menstrualPhase,
@@ -77,6 +78,15 @@ class ContrastTest {
             "lutealPhase" to c.lutealPhase,
         ).forEach { (name, colour) -> assertContrast("$name/surface", colour, s.surface, NON_TEXT_MIN) }
         assertContrast("onPeriod/period", c.onPeriod, c.period, TEXT_MIN)
+        assertContrast("onSurface/predictedPeriodContainer", s.onSurface, c.predictedPeriodContainer, TEXT_MIN)
+        assertContrast(
+            "predictedPeriod/predictedPeriodContainer",
+            c.predictedPeriod,
+            c.predictedPeriodContainer,
+            NON_TEXT_MIN,
+        )
+        // Logged and predicted must look different from each other, not only from the card.
+        assertTrue(c.period != c.predictedPeriodContainer, "logged and predicted fills must differ")
         assertContrast("onPeriodContainer/periodContainer", c.onPeriodContainer, c.periodContainer, TEXT_MIN)
         assertContrast("onFertileWindow/fertileWindow", c.onFertileWindow, c.fertileWindow, TEXT_MIN)
 

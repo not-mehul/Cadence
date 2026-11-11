@@ -15,8 +15,6 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.selection.toggleable
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.ListItem
-import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Switch
@@ -25,7 +23,6 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
@@ -37,6 +34,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.compose.LifecycleResumeEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewModelScope
+import app.cadence.core.ui.components.CadenceListItem
 import app.cadence.core.ui.components.GroupCard
 import app.cadence.core.ui.components.SectionHeader
 import app.cadence.core.ui.theme.CadenceTheme
@@ -47,6 +45,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
+import app.cadence.core.ui.R as UiR
 
 sealed interface HealthConnectMessage {
     data object NotPermitted : HealthConnectMessage
@@ -152,7 +151,6 @@ internal fun HealthConnectRows(
 ) {
     if (state.availability == HealthConnectAvailability.UNAVAILABLE) return
     val gutter = CadenceTheme.spacing.screenGutter
-    val itemColors = ListItemDefaults.colors(containerColor = Color.Transparent)
     Column(Modifier.padding(top = CadenceTheme.spacing.sm)) {
         SectionHeader(
             stringResource(R.string.hc_title),
@@ -168,11 +166,11 @@ internal fun HealthConnectRows(
                 )
                 return@GroupCard
             }
-            ListItem(
-                headlineContent = { Text(stringResource(R.string.hc_share)) },
-                supportingContent = { Text(stringResource(R.string.hc_share_detail)) },
-                trailingContent = { Switch(checked = state.connected, onCheckedChange = null) },
-                colors = itemColors,
+            CadenceListItem(
+                headline = { Text(stringResource(R.string.hc_share)) },
+                supporting = { Text(stringResource(R.string.hc_share_detail)) },
+                icon = UiR.drawable.ms_health_and_safety,
+                trailing = { Switch(checked = state.connected, onCheckedChange = null) },
                 modifier =
                     Modifier.toggleable(
                         value = state.connected,
@@ -182,10 +180,10 @@ internal fun HealthConnectRows(
                     ),
             )
             if (state.connected) {
-                ListItem(
-                    headlineContent = { Text(stringResource(R.string.hc_import)) },
-                    supportingContent = { Text(stringResource(R.string.hc_import_detail)) },
-                    colors = itemColors,
+                CadenceListItem(
+                    headline = { Text(stringResource(R.string.hc_import)) },
+                    supporting = { Text(stringResource(R.string.hc_import_detail)) },
+                    icon = UiR.drawable.ms_settings_backup_restore,
                     modifier =
                         Modifier
                             .toggleable(value = false, enabled = !state.busy, role = Role.Button, onValueChange = {

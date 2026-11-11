@@ -3,14 +3,13 @@ package app.cadence.feature.backup
 import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.annotation.DrawableRes
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.selection.toggleable
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.ListItem
-import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
@@ -23,7 +22,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
@@ -34,8 +32,10 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import app.cadence.core.data.backup.BackupException
 import app.cadence.core.data.backup.ImportMode
 import app.cadence.core.domain.time.TodayProvider
+import app.cadence.core.ui.components.CadenceListItem
 import app.cadence.core.ui.theme.CadenceTheme
 import java.time.LocalDate
+import app.cadence.core.ui.R as UiR
 
 private const val MIN_PASSWORD_LENGTH = 8
 
@@ -66,10 +66,16 @@ fun BackupSettingsRows(
     val importLauncher = rememberImportLauncher(viewModel::startImport)
 
     Column(modifier) {
-        Row(R.string.backup_export, R.string.backup_export_detail) { askPassword = true }
-        Row(R.string.backup_import, R.string.backup_import_detail) { importLauncher() }
-        Row(R.string.backup_csv, R.string.backup_csv_detail) { csvLauncher.launch(fileName(today, "csv")) }
-        Row(R.string.backup_report, R.string.backup_report_detail) {
+        Row(R.string.backup_export, R.string.backup_export_detail, UiR.drawable.ms_backup) { askPassword = true }
+        Row(
+            R.string.backup_import,
+            R.string.backup_import_detail,
+            UiR.drawable.ms_settings_backup_restore,
+        ) { importLauncher() }
+        Row(R.string.backup_csv, R.string.backup_csv_detail, UiR.drawable.ms_table_view) {
+            csvLauncher.launch(fileName(today, "csv"))
+        }
+        Row(R.string.backup_report, R.string.backup_report_detail, UiR.drawable.ms_description) {
             reportLauncher.launch(fileName(today, "pdf", "cadence-report"))
         }
     }
@@ -120,12 +126,13 @@ private fun fileName(
 private fun Row(
     title: Int,
     detail: Int,
+    @DrawableRes icon: Int,
     onClick: () -> Unit,
 ) {
-    ListItem(
-        headlineContent = { Text(stringResource(title)) },
-        supportingContent = { Text(stringResource(detail)) },
-        colors = ListItemDefaults.colors(containerColor = Color.Transparent),
+    CadenceListItem(
+        headline = { Text(stringResource(title)) },
+        supporting = { Text(stringResource(detail)) },
+        icon = icon,
         modifier = Modifier.toggleable(value = false, role = Role.Button, onValueChange = { onClick() }),
     )
 }

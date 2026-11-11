@@ -29,6 +29,8 @@ fun PrimaryButton(
         onClick = onClick,
         modifier = modifier.defaultMinSize(minHeight = 56.dp),
         enabled = enabled,
+        // Expressive: the corners squish a little while pressed.
+        shapes = ButtonDefaults.shapes(),
         contentPadding = ButtonDefaults.ContentPadding,
     ) {
         Row(

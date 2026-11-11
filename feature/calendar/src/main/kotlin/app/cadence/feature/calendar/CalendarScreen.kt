@@ -4,25 +4,39 @@ import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.FilledTonalButton
+import androidx.compose.material3.FilledTonalIconButton
 import androidx.compose.material3.FilterChip
+import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
+import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarDuration
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.SnackbarResult
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -45,6 +59,20 @@ import java.time.LocalDate
 import java.time.YearMonth
 import app.cadence.core.ui.R as UiR
 
+/** Everything the calendar can ask for. */
+data class CalendarActions(
+    /** Shows a day's details under the month. */
+    val onSelect: (LocalDate) -> Unit = {},
+    /** "Edit period days" mode: adds or removes one period day. */
+    val onToggle: (LocalDate) -> Unit = {},
+    val onOpenLog: (LocalDate) -> Unit = {},
+    /** A period started on this day: fills in the expected length. */
+    val onStartPeriod: (LocalDate) -> Unit = {},
+    /** The period ended on this day: clears the days after it. */
+    val onEndPeriod: (LocalDate) -> Unit = {},
+    val onRemovePeriodDay: (LocalDate) -> Unit = {},
+)
+
 @Composable
 fun CalendarScreen(
     onOpenLog: (LocalDate) -> Unit,
@@ -52,18 +80,52 @@ fun CalendarScreen(
     viewModel: CalendarViewModel = hiltViewModel(),
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
-    when (val s = state) {
-        CalendarUiState.Loading -> {
-            Box(modifier.fillMaxSize())
-        }
+    val snackbarHostState = remember { SnackbarHostState() }
+    val formatter = rememberDateFormatter(DateSkeletons.DAY_MONTH_SHORT)
+    val loggedTemplate by rememberUpdatedState(stringResource(R.string.calendar_period_logged))
+    val undoLabel by rememberUpdatedState(stringResource(R.string.calendar_undo))
 
-        is CalendarUiState.Ready -> {
-            CalendarContent(
-                s,
-                onToggle = viewModel::toggle,
-                onOpenLog = onOpenLog,
-                modifier = modifier,
-            )
+    LaunchedEffect(viewModel) {
+        viewModel.events.collect { event ->
+            when (event) {
+                is CalendarEvent.PeriodLogged -> {
+                    val message =
+                        loggedTemplate.format(
+                            formatter.format(event.days.min()),
+                            formatter.format(event.days.max()),
+                        )
+                    val result = snackbarHostState.showSnackbar(message, undoLabel, duration = SnackbarDuration.Long)
+                    if (result == SnackbarResult.ActionPerformed) viewModel.undoLogged(event.days)
+                }
+            }
+        }
+    }
+
+    Scaffold(
+        modifier = modifier,
+        snackbarHost = { SnackbarHost(snackbarHostState) },
+        // The app shell already handles the status and navigation bars.
+        contentWindowInsets = WindowInsets(0),
+    ) { padding ->
+        when (val s = state) {
+            CalendarUiState.Loading -> {
+                Box(Modifier.fillMaxSize())
+            }
+
+            is CalendarUiState.Ready -> {
+                CalendarContent(
+                    s,
+                    CalendarActions(
+                        onSelect = viewModel::select,
+                        onToggle = viewModel::toggle,
+                        onOpenLog = onOpenLog,
+                        onStartPeriod = viewModel::startPeriodOn,
+                        onEndPeriod = viewModel::endPeriodOn,
+                        onRemovePeriodDay = viewModel::removePeriodDay,
+                    ),
+                    modifier = Modifier.padding(padding),
+                )
+            }
         }
     }
 }
@@ -74,12 +136,13 @@ private const val MONTH_RANGE = 120
 /** Narrower than the usual gutter: seven 48dp days need 336dp, and the smallest phones are 360dp wide. */
 private val CALENDAR_GUTTER = 8.dp
 
-@OptIn(ExperimentalFoundationApi::class)
+private val MAX_CONTENT_WIDTH = 480.dp
+
+@OptIn(ExperimentalFoundationApi::class, ExperimentalLayoutApi::class)
 @Composable
 fun CalendarContent(
     state: CalendarUiState.Ready,
-    onToggle: (LocalDate) -> Unit,
-    onOpenLog: (LocalDate) -> Unit,
+    actions: CalendarActions,
     modifier: Modifier = Modifier,
 ) {
     var editPeriods by rememberSaveable { mutableStateOf(false) }
@@ -88,6 +151,7 @@ fun CalendarContent(
     val scope = rememberCoroutineScope()
     val visibleMonth = currentMonth.plusMonths((pagerState.currentPage - MONTH_RANGE).toLong())
     val spacing = CadenceTheme.spacing
+    val goToPage: (Int) -> Unit = { page -> scope.launch { pagerState.animateScrollToPage(page) } }
 
     Column(
         modifier =
@@ -99,33 +163,13 @@ fun CalendarContent(
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         // The month sits in its own card, nearly edge to edge, so every day is a full-size touch target.
-        CadenceSurface(Modifier.widthIn(max = 480.dp)) {
-            Column(Modifier.padding(vertical = spacing.sm, horizontal = spacing.xs)) {
-                Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
-                    IconButton(
-                        onClick = { scope.launch { pagerState.animateScrollToPage(pagerState.currentPage - 1) } },
-                    ) {
-                        Icon(
-                            painterResource(UiR.drawable.ic_chevron_left),
-                            stringResource(R.string.calendar_previous_month),
-                        )
-                    }
-                    Text(
-                        text = rememberDateFormatter(DateSkeletons.MONTH_YEAR).formatHeading(visibleMonth),
-                        style = MaterialTheme.typography.headlineSmall,
-                        textAlign = TextAlign.Center,
-                        modifier = Modifier.weight(1f).semantics { heading() },
-                    )
-                    IconButton(
-                        onClick = { scope.launch { pagerState.animateScrollToPage(pagerState.currentPage + 1) } },
-                    ) {
-                        Icon(
-                            painterResource(UiR.drawable.ic_chevron_right),
-                            stringResource(R.string.calendar_next_month),
-                        )
-                    }
-                }
-
+        CadenceSurface(Modifier.widthIn(max = MAX_CONTENT_WIDTH)) {
+            Column(Modifier.padding(vertical = spacing.md, horizontal = spacing.xs)) {
+                MonthHeader(
+                    month = visibleMonth,
+                    onPrevious = { goToPage(pagerState.currentPage - 1) },
+                    onNext = { goToPage(pagerState.currentPage + 1) },
+                )
                 HorizontalPager(
                     state = pagerState,
                     modifier = Modifier.fillMaxWidth(),
@@ -136,24 +180,58 @@ fun CalendarContent(
                     MonthGrid(
                         month = month,
                         marks = state.marksFor(month),
-                        today = state.today,
                         state = state,
                         editPeriods = editPeriods,
-                        onToggle = onToggle,
-                        onOpenLog = onOpenLog,
+                        actions = actions,
                     )
                 }
             }
         }
 
-        if (visibleMonth != currentMonth) {
-            TextButton(onClick = { scope.launch { pagerState.animateScrollToPage(MONTH_RANGE) } }) {
-                Text(stringResource(R.string.calendar_jump_today))
+        FlowRow(
+            horizontalArrangement = Arrangement.spacedBy(spacing.sm, Alignment.CenterHorizontally),
+            verticalArrangement = Arrangement.spacedBy(spacing.xs),
+            itemVerticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier.widthIn(max = MAX_CONTENT_WIDTH).fillMaxWidth(),
+        ) {
+            val onToday = visibleMonth == currentMonth && state.selected == state.today
+            if (!onToday) {
+                FilledTonalButton(onClick = {
+                    goToPage(MONTH_RANGE)
+                    actions.onSelect(state.today)
+                }) {
+                    Icon(painterResource(UiR.drawable.ms_today), null, Modifier.size(18.dp))
+                    Text(stringResource(R.string.calendar_jump_today), Modifier.padding(start = spacing.sm))
+                }
             }
+            FilterChip(
+                selected = editPeriods,
+                onClick = { editPeriods = !editPeriods },
+                label = { Text(stringResource(R.string.calendar_edit_periods)) },
+                leadingIcon = {
+                    Icon(
+                        painterResource(if (editPeriods) UiR.drawable.ms_check else UiR.drawable.ms_edit_calendar),
+                        null,
+                        Modifier.size(FilterChipDefaults.IconSize),
+                    )
+                },
+            )
         }
+
+        if (editPeriods) {
+            Text(
+                stringResource(R.string.calendar_hint),
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                textAlign = TextAlign.Center,
+            )
+        } else {
+            DayDetails(state, actions, Modifier.widthIn(max = MAX_CONTENT_WIDTH))
+        }
+
         Legend(
             showFertileWindow = state.showsFertileWindow,
-            modifier = Modifier.widthIn(max = 480.dp).fillMaxWidth().padding(horizontal = spacing.sm),
+            modifier = Modifier.widthIn(max = MAX_CONTENT_WIDTH).fillMaxWidth().padding(horizontal = spacing.sm),
         )
         if (state.showsFertileWindow) {
             Text(
@@ -164,16 +242,39 @@ fun CalendarContent(
                 modifier = Modifier.padding(horizontal = spacing.sm),
             )
         }
-        FilterChip(
-            selected = editPeriods,
-            onClick = { editPeriods = !editPeriods },
-            label = { Text(stringResource(R.string.calendar_edit_periods)) },
-        )
-        Text(
-            stringResource(if (editPeriods) R.string.calendar_hint else R.string.calendar_hint_log),
-            style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-            textAlign = TextAlign.Center,
-        )
     }
 }
+
+@Composable
+private fun MonthHeader(
+    month: YearMonth,
+    onPrevious: () -> Unit,
+    onNext: () -> Unit,
+) {
+    val colors =
+        IconButtonDefaults.filledTonalIconButtonColors(
+            containerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
+        )
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        modifier = Modifier.fillMaxWidth().padding(horizontal = CadenceTheme.spacing.sm),
+    ) {
+        FilledTonalIconButton(onClick = onPrevious, colors = colors, shapes = IconButtonDefaults.shapes()) {
+            Icon(painterResource(UiR.drawable.ic_chevron_left), stringResource(R.string.calendar_previous_month))
+        }
+        Text(
+            text = rememberDateFormatter(DateSkeletons.MONTH_YEAR).formatHeading(month),
+            style = MaterialTheme.typography.headlineSmall,
+            textAlign = TextAlign.Center,
+            modifier = Modifier.weight(1f).semantics { heading() },
+        )
+        FilledTonalIconButton(onClick = onNext, colors = colors, shapes = IconButtonDefaults.shapes()) {
+            Icon(painterResource(UiR.drawable.ic_chevron_right), stringResource(R.string.calendar_next_month))
+        }
+    }
+}
+
+/** The day's date as a heading, e.g. "Friday, 20 March". */
+@Composable
+internal fun dayHeading(date: LocalDate): String =
+    rememberDateFormatter(DateSkeletons.WEEKDAY_DAY_MONTH).formatHeading(date)

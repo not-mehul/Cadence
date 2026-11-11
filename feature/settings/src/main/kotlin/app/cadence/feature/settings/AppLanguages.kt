@@ -16,6 +16,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import java.util.Locale
+import app.cadence.core.ui.R as UiR
 
 /**
  * The languages Cadence is translated into, and the per-app language choice.
@@ -61,6 +62,7 @@ internal fun LanguageRow() {
     val context = LocalContext.current
     if (!AppLanguages.canChooseInApp) {
         SettingRow(
+            icon = UiR.drawable.ms_translate,
             title = stringResource(R.string.settings_language),
             value = stringResource(R.string.settings_language_follows_phone),
             onClick = { context.openSettings(Intent(Settings.ACTION_LOCALE_SETTINGS)) },
@@ -79,6 +81,7 @@ private fun LanguageChooserRow(context: Context) {
         tag?.let(AppLanguages::displayName) ?: stringResource(R.string.settings_language_system)
     }
     SettingRow(
+        icon = UiR.drawable.ms_translate,
         title = stringResource(R.string.settings_language),
         value = label(current),
         onClick = { choosing = true },

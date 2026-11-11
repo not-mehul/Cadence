@@ -56,10 +56,16 @@ fun CadenceApp(
         NavigationSuiteScaffold(
             navigationSuiteItems = {
                 TopLevelDestination.entries.forEach { destination ->
+                    val selected = currentDestination.isOn(destination)
                     item(
-                        selected = currentDestination.isOn(destination),
+                        selected = selected,
                         onClick = { navController.navigateToTopLevel(destination) },
-                        icon = { Icon(painterResource(destination.icon), contentDescription = null) },
+                        icon = {
+                            Icon(
+                                painterResource(if (selected) destination.selectedIcon else destination.icon),
+                                contentDescription = null,
+                            )
+                        },
                         label = { Text(stringResource(destination.label)) },
                     )
                 }

@@ -11,11 +11,15 @@ import androidx.compose.ui.graphics.Color
  */
 @Immutable
 data class CycleColors(
-    /** Logged period day fill. */
+    /** Logged period day fill on the calendar (peach). A soft fill: [periodOutline] is the visible edge. */
     val period: Color,
     val onPeriod: Color,
-    /** Predicted period: drawn as a dashed outline in this colour. */
+    /** The solid ring around a logged period day; meets 3:1 against the card. */
+    val periodOutline: Color,
+    /** Predicted period: a dashed outline in this colour (pink)... */
     val predictedPeriod: Color,
+    /** ...around this soft pink fill. */
+    val predictedPeriodContainer: Color,
     /** Soft fill for period days on the calendar. */
     val periodContainer: Color,
     val onPeriodContainer: Color,
@@ -39,9 +43,11 @@ data class CycleColors(
 internal val LightCycleColors =
     with(Palette) {
         CycleColors(
-            period = RosewoodLight,
-            onPeriod = OnRosewoodLight,
-            predictedPeriod = RosewoodLight,
+            period = PeachLight,
+            onPeriod = OnPeachLight,
+            periodOutline = PeachOutlineLight,
+            predictedPeriod = PinkLight,
+            predictedPeriodContainer = PinkContainerLight,
             periodContainer = RosewoodContainerLight,
             onPeriodContainer = OnRosewoodContainerLight,
             fertileWindow = TealContainerLight,
@@ -62,9 +68,11 @@ internal val LightCycleColors =
 internal val DarkCycleColors =
     with(Palette) {
         CycleColors(
-            period = RosewoodDark,
-            onPeriod = OnRosewoodDark,
-            predictedPeriod = RosewoodDark,
+            period = PeachDark,
+            onPeriod = OnPeachDark,
+            periodOutline = PeachDark,
+            predictedPeriod = PinkDark,
+            predictedPeriodContainer = PinkContainerDark,
             periodContainer = RosewoodContainerDark,
             onPeriodContainer = OnRosewoodContainerDark,
             fertileWindow = TealContainerDark,

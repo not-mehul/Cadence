@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialShapes
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -18,6 +19,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.unit.dp
+import androidx.graphics.shapes.RoundedPolygon
 import app.cadence.core.domain.model.CyclePhase
 import app.cadence.core.ui.R
 import app.cadence.core.ui.theme.CadenceTheme
@@ -30,6 +32,8 @@ data class PhaseStyle(
     val color: Color,
     val tint: Color,
     @param:DrawableRes val icon: Int,
+    /** The phase's signature shape: the buddy's body and the hero's accents. */
+    val shape: RoundedPolygon = MaterialShapes.Cookie9Sided,
 )
 
 object PhaseStyles {
@@ -39,11 +43,25 @@ object PhaseStyles {
     fun of(phase: CyclePhase?): PhaseStyle {
         val c = CadenceTheme.cycleColors
         return when (phase) {
-            CyclePhase.MENSTRUAL -> PhaseStyle(c.menstrualPhase, c.menstrualTint, R.drawable.ic_phase_menstrual)
-            CyclePhase.FOLLICULAR -> PhaseStyle(c.follicularPhase, c.follicularTint, R.drawable.ic_phase_follicular)
-            CyclePhase.OVULATORY -> PhaseStyle(c.ovulatoryPhase, c.ovulatoryTint, R.drawable.ic_phase_ovulatory)
-            CyclePhase.LUTEAL -> PhaseStyle(c.lutealPhase, c.lutealTint, R.drawable.ic_phase_luteal)
-            null -> neutral()
+            CyclePhase.MENSTRUAL -> {
+                PhaseStyle(c.menstrualPhase, c.menstrualTint, R.drawable.ic_phase_menstrual, MaterialShapes.Heart)
+            }
+
+            CyclePhase.FOLLICULAR -> {
+                PhaseStyle(c.follicularPhase, c.follicularTint, R.drawable.ic_phase_follicular, MaterialShapes.Flower)
+            }
+
+            CyclePhase.OVULATORY -> {
+                PhaseStyle(c.ovulatoryPhase, c.ovulatoryTint, R.drawable.ic_phase_ovulatory, MaterialShapes.Sunny)
+            }
+
+            CyclePhase.LUTEAL -> {
+                PhaseStyle(c.lutealPhase, c.lutealTint, R.drawable.ic_phase_luteal, MaterialShapes.Puffy)
+            }
+
+            null -> {
+                neutral()
+            }
         }
     }
 
@@ -60,9 +78,9 @@ object PhaseStyles {
     fun pack(inBreak: Boolean): PhaseStyle {
         val c = CadenceTheme.cycleColors
         return if (inBreak) {
-            PhaseStyle(c.menstrualPhase, c.menstrualTint, R.drawable.ic_pill)
+            PhaseStyle(c.menstrualPhase, c.menstrualTint, R.drawable.ic_pill, MaterialShapes.Pill)
         } else {
-            PhaseStyle(c.follicularPhase, c.follicularTint, R.drawable.ic_pill)
+            PhaseStyle(c.follicularPhase, c.follicularTint, R.drawable.ic_pill, MaterialShapes.Pill)
         }
     }
 }

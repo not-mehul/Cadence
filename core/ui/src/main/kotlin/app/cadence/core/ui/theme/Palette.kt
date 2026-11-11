@@ -56,7 +56,19 @@ internal object Palette {
     val PlumTintLight = Color(0xFFEEE1FA)
     val NeutralTintLight = Color(0xFFF5E4E6)
 
+    // Calendar: logged period days are peach, predicted ones a soft pink with a dashed pink edge.
+    val PeachLight = Color(0xFFFFBE9C)
+    val OnPeachLight = Color(0xFF4A1A04)
+    val PeachOutlineLight = Color(0xFFC8653A)
+    val PinkLight = Color(0xFFD6457A)
+    val PinkContainerLight = Color(0xFFFFE3EC)
+
     // Dark
+    val PeachDark = Color(0xFFFFB693)
+    val OnPeachDark = Color(0xFF3D1500)
+    val PinkDark = Color(0xFFFF8FB1)
+    val PinkContainerDark = Color(0xFF4A1D2E)
+
     val RosewoodDark = Color(0xFFFFB1C1)
     val OnRosewoodDark = Color(0xFF5E1128)
     val RosewoodContainerDark = Color(0xFF7C263D)

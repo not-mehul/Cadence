@@ -5,7 +5,6 @@
     <string name="calendar_next_month">Next month</string>
     <string name="calendar_jump_today">Today</string>
     <string name="calendar_hint">Tap a day to add or remove a period day.</string>
-    <string name="calendar_hint_log">Tap a day to see or change what you logged.</string>
     <string name="calendar_edit_periods">Edit period days</string>
     <string name="calendar_legend_logged">Logged</string>
     <string name="calendar_legend_fertile">Fertile window (estimate)</string>
@@ -14,7 +13,6 @@
     <string name="calendar_desc_ovulation">estimated ovulation</string>
     <string name="calendar_fertile_disclaimer">Fertile window and ovulation are estimates. They can\'t be used to prevent pregnancy.</string>
     <string name="calendar_desc_has_log">has a log</string>
-    <string name="calendar_open_log">Open log</string>
     <string name="calendar_legend_period">Period</string>
     <string name="calendar_legend_predicted">Predicted period</string>
     <string name="calendar_legend_today">Today</string>
@@ -22,4 +20,17 @@
     <string name="calendar_state_not_period">Not a period day</string>
     <string name="calendar_desc_predicted">predicted period</string>
     <string name="calendar_desc_today">today</string>
+    <string name="calendar_cycle_day">Cycle day %1$d</string>
+    <string name="calendar_cycle_day_estimate">Cycle day %1$d (estimate)</string>
+    <string name="calendar_pack_day">Pack day %1$d</string>
+    <string name="calendar_nothing_logged">Nothing logged for this day yet.</string>
+    <string name="calendar_future_day">This day hasn\'t come yet. You can add details once it does.</string>
+    <string name="calendar_add_details">Add details</string>
+    <string name="calendar_edit_details">Edit details</string>
+    <string name="calendar_period_started">Period started</string>
+    <string name="calendar_period_ended">Period ended</string>
+    <string name="calendar_not_period">Not a period day</string>
+    <!-- Snackbar after "Period started" on the calendar: first and last day logged. -->
+    <string name="calendar_period_logged">Period logged: %1$s to %2$s</string>
+    <string name="calendar_undo">Undo</string>
 </resources>

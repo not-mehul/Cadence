@@ -159,7 +159,7 @@
     <string name="settings_app_icon_standard_detail">Обычные значок и название</string>
     <string name="settings_app_icon_discreet">Скрытный: «Ежедневник»</string>
     <string name="settings_app_icon_discreet_detail">Нейтральный значок блокнота с названием «Ежедневник». Главному экрану может понадобиться немного времени на обновление, и значок, возможно, придётся добавить заново.</string>
-    <string name="settings_font_credit">Заголовки набраны шрифтом Lora, который распространяется по лицензии SIL Open Font License.</string>
+    <string name="settings_font_credit">Заголовки набраны шрифтом Lora (лицензия SIL Open Font License). Значки — Material Symbols (лицензия Apache 2.0).</string>
     <string name="settings_language">Язык</string>
     <string name="settings_language_system">Как на телефоне</string>
     <string name="settings_language_follows_phone">Используется язык телефона. Нажмите, чтобы открыть языковые настройки телефона.</string>

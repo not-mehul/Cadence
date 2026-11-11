@@ -38,7 +38,6 @@ import app.cadence.core.domain.medication.Medication
 import app.cadence.core.domain.medication.MedicationUse
 import app.cadence.core.ui.components.DayCountStepper
 import app.cadence.core.ui.components.NumberStepper
-import app.cadence.core.ui.components.SectionHeader
 import app.cadence.core.ui.contraception.ContraceptionLabels
 import app.cadence.core.ui.format.currentLocale
 import app.cadence.core.ui.theme.CadenceTheme
@@ -46,6 +45,7 @@ import java.time.LocalDate
 import java.time.LocalTime
 import java.time.format.DateTimeFormatter
 import java.time.format.FormatStyle
+import app.cadence.core.ui.R as UiR
 
 /** Phase 6 data Settings shows besides [app.cadence.core.domain.model.UserSettings]. */
 data class TrackingSettingsState(
@@ -82,12 +82,14 @@ internal fun BirthControlRows(
     var editing by rememberSaveable { mutableStateOf(false) }
     var pickingTime by rememberSaveable { mutableStateOf(false) }
     SettingRow(
+        icon = UiR.drawable.ms_pill,
         title = stringResource(R.string.settings_bc),
         value = schedule?.let { ContraceptionLabels.summary(it) } ?: stringResource(R.string.settings_bc_none),
         onClick = { editing = true },
     )
     if (schedule != null) {
         SwitchRow(
+            icon = UiR.drawable.ms_notifications,
             title = stringResource(R.string.settings_bc_reminder),
             detail = stringResource(R.string.settings_bc_reminder_detail),
             checked = schedule.reminderEnabled,
@@ -98,6 +100,7 @@ internal fun BirthControlRows(
         )
         if (schedule.reminderEnabled) {
             ValueRow(
+                icon = UiR.drawable.ms_alarm,
                 title = stringResource(R.string.settings_bc_reminder_time),
                 value = timeText(schedule.reminderTime),
                 onClick = { pickingTime = true },
@@ -268,12 +271,21 @@ internal fun MedicationsSection(
     var editingId by rememberSaveable { mutableStateOf<Long?>(null) }
     SettingsSection(stringResource(R.string.settings_section_medications)) {
         medications.forEach { medication ->
-            SettingRow(title = medication.name, value = medicationSummary(medication), onClick = {
-                editingId =
-                    medication.id
-            })
+            SettingRow(
+                icon = UiR.drawable.ms_medication,
+                title = medication.name,
+                value =
+                    medicationSummary(
+                        medication,
+                    ),
+                onClick = {
+                    editingId =
+                        medication.id
+                },
+            )
         }
         SettingRow(
+            icon = UiR.drawable.ms_add,
             title = stringResource(R.string.settings_medication_add),
             value = stringResource(R.string.settings_medication_add_detail),
             onClick = { editingId = 0L },
@@ -412,6 +424,7 @@ internal fun TagsRow(
 ) {
     var open by rememberSaveable { mutableStateOf(false) }
     SettingRow(
+        icon = UiR.drawable.ms_sell,
         title = stringResource(R.string.settings_tags),
         value =
             if (tags.isEmpty()) {

@@ -1,5 +1,6 @@
 package app.cadence.feature.log
 
+import androidx.annotation.DrawableRes
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -10,22 +11,28 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.FilterChip
+import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.SheetValue
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
-import androidx.compose.material3.rememberModalBottomSheetState
+import androidx.compose.material3.rememberBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.heading
@@ -42,9 +49,11 @@ import app.cadence.core.domain.log.SexActivity
 import app.cadence.core.domain.model.MenstrualFlow
 import app.cadence.core.ui.components.ScaleSelector
 import app.cadence.core.ui.components.SectionHeader
+import app.cadence.core.ui.expressive.FlowIcon
 import app.cadence.core.ui.format.DateSkeletons
 import app.cadence.core.ui.format.formatHeading
 import app.cadence.core.ui.format.rememberDateFormatter
+import app.cadence.core.ui.log.LogIcons
 import app.cadence.core.ui.log.LogLabels
 import app.cadence.core.ui.theme.CadenceTheme
 import java.time.LocalDate
@@ -67,7 +76,12 @@ fun DayLogSheet(
     }
     ModalBottomSheet(
         onDismissRequest = close,
-        sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
+        // Full height straight away: there's a lot to log.
+        sheetState =
+            rememberBottomSheetState(
+                initialValue = SheetValue.Hidden,
+                enabledValues = setOf(SheetValue.Hidden, SheetValue.Expanded),
+            ),
         modifier = modifier,
     ) {
         when (val s = state) {
@@ -192,7 +206,14 @@ private fun Header(
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
         }
-        TextButton(onClick = onDone) { Text(stringResource(R.string.log_done)) }
+        FilledTonalButton(onClick = onDone, shapes = ButtonDefaults.shapes()) {
+            Icon(
+                painterResource(UiR.drawable.ms_check),
+                contentDescription = null,
+                modifier = Modifier.padding(end = ButtonDefaults.IconSpacing).size(ButtonDefaults.IconSize),
+            )
+            Text(stringResource(R.string.log_done))
+        }
     }
 }
 
@@ -206,7 +227,7 @@ internal fun Section(
     if (!state.shows(category)) return
     Column(Modifier.fillMaxWidth()) {
         HorizontalDivider(Modifier.padding(vertical = CadenceTheme.spacing.xs))
-        SectionHeader(stringResource(LogLabels.category(category)))
+        SectionHeader(stringResource(LogLabels.category(category)), icon = LogIcons.category(category))
         if (hint != null) {
             Text(
                 hint,
@@ -260,6 +281,7 @@ private fun FlowPicker(
                 selected = flow == selected,
                 onClick = { onSelect(flow) },
                 label = { Text(stringResource(LogLabels.flow(flow))) },
+                leadingIcon = { FlowIcon(flow, size = FilterChipDefaults.IconSize) },
                 modifier = Modifier.semantics { role = Role.RadioButton },
             )
         }
@@ -281,6 +303,7 @@ private fun SymptomChips(
                 selected = severity != null,
                 onClick = { onTap(id) },
                 label = { Text(if (severityText == null) name else "$name · $severityText") },
+                leadingIcon = { ChipIcon(LogIcons.symptom(id)) },
                 modifier = Modifier.semantics { stateDescription = severityText ?: offState },
             )
         }
@@ -298,6 +321,7 @@ private fun MoodChips(
                 selected = id in entry.moods,
                 onClick = { onTap(id) },
                 label = { Text(LogLabels.mood(id)) },
+                leadingIcon = { ChipIcon(LogIcons.mood(id)) },
                 modifier = Modifier.semantics { role = Role.Checkbox },
             )
         }
@@ -316,6 +340,7 @@ private fun SexPicker(
                 // Tapping the selected option again clears it.
                 onClick = { onSelect(if (sex == selected) null else sex) },
                 label = { Text(stringResource(LogLabels.sex(sex))) },
+                leadingIcon = { ChipIcon(LogIcons.sex(sex)) },
                 modifier = Modifier.semantics { role = Role.RadioButton },
             )
         }
@@ -339,4 +364,12 @@ private fun NoteField(
         minLines = 3,
         modifier = Modifier.fillMaxWidth(),
     )
+}
+
+/** A decorative icon at the start of a chip; the chip's label carries the meaning. */
+@Composable
+internal fun ChipIcon(
+    @DrawableRes icon: Int,
+) {
+    Icon(painterResource(icon), contentDescription = null, modifier = Modifier.size(FilterChipDefaults.IconSize))
 }

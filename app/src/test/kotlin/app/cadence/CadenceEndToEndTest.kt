@@ -82,12 +82,14 @@ class CadenceEndToEndTest {
         waitFor("Cramps (mild)")
         waitFor("Calm")
 
-        // Calendar shows today as a logged period day.
+        // Calendar: today is selected, and its details say it's a period day with a log.
         tab("Calendar")
         val todayCell =
             hasContentDescription("March 20, 2026, today, has a log") and
-                SemanticsMatcher.expectValue(SemanticsProperties.StateDescription, "Period day")
+                SemanticsMatcher.expectValue(SemanticsProperties.Selected, true)
         compose.waitUntil(TIMEOUT_MS) { compose.onAllNodes(todayCell).fetchSemanticsNodes().isNotEmpty() }
+        waitFor("Today · Period · Cycle day 1")
+        waitFor("Edit details")
 
         // Insights: one period so far.
         tab("Insights")

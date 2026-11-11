@@ -4,14 +4,14 @@ import androidx.annotation.StringRes
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
-import androidx.compose.foundation.layout.FlowRow
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -20,8 +20,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.semantics.heading
-import androidx.compose.ui.semantics.semantics
 import app.cadence.core.domain.cycles.Confidence
 import app.cadence.core.domain.cycles.CyclePrediction
 import app.cadence.core.domain.cycles.CycleSnapshot
@@ -39,6 +37,7 @@ import app.cadence.core.ui.components.PhaseStyles
 import app.cadence.core.ui.components.RingSegment
 import app.cadence.core.ui.contraception.ContraceptionLabels
 import app.cadence.core.ui.log.LogLabels
+import app.cadence.core.ui.log.LoggedChips
 import app.cadence.core.ui.theme.CadenceTheme
 import app.cadence.core.ui.theme.CycleColors
 import app.cadence.core.ui.R as UiR
@@ -343,35 +342,19 @@ internal fun TodayLogCard(
             accent = MaterialTheme.colorScheme.tertiary,
             accentContainer = MaterialTheme.colorScheme.tertiaryContainer,
         ) {
-            TextButton(onClick = onOpen) {
+            TextButton(onClick = onOpen, shapes = ButtonDefaults.shapes()) {
+                Icon(
+                    painterResource(if (items.isEmpty()) UiR.drawable.ms_add else UiR.drawable.ms_edit),
+                    contentDescription = null,
+                    modifier = Modifier.padding(end = ButtonDefaults.IconSpacing).size(ButtonDefaults.IconSize),
+                )
                 Text(stringResource(if (items.isEmpty()) R.string.today_log_add else R.string.today_log_edit))
             }
         }
         if (items.isEmpty()) {
             Text(stringResource(R.string.today_log_empty), style = MaterialTheme.typography.bodyMedium)
         } else {
-            FlowRow(
-                horizontalArrangement = Arrangement.spacedBy(CadenceTheme.spacing.sm),
-                verticalArrangement = Arrangement.spacedBy(CadenceTheme.spacing.xs),
-            ) {
-                items.forEach { label ->
-                    Surface(
-                        shape = MaterialTheme.shapes.small,
-                        color = MaterialTheme.colorScheme.secondaryContainer,
-                        contentColor = MaterialTheme.colorScheme.onSecondaryContainer,
-                    ) {
-                        Text(
-                            label,
-                            style = MaterialTheme.typography.labelLarge,
-                            modifier =
-                                Modifier.padding(
-                                    horizontal = CadenceTheme.spacing.md,
-                                    vertical = CadenceTheme.spacing.xs,
-                                ),
-                        )
-                    }
-                }
-            }
+            LoggedChips(items)
         }
     }
 }

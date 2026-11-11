@@ -18,7 +18,7 @@
     <string name="log_birth_control">Birth control</string>
     <string name="log_dose_taken">Did it</string>
     <string name="log_dose_missed">Missed it</string>
-    <string name="log_tag_new">+ New tag</string>
+    <string name="log_tag_new">New tag</string>
     <string name="log_tag_new_title">New tag</string>
     <string name="log_tag_label">Tag</string>
     <string name="log_tag_add">Add</string>

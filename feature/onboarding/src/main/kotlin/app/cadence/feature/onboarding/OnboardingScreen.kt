@@ -7,11 +7,9 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredWidthIn
@@ -56,12 +54,10 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import app.cadence.core.domain.model.Goal
 import app.cadence.core.ui.components.CadenceCard
-import app.cadence.core.ui.components.CadenceEmblem
 import app.cadence.core.ui.components.CardHeader
-import app.cadence.core.ui.components.CycleRing
 import app.cadence.core.ui.components.DayCountStepper
 import app.cadence.core.ui.components.PrimaryButton
-import app.cadence.core.ui.components.RingSegment
+import app.cadence.core.ui.expressive.BuddyFamily
 import app.cadence.core.ui.theme.CadenceTheme
 import app.cadence.feature.backup.RestoreFromBackupButton
 import java.time.Instant
@@ -277,11 +273,9 @@ private fun StepColumn(
 @Composable
 private fun WelcomeStep(modifier: Modifier = Modifier) {
     StepColumn(modifier) {
-        CadenceEmblem(
+        BuddyFamily(
             Modifier
-                .padding(top = CadenceTheme.spacing.lg)
-                .widthIn(max = 220.dp)
-                .fillMaxWidth()
+                .padding(top = CadenceTheme.spacing.xl, bottom = CadenceTheme.spacing.md)
                 .align(Alignment.CenterHorizontally),
         )
         StepTitle(stringResource(R.string.onboarding_welcome_title))

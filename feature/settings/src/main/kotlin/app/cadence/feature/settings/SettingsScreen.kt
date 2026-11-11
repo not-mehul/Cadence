@@ -11,6 +11,7 @@ import android.provider.Settings
 import androidx.activity.compose.LocalActivity
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.annotation.DrawableRes
 import androidx.annotation.StringRes
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -28,9 +29,6 @@ import androidx.compose.foundation.selection.toggleable
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Checkbox
-import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.ListItem
-import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Text
@@ -63,6 +61,7 @@ import app.cadence.core.domain.model.ThemePreference
 import app.cadence.core.domain.model.UserSettings
 import app.cadence.core.domain.reminders.ReminderSettings
 import app.cadence.core.domain.security.SecuritySettings
+import app.cadence.core.ui.components.CadenceListItem
 import app.cadence.core.ui.components.DayCountStepper
 import app.cadence.core.ui.components.GroupCard
 import app.cadence.core.ui.components.ScreenTitle
@@ -260,17 +259,20 @@ fun SettingsContent(
 
         SettingsSection(stringResource(R.string.settings_section_cycle)) {
             SettingRow(
+                icon = UiR.drawable.ms_event_repeat,
                 title = stringResource(R.string.settings_cycle_length),
                 value = pluralStringResource(UiR.plurals.days_count, defaults.cycleLength, defaults.cycleLength),
                 onClick = { dialog = SettingsDialog.CYCLE_LENGTH },
             )
             SettingRow(
+                icon = UiR.drawable.ms_water_drop,
                 title = stringResource(R.string.settings_period_length),
                 value = pluralStringResource(UiR.plurals.days_count, defaults.periodLength, defaults.periodLength),
                 onClick = { dialog = SettingsDialog.PERIOD_LENGTH },
             )
             Note(stringResource(R.string.settings_cycle_defaults_note))
             SettingRow(
+                icon = UiR.drawable.ms_tune,
                 title = stringResource(R.string.settings_mode),
                 value = stringResource(goalLabel(settings.goal)),
                 onClick = { dialog = SettingsDialog.MODE },
@@ -284,6 +286,7 @@ fun SettingsContent(
             val hideable = LogCategory.entries.filter { it.canBeHidden }
             val shown = hideable.count { it !in settings.hiddenCategories }
             SettingRow(
+                icon = UiR.drawable.ms_checklist,
                 title = stringResource(R.string.settings_log_categories),
                 value =
                     pluralStringResource(
@@ -303,12 +306,14 @@ fun SettingsContent(
 
         SettingsSection(stringResource(R.string.settings_section_appearance)) {
             SettingRow(
+                icon = UiR.drawable.ms_palette,
                 title = stringResource(R.string.settings_theme),
                 value = stringResource(themeLabel(settings.theme)),
                 onClick = { dialog = SettingsDialog.THEME },
             )
             LanguageRow()
             SettingRow(
+                icon = UiR.drawable.ms_apps,
                 title = stringResource(R.string.settings_app_icon),
                 value = stringResource(appIconLabel(appIcon)),
                 onClick = { dialog = SettingsDialog.APP_ICON },
@@ -319,6 +324,7 @@ fun SettingsContent(
             Note(stringResource(R.string.settings_privacy_statement))
             val security = settings.security
             SwitchRow(
+                icon = UiR.drawable.ms_lock,
                 title = stringResource(R.string.settings_lock),
                 detail = stringResource(R.string.settings_lock_detail),
                 checked = security.lockEnabled,
@@ -326,18 +332,21 @@ fun SettingsContent(
             )
             if (security.lockEnabled) {
                 SettingRow(
+                    icon = UiR.drawable.ms_alarm,
                     title = stringResource(R.string.settings_lock_timeout),
                     value = stringResource(lockTimeoutLabel(security.lockTimeoutMinutes)),
                     onClick = { dialog = SettingsDialog.LOCK_TIMEOUT },
                 )
             }
             SwitchRow(
+                icon = UiR.drawable.ms_screenshot,
                 title = stringResource(R.string.settings_block_screenshots),
                 detail = stringResource(R.string.settings_block_screenshots_detail),
                 checked = security.blockScreenshots,
                 onCheckedChange = actions.onBlockScreenshots,
             )
             SettingRow(
+                icon = UiR.drawable.ms_privacy_tip,
                 title = stringResource(R.string.settings_privacy_explainer),
                 value = stringResource(R.string.settings_privacy_explainer_detail),
                 onClick = { dialog = SettingsDialog.PRIVACY },
@@ -348,6 +357,7 @@ fun SettingsContent(
         SettingsSection(stringResource(R.string.settings_section_data)) {
             backupRows()
             SettingRow(
+                icon = UiR.drawable.ms_delete_forever,
                 title = stringResource(R.string.settings_delete_all),
                 value = stringResource(R.string.settings_delete_all_detail),
                 onClick = { dialog = SettingsDialog.DELETE },
@@ -527,12 +537,14 @@ internal fun SettingRow(
     title: String,
     value: String,
     onClick: () -> Unit,
+    @DrawableRes icon: Int? = null,
     titleColor: Color = Color.Unspecified,
 ) {
-    ListItem(
-        headlineContent = { Text(title, color = titleColor) },
-        supportingContent = { Text(value) },
-        colors = ListItemDefaults.colors(containerColor = Color.Transparent),
+    CadenceListItem(
+        headline = { Text(title, color = titleColor) },
+        supporting = { Text(value) },
+        icon = icon,
+        iconTint = if (titleColor == Color.Unspecified) MaterialTheme.colorScheme.primary else titleColor,
         modifier = Modifier.selectable(selected = false, onClick = onClick, role = Role.Button),
     )
 }

@@ -17,6 +17,7 @@ import app.cadence.core.domain.model.MenstrualFlow
 import app.cadence.core.domain.model.UserSettings
 import app.cadence.core.domain.reminders.ReminderSettings
 import app.cadence.core.ui.theme.CadenceTheme
+import app.cadence.feature.calendar.CalendarActions
 import app.cadence.feature.calendar.CalendarContent
 import app.cadence.feature.calendar.CalendarUiState
 import app.cadence.feature.insights.CurrentCycle
@@ -118,7 +119,7 @@ class RussianTest {
     private fun showCalendar() =
         show {
             val prediction = CyclePredictor.predict(CycleHistory.from(flows), settings.cycleDefaults, today)
-            CalendarContent(CalendarUiState.Ready(today, flows, prediction, emptySet(), 14), {}, {})
+            CalendarContent(CalendarUiState.Ready(today, flows, prediction, emptySet(), 14), CalendarActions())
         }
 
     private fun showInsights() =

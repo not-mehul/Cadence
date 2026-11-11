@@ -31,6 +31,7 @@ import app.cadence.core.domain.log.DayEntry
 import app.cadence.core.ui.components.SectionHeader
 import app.cadence.core.ui.contraception.ContraceptionLabels
 import app.cadence.core.ui.theme.CadenceTheme
+import app.cadence.core.ui.R as UiR
 
 /** What the Phase 6 parts of the log can do. */
 class DayLogTrackingActions(
@@ -49,7 +50,7 @@ internal fun DoseSection(
 ) {
     Column(Modifier.fillMaxWidth()) {
         HorizontalDivider(Modifier.padding(vertical = CadenceTheme.spacing.xs))
-        SectionHeader(stringResource(R.string.log_birth_control))
+        SectionHeader(stringResource(R.string.log_birth_control), icon = UiR.drawable.ms_pill)
         Text(
             stringResource(if (isToday) ContraceptionLabels.task(action) else ContraceptionLabels.noun(action)),
             modifier = Modifier.padding(bottom = CadenceTheme.spacing.sm),
@@ -57,15 +58,16 @@ internal fun DoseSection(
         ChipRow {
             val options =
                 listOf(
-                    DoseStatus.TAKEN to R.string.log_dose_taken,
-                    DoseStatus.MISSED to R.string.log_dose_missed,
+                    Triple(DoseStatus.TAKEN, R.string.log_dose_taken, UiR.drawable.ms_check),
+                    Triple(DoseStatus.MISSED, R.string.log_dose_missed, UiR.drawable.ms_close),
                 )
-            options.forEach { (option, label) ->
+            options.forEach { (option, label, icon) ->
                 FilterChip(
                     selected = status == option,
                     // Tapping the selected option again clears it.
                     onClick = { onDose(if (status == option) null else option) },
                     label = { Text(stringResource(label)) },
+                    leadingIcon = { ChipIcon(icon) },
                     modifier = Modifier.semantics { role = Role.RadioButton },
                 )
             }
@@ -87,10 +89,15 @@ internal fun TagChips(
                 selected = tag.id in entry.tags,
                 onClick = { onToggle(tag.id) },
                 label = { Text(tag.label) },
+                leadingIcon = { ChipIcon(UiR.drawable.ms_sell) },
                 modifier = Modifier.semantics { role = Role.Checkbox },
             )
         }
-        AssistChip(onClick = { adding = true }, label = { Text(stringResource(R.string.log_tag_new)) })
+        AssistChip(
+            onClick = { adding = true },
+            label = { Text(stringResource(R.string.log_tag_new)) },
+            leadingIcon = { ChipIcon(UiR.drawable.ms_add) },
+        )
     }
     if (adding) {
         NewTagDialog(
@@ -147,6 +154,7 @@ internal fun MedicationChips(
                 selected = taken,
                 onClick = { onTakenChange(medication.id, !taken) },
                 label = { Text(medication.name) },
+                leadingIcon = { ChipIcon(UiR.drawable.ms_medication) },
                 modifier = Modifier.semantics { role = Role.Checkbox },
             )
         }

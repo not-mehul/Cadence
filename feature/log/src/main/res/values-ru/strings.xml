@@ -17,7 +17,7 @@
     <string name="log_birth_control">Контрацепция</string>
     <string name="log_dose_taken">Сделано</string>
     <string name="log_dose_missed">Пропущено</string>
-    <string name="log_tag_new">+ Новая метка</string>
+    <string name="log_tag_new">Новая метка</string>
     <string name="log_tag_new_title">Новая метка</string>
     <string name="log_tag_label">Метка</string>
     <string name="log_tag_add">Добавить</string>

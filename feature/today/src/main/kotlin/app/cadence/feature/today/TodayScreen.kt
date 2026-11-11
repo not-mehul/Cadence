@@ -3,15 +3,20 @@ package app.cadence.feature.today
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialShapes
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarDuration
@@ -30,6 +35,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.heading
@@ -44,12 +50,14 @@ import app.cadence.core.domain.cycles.FertileWindow
 import app.cadence.core.domain.model.CyclePhase
 import app.cadence.core.domain.model.Goal
 import app.cadence.core.ui.components.CadenceCard
-import app.cadence.core.ui.components.CadenceEmblem
 import app.cadence.core.ui.components.CardHeader
 import app.cadence.core.ui.components.HeroCard
 import app.cadence.core.ui.components.PhaseChip
+import app.cadence.core.ui.components.PhaseStyle
 import app.cadence.core.ui.components.PhaseStyles
 import app.cadence.core.ui.components.PrimaryButton
+import app.cadence.core.ui.expressive.Buddy
+import app.cadence.core.ui.expressive.BuddyFace
 import app.cadence.core.ui.format.DateSkeletons
 import app.cadence.core.ui.format.formatHeading
 import app.cadence.core.ui.format.rememberDateFormatter
@@ -142,19 +150,32 @@ fun TodayContent(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(spacing.md),
     ) {
-        TodayHeader(snapshot.today)
+        val style = heroStyle(snapshot, birthControl != null)
+        TodayHeader(snapshot.today, style)
 
         // The hero takes on the colour of where you are in your cycle (or pack).
-        HeroCard(heroStyle(snapshot, birthControl != null)) {
-            heroLabel(snapshot, birthControl)?.let { PhaseChip(it, heroStyle(snapshot, birthControl != null)) }
+        HeroCard(style) {
+            heroLabel(snapshot, birthControl)?.let { PhaseChip(it, style) }
             val ringModifier = Modifier.widthIn(max = 248.dp).fillMaxWidth()
             when {
-                birthControl != null && pack != null -> PackRing(birthControl.schedule, pack, ringModifier)
+                birthControl != null && pack != null -> {
+                    PackRing(birthControl.schedule, pack, ringModifier)
+                }
 
-                snapshot.timeline != null -> TodayRing(snapshot, ringModifier)
+                snapshot.timeline != null -> {
+                    TodayRing(snapshot, ringModifier)
+                }
 
-                // Nothing logged yet: the emblem stands in for the ring.
-                else -> CadenceEmblem(Modifier.widthIn(max = 168.dp).fillMaxWidth())
+                // Nothing logged yet: a cheerful buddy stands in for the ring.
+                else -> {
+                    Buddy(
+                        body = buddyBody(style),
+                        face = MaterialTheme.colorScheme.onSurface,
+                        shape = MaterialShapes.Cookie9Sided,
+                        expression = BuddyFace.JOYFUL,
+                        size = 148.dp,
+                    )
+                }
             }
             Text(
                 text = headline(snapshot.status),
@@ -170,12 +191,25 @@ fun TodayContent(
                 stringResource(R.string.today_action_end),
                 onClick = { showEndDialog = true },
                 Modifier.fillMaxWidth(),
+                leadingIcon = painterResource(UiR.drawable.ms_check),
             )
         } else {
-            PrimaryButton(stringResource(R.string.today_action_start), onClick = onStartPeriod, Modifier.fillMaxWidth())
+            PrimaryButton(
+                stringResource(R.string.today_action_start),
+                onClick = onStartPeriod,
+                Modifier.fillMaxWidth(),
+                leadingIcon = painterResource(UiR.drawable.ms_water_drop),
+            )
         }
         if (snapshot.canExtendPeriod) {
-            TextButton(onClick = onLogToday) { Text(stringResource(R.string.today_action_extend)) }
+            TextButton(onClick = onLogToday, shapes = ButtonDefaults.shapes()) {
+                Icon(
+                    painterResource(UiR.drawable.ms_add),
+                    contentDescription = null,
+                    modifier = Modifier.padding(end = ButtonDefaults.IconSpacing).size(ButtonDefaults.IconSize),
+                )
+                Text(stringResource(R.string.today_action_extend))
+            }
         }
 
         if (birthControl != null) {
@@ -276,9 +310,12 @@ private fun FertileWindowCard(fertile: FertileWindow) {
     }
 }
 
-/** A greeting for the time of day, and the date, in the display typeface. */
+/** A greeting for the time of day and the date, with a little buddy in the colours of the phase. */
 @Composable
-private fun TodayHeader(today: LocalDate) {
+private fun TodayHeader(
+    today: LocalDate,
+    style: PhaseStyle,
+) {
     val greeting =
         remember {
             when (LocalTime.now().hour) {
@@ -287,18 +324,31 @@ private fun TodayHeader(today: LocalDate) {
                 else -> R.string.today_greeting_evening
             }
         }
-    Column(Modifier.fillMaxWidth()) {
-        Text(
-            stringResource(greeting),
-            style = MaterialTheme.typography.titleSmall,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-        )
-        Text(
-            text = rememberDateFormatter(DateSkeletons.WEEKDAY_DAY_MONTH).formatHeading(today),
-            style = MaterialTheme.typography.headlineSmall,
+    Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+        Column(Modifier.weight(1f)) {
+            Text(
+                stringResource(greeting),
+                style = MaterialTheme.typography.titleSmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+            Text(
+                text = rememberDateFormatter(DateSkeletons.WEEKDAY_DAY_MONTH).formatHeading(today),
+                style = MaterialTheme.typography.headlineSmall,
+            )
+        }
+        Buddy(
+            body = buddyBody(style),
+            face = MaterialTheme.colorScheme.onSurface,
+            shape = style.shape,
+            size = 56.dp,
         )
     }
 }
+
+/** The buddy wears a slightly deeper version of the phase's wash, so it shows on any background. */
+private fun buddyBody(style: PhaseStyle) = lerp(style.tint, style.color, BUDDY_DEPTH)
+
+private const val BUDDY_DEPTH = 0.22f
 
 private val MORNING_HOURS = 5..11
 private val AFTERNOON_HOURS = 12..17

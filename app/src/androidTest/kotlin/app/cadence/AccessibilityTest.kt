@@ -25,6 +25,7 @@ import app.cadence.core.domain.model.UserSettings
 import app.cadence.core.domain.patterns.PatternTiming
 import app.cadence.core.domain.patterns.SymptomPattern
 import app.cadence.core.ui.theme.CadenceTheme
+import app.cadence.feature.calendar.CalendarActions
 import app.cadence.feature.calendar.CalendarContent
 import app.cadence.feature.calendar.CalendarUiState
 import app.cadence.feature.insights.CurrentCycle
@@ -114,7 +115,7 @@ class AccessibilityTest {
     @Composable
     private fun Calendar() {
         val prediction = CyclePredictor.predict(CycleHistory.from(flows), tracking.cycleDefaults, today)
-        CalendarContent(CalendarUiState.Ready(today, flows, prediction, setOf(today), 14), {}, {})
+        CalendarContent(CalendarUiState.Ready(today, flows, prediction, setOf(today), 14), CalendarActions())
     }
 
     @Composable

@@ -67,7 +67,7 @@ internal fun DoseSection(
                     // Tapping the selected option again clears it.
                     onClick = { onDose(if (status == option) null else option) },
                     label = { Text(stringResource(label)) },
-                    leadingIcon = { ChipIcon(icon) },
+                    leadingIcon = { ChipIcon(icon, selected = status == option) },
                     modifier = Modifier.semantics { role = Role.RadioButton },
                 )
             }
@@ -89,7 +89,7 @@ internal fun TagChips(
                 selected = tag.id in entry.tags,
                 onClick = { onToggle(tag.id) },
                 label = { Text(tag.label) },
-                leadingIcon = { ChipIcon(UiR.drawable.ms_sell) },
+                leadingIcon = { ChipIcon(UiR.drawable.ms_sell, selected = tag.id in entry.tags) },
                 modifier = Modifier.semantics { role = Role.Checkbox },
             )
         }
@@ -154,7 +154,7 @@ internal fun MedicationChips(
                 selected = taken,
                 onClick = { onTakenChange(medication.id, !taken) },
                 label = { Text(medication.name) },
-                leadingIcon = { ChipIcon(UiR.drawable.ms_medication) },
+                leadingIcon = { ChipIcon(UiR.drawable.ms_medication, selected = taken) },
                 modifier = Modifier.semantics { role = Role.Checkbox },
             )
         }

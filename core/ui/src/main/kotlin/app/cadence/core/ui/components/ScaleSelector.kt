@@ -1,5 +1,6 @@
 package app.cadence.core.ui.components
 
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -16,8 +17,10 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
@@ -52,6 +55,12 @@ fun ScaleSelector(
                 val isSelected = value == selected
                 val description = stringResource(R.string.scale_value, label, value, range.last)
                 val colors = MaterialTheme.colorScheme
+                // The chosen number gives a small, springy pop.
+                val pop by animateFloatAsState(
+                    targetValue = if (isSelected) 1.08f else 1f,
+                    animationSpec = MaterialTheme.motionScheme.fastSpatialSpec(),
+                    label = "pop",
+                )
                 Surface(
                     shape = CircleShape,
                     color = if (isSelected) colors.primary else colors.surface,
@@ -60,7 +69,10 @@ fun ScaleSelector(
                     modifier =
                         Modifier
                             .size(CadenceTheme.spacing.minTouchTarget)
-                            .selectable(
+                            .graphicsLayer {
+                                scaleX = pop
+                                scaleY = pop
+                            }.selectable(
                                 selected = isSelected,
                                 role = Role.RadioButton,
                                 onClick = { onSelect(if (isSelected) null else value) },

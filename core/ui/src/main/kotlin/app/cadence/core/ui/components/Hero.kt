@@ -22,6 +22,7 @@ import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
+import app.cadence.core.ui.expressive.rememberTwinkle
 import app.cadence.core.ui.expressive.sparkles
 import app.cadence.core.ui.theme.CadenceTheme
 import kotlin.math.max
@@ -62,13 +63,14 @@ fun HeroCard(
     content: @Composable ColumnScope.() -> Unit,
 ) {
     val base = MaterialTheme.colorScheme.surfaceContainerLowest
+    val twinkle = rememberTwinkle()
     Box(
         modifier
             .fillMaxWidth()
             .clip(MaterialTheme.shapes.extraLarge)
             .background(Brush.verticalGradient(0f to style.tint, 1f to lerpTowards(style.tint, base)))
             .drawBehind { drawRipples(style.color) }
-            .sparkles(style.color, alpha = SPARKLE_ALPHA),
+            .sparkles(style.color, alpha = SPARKLE_ALPHA) { twinkle?.value ?: 0f },
     ) {
         Column(
             modifier =

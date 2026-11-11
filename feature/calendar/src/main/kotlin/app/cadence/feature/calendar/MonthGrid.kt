@@ -25,13 +25,10 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawBehind
-import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.PathEffect
-import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.Stroke
-import androidx.compose.ui.graphics.drawscope.translate
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.clearAndSetSemantics
@@ -40,10 +37,7 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.stateDescription
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.graphics.shapes.Morph
 import app.cadence.core.domain.cycles.DayMark
-import app.cadence.core.ui.expressive.CadenceShapeSet
-import app.cadence.core.ui.expressive.scaledPath
 import app.cadence.core.ui.format.DateSkeletons
 import app.cadence.core.ui.format.currentLocale
 import app.cadence.core.ui.format.rememberDateFormatter
@@ -130,7 +124,7 @@ private fun DayCell(
 ) {
     val colors = CadenceTheme.cycleColors
     val scheme = MaterialTheme.colorScheme
-    // The selection grows from a circle into a scalloped cookie, with an expressive spring.
+    // The selection ring fades in and the day gives a small, springy pop.
     val selection by animateFloatAsState(
         targetValue = if (selected) 1f else 0f,
         animationSpec = MaterialTheme.motionScheme.defaultSpatialSpec(),
@@ -139,7 +133,8 @@ private fun DayCell(
     val textColor =
         when {
             mark == DayMark.LOGGED_PERIOD -> colors.onPeriod
-            mark == DayMark.FERTILE || mark == DayMark.OVULATION -> colors.onFertileWindow
+            mark == DayMark.OVULATION -> colors.onOvulation
+            mark == DayMark.FERTILE -> colors.onFertileWindow
             mark == DayMark.NONE && selected -> scheme.onPrimaryContainer
             !enabled -> scheme.onSurfaceVariant
             else -> scheme.onSurface
@@ -154,15 +149,9 @@ private fun DayCell(
             if (hasDetails) add(stringResource(R.string.calendar_desc_has_log))
         }.joinToString(", ")
     val state = stringResource(if (logged) R.string.calendar_state_period else R.string.calendar_state_not_period)
-    val markerColor =
-        when (mark) {
-            DayMark.LOGGED_PERIOD -> colors.onPeriod
-            DayMark.FERTILE, DayMark.OVULATION -> colors.onFertileWindow
-            else -> scheme.onSurface
-        }
-    val selectionMorph = remember { Morph(CadenceShapeSet.circle, CadenceShapeSet.selectedDay) }
-    val selectionColor = scheme.primary
-    val selectionFill = scheme.primaryContainer
+    val ringColor = scheme.primary
+    val todayColor = scheme.onSurfaceVariant
+    val softFill = scheme.primaryContainer
 
     val interaction =
         if (editPeriods) {
@@ -180,20 +169,24 @@ private fun DayCell(
                     contentDescription = description
                     if (editPeriods) stateDescription = state
                 }.drawBehind {
-                    if (selection > 0f) {
-                        drawSelection(
-                            selectionMorph,
-                            selection,
-                            selectionColor,
-                            selectionFill.takeIf {
-                                mark ==
-                                    DayMark.NONE
-                            },
-                        )
+                    // One outer ring at most: the selection, or else today. They cross-fade.
+                    val radius = size.minDimension / 2 - OUTER_RING_INSET.toPx()
+                    if (isToday && selection < 1f) {
+                        drawCircle(todayColor.copy(alpha = 1f - selection), radius, style = Stroke(TODAY_STROKE.toPx()))
                     }
-                }.padding(5.dp)
-                .dayMarkBackground(mark, colors)
-                .then(if (isToday) Modifier.todayRing(markerColor) else Modifier),
+                    if (selection > 0f) {
+                        drawCircle(ringColor.copy(alpha = selection), radius, style = Stroke(SELECTED_STROKE.toPx()))
+                    }
+                }.padding(FILL_INSET)
+                .graphicsLayer {
+                    val pop = 1f + POP * selection
+                    scaleX = pop
+                    scaleY = pop
+                }.drawBehind {
+                    if (mark == DayMark.NONE && selection > 0f) drawCircle(softFill.copy(alpha = selection))
+                }
+                // The dash is the predicted day's only line, so it gives way to the today and selection rings.
+                .dayMarkFill(mark, colors, dashed = !isToday && !selected),
         contentAlignment = Alignment.Center,
     ) {
         Text(
@@ -206,83 +199,58 @@ private fun DayCell(
             Box(
                 Modifier
                     .align(Alignment.BottomCenter)
-                    .padding(bottom = 4.dp)
+                    .padding(bottom = 3.dp)
                     .size(5.dp)
-                    .background(markerColor, CircleShape),
+                    .background(textColor, CircleShape),
             )
         }
     }
 }
 
-/** A scalloped ring around the selected day, filled softly when the day has no other mark. */
-private fun DrawScope.drawSelection(
-    morph: Morph,
-    progress: Float,
-    color: Color,
-    fill: Color?,
-) {
-    val inset = 1.dp.toPx()
-    val side = size.minDimension - inset * 2
-    val scale = SELECTION_START_SCALE + (1f - SELECTION_START_SCALE) * progress
-    val drawn = side * scale
-    val path = morph.scaledPath(progress, Size(drawn, drawn))
-    translate((size.width - drawn) / 2, (size.height - drawn) / 2) {
-        fill?.let { drawPath(path, it.copy(alpha = progress)) }
-        drawPath(path, color.copy(alpha = progress), style = Stroke(width = 2.5.dp.toPx()))
-    }
-}
+private val OUTER_RING_INSET = 2.dp
+private val FILL_INSET = 6.dp
+private val TODAY_STROKE = 1.5.dp
+private val SELECTED_STROKE = 2.5.dp
+private const val POP = 0.06f
 
-private const val SELECTION_START_SCALE = 0.7f
-
-/** A thin solid ring inside the cell; sits inside the dashed predicted ring when both apply. */
-private fun Modifier.todayRing(color: Color): Modifier =
-    drawBehind {
-        val stroke = 1.5.dp.toPx()
-        drawCircle(color = color, radius = size.minDimension / 2 - 4.dp.toPx(), style = Stroke(width = stroke))
-    }
-
-internal fun Modifier.dayMarkBackground(
+/**
+ * The day's mark as a plain circle: peach for a logged period, teal for the fertile window and
+ * a deeper teal for ovulation. A predicted period is soft pink with a dashed edge ([dashed]),
+ * so logged and predicted differ in line as well as colour.
+ */
+internal fun Modifier.dayMarkFill(
     mark: DayMark,
     colors: CycleColors,
+    dashed: Boolean = true,
 ): Modifier =
     when (mark) {
-        // Peach, with a deeper ring so the day stands out from the card.
         DayMark.LOGGED_PERIOD -> {
-            drawBehind {
-                val stroke = 1.5.dp.toPx()
-                drawCircle(colors.period)
-                drawCircle(colors.periodOutline, radius = size.minDimension / 2 - stroke / 2, style = Stroke(stroke))
-            }
+            background(colors.period, CircleShape)
         }
 
         DayMark.FERTILE -> {
             background(colors.fertileWindow, CircleShape)
         }
 
-        // A sun: ovulation differs from the fertile days by shape, not just colour.
         DayMark.OVULATION -> {
-            drawBehind {
-                val path = CadenceShapeSet.ovulation.scaledPath(size)
-                drawPath(path, colors.fertileWindow)
-                drawPath(path, colors.ovulation, style = Stroke(width = 1.5.dp.toPx()))
-            }
+            background(colors.ovulation, CircleShape)
         }
 
-        // Soft pink with a dashed edge: an estimate, unlike the solid logged days.
         DayMark.PREDICTED_PERIOD -> {
             drawBehind {
-                val stroke = 2.dp.toPx()
                 drawCircle(colors.predictedPeriodContainer)
-                drawCircle(
-                    color = colors.predictedPeriod,
-                    radius = size.minDimension / 2 - stroke / 2,
-                    center = Offset(size.width / 2, size.height / 2),
-                    style =
-                        Stroke(
-                            width = stroke,
-                            pathEffect = PathEffect.dashPathEffect(floatArrayOf(5.dp.toPx(), 3.5.dp.toPx())),
-                        ),
-                )
+                if (dashed) {
+                    val stroke = 1.5.dp.toPx()
+                    drawCircle(
+                        color = colors.predictedPeriod,
+                        radius = size.minDimension / 2 - stroke / 2,
+                        style =
+                            Stroke(
+                                width = stroke,
+                                pathEffect = PathEffect.dashPathEffect(floatArrayOf(4.dp.toPx(), 3.dp.toPx())),
+                            ),
+                    )
+                }
             }
         }
 
@@ -290,6 +258,10 @@ internal fun Modifier.dayMarkBackground(
             this
         }
     }
+
+/** Today's ring, for the legend. */
+private fun Modifier.todayRing(color: Color): Modifier =
+    drawBehind { drawCircle(color, size.minDimension / 2 - 1.dp.toPx(), style = Stroke(TODAY_STROKE.toPx())) }
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
@@ -305,21 +277,21 @@ internal fun Legend(
         itemVerticalAlignment = Alignment.CenterVertically,
     ) {
         LegendItem(stringResource(R.string.calendar_legend_period)) {
-            Box(Modifier.size(18.dp).dayMarkBackground(DayMark.LOGGED_PERIOD, colors))
+            Box(Modifier.size(18.dp).dayMarkFill(DayMark.LOGGED_PERIOD, colors))
         }
         LegendItem(stringResource(R.string.calendar_legend_predicted)) {
-            Box(Modifier.size(18.dp).dayMarkBackground(DayMark.PREDICTED_PERIOD, colors))
+            Box(Modifier.size(18.dp).dayMarkFill(DayMark.PREDICTED_PERIOD, colors))
         }
         if (showFertileWindow) {
             LegendItem(stringResource(R.string.calendar_legend_fertile)) {
-                Box(Modifier.size(18.dp).dayMarkBackground(DayMark.FERTILE, colors))
+                Box(Modifier.size(18.dp).dayMarkFill(DayMark.FERTILE, colors))
             }
             LegendItem(stringResource(R.string.calendar_legend_ovulation)) {
-                Box(Modifier.size(18.dp).dayMarkBackground(DayMark.OVULATION, colors))
+                Box(Modifier.size(18.dp).dayMarkFill(DayMark.OVULATION, colors))
             }
         }
         LegendItem(stringResource(R.string.calendar_legend_today)) {
-            Box(Modifier.size(18.dp).todayRing(MaterialTheme.colorScheme.onSurface))
+            Box(Modifier.size(18.dp).todayRing(MaterialTheme.colorScheme.onSurfaceVariant))
         }
         LegendItem(stringResource(R.string.calendar_legend_logged)) {
             Box(Modifier.size(18.dp), contentAlignment = Alignment.Center) {

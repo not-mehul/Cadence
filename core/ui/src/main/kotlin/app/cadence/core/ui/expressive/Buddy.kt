@@ -1,16 +1,30 @@
 package app.cadence.core.ui.expressive
 
 import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.StartOffset
+import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.keyframes
+import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.MaterialShapes
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.State
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
@@ -19,12 +33,19 @@ import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.drawscope.scale
+import androidx.compose.ui.graphics.drawscope.translate
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.graphics.shapes.Morph
 import androidx.graphics.shapes.RoundedPolygon
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import kotlin.math.PI
+import kotlin.math.sin
 
 /** How the buddy looks. */
 enum class BuddyFace {
@@ -39,9 +60,12 @@ enum class BuddyFace {
 }
 
 /**
- * Cadence's little companion: a soft Material shape with a face. It bounces in, grows from a
- * circle into its [shape], and blinks a couple of times, then stays still. Purely decorative:
- * it has no semantics, so screen readers skip it.
+ * Cadence's little companion: a soft Material shape with a face. It bounces in and grows from a
+ * circle into its [shape], then breathes gently and blinks every few seconds. Tap it and it hops
+ * with a happy face. Purely decorative: it has no semantics, so screen readers skip it, and it
+ * keeps still when the system's animations are off.
+ *
+ * Buddies on one screen pass different [rhythm]s so they don't blink in unison.
  */
 @Composable
 fun Buddy(
@@ -54,34 +78,108 @@ fun Buddy(
     cheeks: Color = Color(0xFFFF8FA8),
     /** Waits this long before bouncing in, so a group can arrive one after another. */
     enterDelayMillis: Long = 0,
+    rhythm: Int = 0,
 ) {
     val animate = rememberAnimationsEnabled()
     val grow = remember { Animatable(if (animate) 0f else 1f) }
     val bounce = remember { Animatable(if (animate) 0.6f else 1f) }
-    val eyes = remember { Animatable(1f) }
+    val hop = remember { Animatable(0f) }
+    var cheering by remember { mutableStateOf(false) }
+    val scope = rememberCoroutineScope()
     val morph = remember(shape) { Morph(MaterialShapes.Circle, shape) }
 
     LaunchedEffect(animate) {
         if (!animate) return@LaunchedEffect
         delay(enterDelayMillis)
         launch { grow.animateTo(1f, spring(dampingRatio = 0.7f, stiffness = Spring.StiffnessLow)) }
-        launch { bounce.animateTo(1f, spring(dampingRatio = 0.38f, stiffness = Spring.StiffnessMediumLow)) }
-        if (expression == BuddyFace.HAPPY) {
-            repeat(BLINKS) {
-                delay(BLINK_GAP_MS)
-                eyes.animateTo(0.1f, tween(BLINK_MS))
-                eyes.animateTo(1f, tween(BLINK_MS))
+        bounce.animateTo(1f, spring(dampingRatio = 0.38f, stiffness = Spring.StiffnessMediumLow))
+    }
+    val idle = if (animate) rememberIdle(rhythm) else null
+
+    val tap =
+        if (animate) {
+            Modifier.pointerInput(Unit) {
+                detectTapGestures {
+                    scope.launch {
+                        cheering = true
+                        hop.animateTo(1f, tween(HOP_UP_MS, easing = FastOutSlowInEasing))
+                        hop.animateTo(0f, spring(dampingRatio = 0.32f, stiffness = Spring.StiffnessMedium))
+                        delay(CHEER_HOLD_MS)
+                        cheering = false
+                    }
+                }
+            }
+        } else {
+            Modifier
+        }
+
+    Canvas(modifier.size(size).then(tap)) {
+        val breath = idle?.breath?.value ?: 1f
+        translate(top = -hop.value * this.size.height * HOP_HEIGHT) {
+            scale(bounce.value * breath) {
+                drawPath(morph.scaledPath(grow.value, this.size), body)
+                drawFace(
+                    face,
+                    cheeks,
+                    if (cheering) BuddyFace.JOYFUL else expression,
+                    idle?.eyes?.value ?: 1f,
+                )
             }
         }
     }
-
-    Canvas(modifier.size(size)) {
-        scale(bounce.value) {
-            drawPath(morph.scaledPath(grow.value, this.size), body)
-            drawFace(face, cheeks, expression, eyes.value)
-        }
-    }
 }
+
+/** The buddy's idle loop: a slow breath and a blink every few seconds. */
+private class Idle(
+    val breath: State<Float>,
+    val eyes: State<Float>,
+)
+
+@Composable
+private fun rememberIdle(rhythm: Int): Idle {
+    val transition = rememberInfiniteTransition(label = "buddy")
+    val offset = StartOffset((rhythm * RHYTHM_STEP_MS) % BLINK_CYCLE_MS)
+    val breath =
+        transition.animateFloat(
+            initialValue = 1f,
+            targetValue = BREATH_SCALE,
+            animationSpec =
+                infiniteRepeatable(
+                    tween(BREATH_MS + rhythm % 3 * 200, easing = FastOutSlowInEasing),
+                    RepeatMode.Reverse,
+                    offset,
+                ),
+            label = "breath",
+        )
+    val eyes =
+        transition.animateFloat(
+            initialValue = 1f,
+            targetValue = 1f,
+            animationSpec =
+                infiniteRepeatable(
+                    keyframes {
+                        durationMillis = BLINK_CYCLE_MS
+                        1f at BLINK_AT_MS
+                        EYES_SHUT at BLINK_AT_MS + BLINK_MS
+                        1f at BLINK_AT_MS + BLINK_MS * 2
+                    },
+                    initialStartOffset = offset,
+                ),
+            label = "blink",
+        )
+    return remember(breath, eyes) { Idle(breath, eyes) }
+}
+
+private const val BREATH_SCALE = 1.035f
+private const val BREATH_MS = 1_800
+private const val BLINK_CYCLE_MS = 4_200
+private const val BLINK_AT_MS = 3_300
+private const val BLINK_MS = 90
+private const val EYES_SHUT = 0.1f
+private const val RHYTHM_STEP_MS = 1_300
+private const val HOP_UP_MS = 140
+private const val HOP_HEIGHT = 0.18f
+private const val CHEER_HOLD_MS = 700L
 
 private fun DrawScope.drawFace(
     face: Color,
@@ -147,10 +245,6 @@ private fun DrawScope.drawFace(
     )
 }
 
-private const val BLINKS = 2
-private const val BLINK_GAP_MS = 1_100L
-private const val BLINK_MS = 90
-
 /**
  * The four phases as friends: a heart (period), a flower (follicular), a sun (ovulatory) and a
  * cloud (luteal), bouncing in one after another. Decorative.
@@ -186,6 +280,7 @@ fun BuddyFamily(
                 expression = if (i % 2 == 0) BuddyFace.HAPPY else BuddyFace.JOYFUL,
                 size = size,
                 enterDelayMillis = i * FAMILY_STAGGER_MS,
+                rhythm = i,
                 // A gentle wave: the middle two sit a little higher.
                 modifier =
                     androidx.compose.ui.Modifier
@@ -197,3 +292,50 @@ fun BuddyFamily(
 
 private const val FAMILY_DEPTH = 0.3f
 private const val FAMILY_STAGGER_MS = 120L
+
+/**
+ * Three little "z"s drifting up and fading, for a sleeping buddy. Decorative: hidden from screen
+ * readers. They hold still, softly visible, when animations are off.
+ */
+@Composable
+fun SleepyZs(
+    color: Color,
+    modifier: Modifier = Modifier,
+) {
+    val drift =
+        if (rememberAnimationsEnabled()) {
+            rememberInfiniteTransition(label = "zzz").animateFloat(
+                initialValue = 0f,
+                targetValue = 1f,
+                animationSpec = infiniteRepeatable(tween(ZZZ_MS, easing = LinearEasing)),
+                label = "drift",
+            )
+        } else {
+            null
+        }
+    androidx.compose.foundation.layout.Box(modifier.size(ZZZ_BOX).clearAndSetSemantics {}) {
+        repeat(ZZZ_COUNT) { i ->
+            androidx.compose.material3.Text(
+                text = "z",
+                color = color,
+                fontSize = (12 + i * 5).sp,
+                style = androidx.compose.material3.MaterialTheme.typography.titleMedium,
+                modifier =
+                    Modifier
+                        .align(androidx.compose.ui.Alignment.BottomStart)
+                        .graphicsLayer {
+                            // Each z is a third of a cycle behind the one before.
+                            val p = drift?.let { (it.value + i / ZZZ_COUNT.toFloat()) % 1f } ?: (0.3f + i * 0.2f)
+                            translationX = (i * 14).dp.toPx() + 4.dp.toPx() * sin(p * 2 * PI).toFloat()
+                            translationY = -ZZZ_RISE.toPx() * p
+                            alpha = sin(p * PI).toFloat()
+                        },
+            )
+        }
+    }
+}
+
+private const val ZZZ_MS = 3_600
+private const val ZZZ_COUNT = 3
+private val ZZZ_BOX = 64.dp
+private val ZZZ_RISE = 40.dp

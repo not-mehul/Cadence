@@ -11,11 +11,9 @@ import androidx.compose.ui.graphics.Color
  */
 @Immutable
 data class CycleColors(
-    /** Logged period day fill on the calendar (peach). A soft fill: [periodOutline] is the visible edge. */
+    /** Logged period day fill on the calendar: a pinkish peach that stands out from the card on its own. */
     val period: Color,
     val onPeriod: Color,
-    /** The solid ring around a logged period day; meets 3:1 against the card. */
-    val periodOutline: Color,
     /** Predicted period: a dashed outline in this colour (pink)... */
     val predictedPeriod: Color,
     /** ...around this soft pink fill. */
@@ -26,12 +24,18 @@ data class CycleColors(
     /** Fertile-window tint (estimate only). */
     val fertileWindow: Color,
     val onFertileWindow: Color,
-    /** Estimated ovulation marker. */
+    /** Estimated ovulation marker: a solid circle, darker than the fertile days around it. */
     val ovulation: Color,
+    val onOvulation: Color,
     val menstrualPhase: Color,
     val follicularPhase: Color,
     val ovulatoryPhase: Color,
     val lutealPhase: Color,
+    /** The cycle ring's segments: brighter than the phase colours in light mode, the same in dark. */
+    val menstrualRing: Color,
+    val follicularRing: Color,
+    val ovulatoryRing: Color,
+    val lutealRing: Color,
     /** Soft washes behind content, one per phase; [neutralTint] when no phase applies. */
     val menstrualTint: Color,
     val follicularTint: Color,
@@ -45,7 +49,6 @@ internal val LightCycleColors =
         CycleColors(
             period = PeachLight,
             onPeriod = OnPeachLight,
-            periodOutline = PeachOutlineLight,
             predictedPeriod = PinkLight,
             predictedPeriodContainer = PinkContainerLight,
             periodContainer = RosewoodContainerLight,
@@ -53,10 +56,15 @@ internal val LightCycleColors =
             fertileWindow = TealContainerLight,
             onFertileWindow = OnTealContainerLight,
             ovulation = TealLight,
+            onOvulation = OnTealLight,
             menstrualPhase = RosewoodLight,
             follicularPhase = AmberLight,
             ovulatoryPhase = TealLight,
             lutealPhase = PlumLight,
+            menstrualRing = RoseRingLight,
+            follicularRing = AmberRingLight,
+            ovulatoryRing = TealRingLight,
+            lutealRing = PlumRingLight,
             menstrualTint = RoseTintLight,
             follicularTint = AmberTintLight,
             ovulatoryTint = TealTintLight,
@@ -70,7 +78,6 @@ internal val DarkCycleColors =
         CycleColors(
             period = PeachDark,
             onPeriod = OnPeachDark,
-            periodOutline = PeachDark,
             predictedPeriod = PinkDark,
             predictedPeriodContainer = PinkContainerDark,
             periodContainer = RosewoodContainerDark,
@@ -78,10 +85,15 @@ internal val DarkCycleColors =
             fertileWindow = TealContainerDark,
             onFertileWindow = OnTealContainerDark,
             ovulation = TealDark,
+            onOvulation = OnTealDark,
             menstrualPhase = RosewoodDark,
             follicularPhase = AmberDark,
             ovulatoryPhase = TealDark,
             lutealPhase = PlumDark,
+            menstrualRing = RosewoodDark,
+            follicularRing = AmberDark,
+            ovulatoryRing = TealDark,
+            lutealRing = PlumDark,
             menstrualTint = RoseTintDark,
             follicularTint = AmberTintDark,
             ovulatoryTint = TealTintDark,

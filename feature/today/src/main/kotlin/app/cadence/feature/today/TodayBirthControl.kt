@@ -51,8 +51,8 @@ internal fun PackRing(
     val colors = CadenceTheme.cycleColors
     val segments =
         buildList {
-            add(RingSegment(1, schedule.activeDays, colors.follicularPhase))
-            if (schedule.hasBreak) add(RingSegment(schedule.activeDays + 1, schedule.packLength, colors.menstrualPhase))
+            add(RingSegment(1, schedule.activeDays, colors.follicularRing))
+            if (schedule.hasBreak) add(RingSegment(schedule.activeDays + 1, schedule.packLength, colors.menstrualRing))
         }
     CycleRing(
         cycleLength = schedule.packLength,

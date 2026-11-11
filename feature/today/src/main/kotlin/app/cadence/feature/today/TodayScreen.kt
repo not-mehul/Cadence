@@ -151,7 +151,9 @@ fun TodayContent(
         verticalArrangement = Arrangement.spacedBy(spacing.md),
     ) {
         val style = heroStyle(snapshot, birthControl != null)
-        TodayHeader(snapshot.today, style)
+        // The buddy beams once something is logged for today, or today's pill, patch or ring is done.
+        val cheerful = !state.todayEntry.isEmpty || birthControl?.todayStatus == DoseStatus.TAKEN
+        TodayHeader(snapshot.today, style, cheerful)
 
         // The hero takes on the colour of where you are in your cycle (or pack).
         HeroCard(style) {
@@ -315,6 +317,7 @@ private fun FertileWindowCard(fertile: FertileWindow) {
 private fun TodayHeader(
     today: LocalDate,
     style: PhaseStyle,
+    cheerful: Boolean,
 ) {
     val greeting =
         remember {
@@ -340,6 +343,7 @@ private fun TodayHeader(
             body = buddyBody(style),
             face = MaterialTheme.colorScheme.onSurface,
             shape = style.shape,
+            expression = if (cheerful) BuddyFace.JOYFUL else BuddyFace.HAPPY,
             size = 56.dp,
         )
     }

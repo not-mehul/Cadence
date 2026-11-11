@@ -68,8 +68,8 @@ class ContrastTest {
         s: ColorScheme,
     ) {
         listOf(
-            // The peach fill is soft on purpose; its ring is what has to stand out.
-            "periodOutline" to c.periodOutline,
+            // Logged period days are a solid fill with no outline, so the fill itself must stand out.
+            "period" to c.period,
             "predictedPeriod" to c.predictedPeriod,
             "ovulation" to c.ovulation,
             "menstrualPhase" to c.menstrualPhase,
@@ -89,6 +89,7 @@ class ContrastTest {
         assertTrue(c.period != c.predictedPeriodContainer, "logged and predicted fills must differ")
         assertContrast("onPeriodContainer/periodContainer", c.onPeriodContainer, c.periodContainer, TEXT_MIN)
         assertContrast("onFertileWindow/fertileWindow", c.onFertileWindow, c.fertileWindow, TEXT_MIN)
+        assertContrast("onOvulation/ovulation", c.onOvulation, c.ovulation, TEXT_MIN)
 
         // Phase washes sit behind text: body text, secondary text, and the phase's own colour.
         listOf(

@@ -2,6 +2,7 @@ package app.cadence
 
 import androidx.activity.compose.LocalActivity
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
@@ -35,6 +36,7 @@ import androidx.fragment.app.FragmentActivity
 import app.cadence.core.ui.components.PrimaryButton
 import app.cadence.core.ui.expressive.Buddy
 import app.cadence.core.ui.expressive.BuddyFace
+import app.cadence.core.ui.expressive.SleepyZs
 import app.cadence.core.ui.security.DeviceAuth
 import app.cadence.core.ui.theme.CadenceTheme
 
@@ -107,13 +109,18 @@ private fun CenteredMessage(
             verticalArrangement = Arrangement.spacedBy(spacing.lg, Alignment.CenterVertically),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
-            Buddy(
-                body = CadenceTheme.cycleColors.lutealTint,
-                face = MaterialTheme.colorScheme.onSurface,
-                shape = MaterialShapes.Puffy,
-                expression = BuddyFace.SLEEPY,
-                size = 148.dp,
-            )
+            // A dozing buddy, with z's drifting up from it.
+            Box {
+                Buddy(
+                    body = CadenceTheme.cycleColors.lutealTint,
+                    face = MaterialTheme.colorScheme.onSurface,
+                    shape = MaterialShapes.Puffy,
+                    expression = BuddyFace.SLEEPY,
+                    size = 148.dp,
+                    modifier = Modifier.padding(top = 32.dp, start = 40.dp, end = 40.dp),
+                )
+                SleepyZs(CadenceTheme.cycleColors.lutealPhase, Modifier.align(Alignment.TopEnd))
+            }
             Text(
                 title,
                 style = MaterialTheme.typography.headlineSmall,

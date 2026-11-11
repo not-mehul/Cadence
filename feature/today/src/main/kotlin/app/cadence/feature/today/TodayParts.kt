@@ -175,17 +175,17 @@ internal fun ringSegments(
     colors: CycleColors,
 ): List<RingSegment> {
     val periodEnd = timeline.periodEndDay.coerceAtMost(timeline.cycleLength)
-    val segments = mutableListOf(RingSegment(1, periodEnd, colors.menstrualPhase))
+    val segments = mutableListOf(RingSegment(1, periodEnd, colors.menstrualRing))
     val fertile = timeline.fertileWindowDays ?: return segments
     val fertileStart = maxOf(fertile.first, periodEnd + 1)
     val fertileEnd = minOf(fertile.last, timeline.cycleLength)
-    if (fertileStart > periodEnd + 1) segments += RingSegment(periodEnd + 1, fertileStart - 1, colors.follicularPhase)
-    if (fertileEnd >= fertileStart) segments += RingSegment(fertileStart, fertileEnd, colors.ovulatoryPhase)
+    if (fertileStart > periodEnd + 1) segments += RingSegment(periodEnd + 1, fertileStart - 1, colors.follicularRing)
+    if (fertileEnd >= fertileStart) segments += RingSegment(fertileStart, fertileEnd, colors.ovulatoryRing)
     val lutealStart = maxOf(fertileEnd, periodEnd) + 1
     if (lutealStart <=
         timeline.cycleLength
     ) {
-        segments += RingSegment(lutealStart, timeline.cycleLength, colors.lutealPhase)
+        segments += RingSegment(lutealStart, timeline.cycleLength, colors.lutealRing)
     }
     return segments
 }

@@ -1,5 +1,11 @@
 package app.cadence.feature.calendar
 
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInHorizontally
+import androidx.compose.animation.slideOutHorizontally
+import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -262,12 +268,26 @@ private fun MonthHeader(
         FilledTonalIconButton(onClick = onPrevious, colors = colors, shapes = IconButtonDefaults.shapes()) {
             Icon(painterResource(UiR.drawable.ic_chevron_left), stringResource(R.string.calendar_previous_month))
         }
-        Text(
-            text = rememberDateFormatter(DateSkeletons.MONTH_YEAR).formatHeading(month),
-            style = MaterialTheme.typography.headlineSmall,
-            textAlign = TextAlign.Center,
-            modifier = Modifier.weight(1f).semantics { heading() },
-        )
+        val formatter = rememberDateFormatter(DateSkeletons.MONTH_YEAR)
+        // The title slides the way the months move.
+        AnimatedContent(
+            targetState = month,
+            transitionSpec = {
+                val direction = if (targetState.isAfter(initialState)) 1 else -1
+                (slideInHorizontally { it / 3 * direction } + fadeIn())
+                    .togetherWith(slideOutHorizontally { -it / 3 * direction } + fadeOut())
+            },
+            contentAlignment = Alignment.Center,
+            label = "month",
+            modifier = Modifier.weight(1f),
+        ) { shown ->
+            Text(
+                text = formatter.formatHeading(shown),
+                style = MaterialTheme.typography.headlineSmall,
+                textAlign = TextAlign.Center,
+                modifier = Modifier.fillMaxWidth().semantics { heading() },
+            )
+        }
         FilledTonalIconButton(onClick = onNext, colors = colors, shapes = IconButtonDefaults.shapes()) {
             Icon(painterResource(UiR.drawable.ic_chevron_right), stringResource(R.string.calendar_next_month))
         }

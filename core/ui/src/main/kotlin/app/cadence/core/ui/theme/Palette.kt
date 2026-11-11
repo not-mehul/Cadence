@@ -56,16 +56,22 @@ internal object Palette {
     val PlumTintLight = Color(0xFFEEE1FA)
     val NeutralTintLight = Color(0xFFF5E4E6)
 
-    // Calendar: logged period days are peach, predicted ones a soft pink with a dashed pink edge.
-    val PeachLight = Color(0xFFFFBE9C)
-    val OnPeachLight = Color(0xFF4A1A04)
-    val PeachOutlineLight = Color(0xFFC8653A)
+    // Calendar: logged period days are a pinkish peach, predicted ones a soft pink with a dashed pink edge.
+    val PeachLight = Color(0xFFDF6C7C)
+    val OnPeachLight = Color(0xFF2E0610)
     val PinkLight = Color(0xFFD6457A)
     val PinkContainerLight = Color(0xFFFFE3EC)
 
+    // The cycle ring on Today: bright, lively versions of the phase colours. The ring is drawn
+    // alongside the phase's name and the day number, so it doesn't carry meaning on its own.
+    val RoseRingLight = Color(0xFFEC5B7E)
+    val AmberRingLight = Color(0xFFFFA726)
+    val TealRingLight = Color(0xFF1FB5A6)
+    val PlumRingLight = Color(0xFF9C6ADE)
+
     // Dark
-    val PeachDark = Color(0xFFFFB693)
-    val OnPeachDark = Color(0xFF3D1500)
+    val PeachDark = Color(0xFFFF9AA5)
+    val OnPeachDark = Color(0xFF3D0A14)
     val PinkDark = Color(0xFFFF8FB1)
     val PinkContainerDark = Color(0xFF4A1D2E)
 

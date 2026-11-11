@@ -1,6 +1,9 @@
 package app.cadence.feature.log
 
 import androidx.annotation.DrawableRes
+import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.spring
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -30,8 +33,12 @@ import androidx.compose.material3.rememberBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
@@ -50,6 +57,7 @@ import app.cadence.core.domain.model.MenstrualFlow
 import app.cadence.core.ui.components.ScaleSelector
 import app.cadence.core.ui.components.SectionHeader
 import app.cadence.core.ui.expressive.FlowIcon
+import app.cadence.core.ui.expressive.rememberAnimationsEnabled
 import app.cadence.core.ui.format.DateSkeletons
 import app.cadence.core.ui.format.formatHeading
 import app.cadence.core.ui.format.rememberDateFormatter
@@ -303,7 +311,7 @@ private fun SymptomChips(
                 selected = severity != null,
                 onClick = { onTap(id) },
                 label = { Text(if (severityText == null) name else "$name · $severityText") },
-                leadingIcon = { ChipIcon(LogIcons.symptom(id)) },
+                leadingIcon = { ChipIcon(LogIcons.symptom(id), selected = severity != null) },
                 modifier = Modifier.semantics { stateDescription = severityText ?: offState },
             )
         }
@@ -321,7 +329,7 @@ private fun MoodChips(
                 selected = id in entry.moods,
                 onClick = { onTap(id) },
                 label = { Text(LogLabels.mood(id)) },
-                leadingIcon = { ChipIcon(LogIcons.mood(id)) },
+                leadingIcon = { ChipIcon(LogIcons.mood(id), selected = id in entry.moods) },
                 modifier = Modifier.semantics { role = Role.Checkbox },
             )
         }
@@ -340,7 +348,7 @@ private fun SexPicker(
                 // Tapping the selected option again clears it.
                 onClick = { onSelect(if (sex == selected) null else sex) },
                 label = { Text(stringResource(LogLabels.sex(sex))) },
-                leadingIcon = { ChipIcon(LogIcons.sex(sex)) },
+                leadingIcon = { ChipIcon(LogIcons.sex(sex), selected = sex == selected) },
                 modifier = Modifier.semantics { role = Role.RadioButton },
             )
         }
@@ -370,6 +378,28 @@ private fun NoteField(
 @Composable
 internal fun ChipIcon(
     @DrawableRes icon: Int,
+    selected: Boolean = false,
 ) {
-    Icon(painterResource(icon), contentDescription = null, modifier = Modifier.size(FilterChipDefaults.IconSize))
+    // Picking a chip makes its icon pop with a little bounce; unpicking it is quiet.
+    val animate = rememberAnimationsEnabled()
+    val scale = remember { Animatable(1f) }
+    var wasSelected by remember { mutableStateOf(selected) }
+    LaunchedEffect(selected) {
+        if (animate && selected && !wasSelected) {
+            scale.snapTo(POP_FROM)
+            scale.animateTo(1f, spring(dampingRatio = 0.35f, stiffness = Spring.StiffnessMedium))
+        }
+        wasSelected = selected
+    }
+    Icon(
+        painterResource(icon),
+        contentDescription = null,
+        modifier =
+            Modifier.size(FilterChipDefaults.IconSize).graphicsLayer {
+                scaleX = scale.value
+                scaleY = scale.value
+            },
+    )
 }
+
+private const val POP_FROM = 0.4f

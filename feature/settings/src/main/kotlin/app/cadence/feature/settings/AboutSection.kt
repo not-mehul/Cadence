@@ -32,8 +32,7 @@ internal fun AboutSection(modifier: Modifier = Modifier) {
     val context = LocalContext.current
     val info = remember(context) { AppInfo.read(context) }
     val gutter = CadenceTheme.spacing.screenGutter
-    Column(modifier) {
-        SectionHeader(stringResource(R.string.settings_section_about), Modifier.padding(horizontal = gutter))
+    SettingsSection(stringResource(R.string.settings_section_about), modifier) {
         Note(stringResource(R.string.settings_version, info.version))
         Note(stringResource(R.string.settings_updates))
         val releasesUrl = stringResource(R.string.settings_releases_url)
@@ -52,6 +51,7 @@ internal fun AboutSection(modifier: Modifier = Modifier) {
             )
         }
         Note(stringResource(R.string.settings_disclaimer))
+        Note(stringResource(R.string.settings_font_credit))
     }
 }
 

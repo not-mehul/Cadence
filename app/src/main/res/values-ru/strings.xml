@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Cadence</string>
+    <string name="app_name_discreet">Ежедневник</string>
+    <string name="nav_today">Сегодня</string>
+    <string name="nav_calendar">Календарь</string>
+    <string name="nav_insights">Обзор</string>
+    <string name="nav_settings">Настройки</string>
+
+    <string name="lock_title">Cadence заблокирован</string>
+    <string name="lock_body">Разблокируйте отпечатком пальца, лицом или способом блокировки экрана.</string>
+    <string name="lock_unlock">Разблокировать</string>
+    <string name="lock_prompt_title">Разблокировать Cadence</string>
+
+    <string name="recovery_title">Не удаётся открыть данные</string>
+    <string name="recovery_body">Ключ шифрования, который защищает данные Cadence на этом телефоне, больше недоступен. Так бывает после некоторых сбросов телефона или изменений настроек безопасности. Сохранённые здесь данные восстановить нельзя. Можно начать заново, а затем восстановить данные из файла резервной копии, если он у вас есть.</string>
+    <string name="recovery_start_over">Начать заново</string>
+    <string name="recovery_confirm_title">Начать заново?</string>
+    <string name="recovery_confirm_body">Нечитаемые данные будут удалены с этого телефона. Это действие нельзя отменить.</string>
+    <string name="recovery_cancel">Отмена</string>
+</resources>

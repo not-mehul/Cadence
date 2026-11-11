@@ -14,6 +14,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.requiredWidthIn
 import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.widthIn
@@ -23,6 +24,7 @@ import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.selection.selectableGroup
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.DatePicker
+import androidx.compose.material3.DatePickerDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -42,6 +44,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
@@ -52,6 +55,9 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import app.cadence.core.domain.model.Goal
+import app.cadence.core.ui.components.CadenceCard
+import app.cadence.core.ui.components.CadenceEmblem
+import app.cadence.core.ui.components.CardHeader
 import app.cadence.core.ui.components.CycleRing
 import app.cadence.core.ui.components.DayCountStepper
 import app.cadence.core.ui.components.PrimaryButton
@@ -271,30 +277,26 @@ private fun StepColumn(
 @Composable
 private fun WelcomeStep(modifier: Modifier = Modifier) {
     StepColumn(modifier) {
-        Spacer(Modifier.height(CadenceTheme.spacing.xxl))
-        CycleRing(
-            cycleLength = 28,
-            today = 9,
-            segments = listOf(RingSegment(1, 9, MaterialTheme.colorScheme.primary)),
-            contentDescription = null,
-            modifier = Modifier.size(72.dp),
+        CadenceEmblem(
+            Modifier
+                .padding(top = CadenceTheme.spacing.lg)
+                .widthIn(max = 220.dp)
+                .fillMaxWidth()
+                .align(Alignment.CenterHorizontally),
         )
         StepTitle(stringResource(R.string.onboarding_welcome_title))
         StepBody(stringResource(R.string.onboarding_welcome_body))
-        OutlinedCard(Modifier.fillMaxWidth()) {
-            Column(
-                Modifier.padding(CadenceTheme.spacing.lg),
-                verticalArrangement = Arrangement.spacedBy(CadenceTheme.spacing.xs),
-            ) {
-                Text(
-                    stringResource(R.string.onboarding_welcome_private_title),
-                    style = MaterialTheme.typography.titleMedium,
-                )
-                Text(
-                    stringResource(R.string.onboarding_welcome_private_body),
-                    style = MaterialTheme.typography.bodyMedium,
-                )
-            }
+        CadenceCard {
+            CardHeader(
+                stringResource(R.string.onboarding_welcome_private_title),
+                icon = painterResource(UiR.drawable.ic_lock),
+                accent = MaterialTheme.colorScheme.tertiary,
+                accentContainer = MaterialTheme.colorScheme.tertiaryContainer,
+            )
+            Text(
+                stringResource(R.string.onboarding_welcome_private_body),
+                style = MaterialTheme.typography.bodyMedium,
+            )
         }
         Text(
             stringResource(R.string.onboarding_welcome_disclaimer),
@@ -340,9 +342,20 @@ private fun LastPeriodStep(
     StepColumn(modifier) {
         StepTitle(stringResource(R.string.onboarding_last_period_title))
         StepBody(stringResource(R.string.onboarding_last_period_body))
-        DatePicker(state = pickerState, showModeToggle = false, title = null, headline = null)
+        // Material's date picker needs 360dp. On a 360dp phone it spills into the screen's side
+        // padding (which is exactly wide enough) rather than losing its last column.
+        DatePicker(
+            state = pickerState,
+            showModeToggle = false,
+            title = null,
+            headline = null,
+            colors = DatePickerDefaults.colors(containerColor = Color.Transparent),
+            modifier = Modifier.requiredWidthIn(min = DATE_PICKER_MIN_WIDTH),
+        )
     }
 }
+
+private val DATE_PICKER_MIN_WIDTH = 360.dp
 
 /** Material's date picker works in UTC milliseconds at midnight. */
 private fun LocalDate.toUtcMillis(): Long = atStartOfDay(ZoneOffset.UTC).toInstant().toEpochMilli()

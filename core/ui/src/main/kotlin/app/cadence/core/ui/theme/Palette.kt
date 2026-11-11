@@ -48,6 +48,14 @@ internal object Palette {
     val AmberLight = Color(0xFF8A5100)
     val PlumLight = Color(0xFF6D4C8C)
 
+    // Soft washes behind content, one per phase. Text in onSurface, onSurfaceVariant and the
+    // phase's own colour all meet AA on them (see ContrastTest).
+    val RoseTintLight = Color(0xFFFFE3E8)
+    val AmberTintLight = Color(0xFFFFE9CF)
+    val TealTintLight = Color(0xFFD6F2EE)
+    val PlumTintLight = Color(0xFFEEE1FA)
+    val NeutralTintLight = Color(0xFFF5E4E6)
+
     // Dark
     val RosewoodDark = Color(0xFFFFB1C1)
     val OnRosewoodDark = Color(0xFF5E1128)
@@ -88,4 +96,10 @@ internal object Palette {
 
     val AmberDark = Color(0xFFFFB870)
     val PlumDark = Color(0xFFD7BAF5)
+
+    val RoseTintDark = Color(0xFF4A1D2A)
+    val AmberTintDark = Color(0xFF3F2A10)
+    val TealTintDark = Color(0xFF123B39)
+    val PlumTintDark = Color(0xFF33264A)
+    val NeutralTintDark = Color(0xFF31282A)
 }

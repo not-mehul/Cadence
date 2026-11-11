@@ -98,6 +98,8 @@ jobs:
           api-level: ${{ matrix.api-level }}
           arch: x86_64
           target: google_apis
+          # A real phone's screen (411dp wide); the default AVD is 320dp, smaller than any supported phone.
+          profile: pixel_6
           disable-animations: true
           disk-size: 2048M
           emulator-boot-timeout: 900

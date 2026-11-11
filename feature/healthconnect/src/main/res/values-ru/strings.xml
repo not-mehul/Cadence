@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="hc_title">Health Connect</string>
+    <string name="hc_needs_update">Обновите приложение Health Connect, чтобы передавать в него дни месячных.</string>
+    <string name="hc_share">Передавать в Health Connect</string>
+    <string name="hc_share_detail">Дни месячных и интенсивность выделений сохраняются в Health Connect на этом телефоне. Приложения, которым вы дали там доступ, могут их читать, а некоторые — выгружать в интернет.</string>
+    <string name="hc_import">Скопировать месячные из других приложений</string>
+    <string name="hc_import_detail">Добавляет дни месячных, которые другие приложения сохранили в Health Connect, в дни без ваших записей</string>
+    <string name="hc_not_permitted">Передача в Health Connect осталась выключенной: Cadence нужно разрешение на чтение и запись данных о менструации.</string>
+    <string name="hc_failed">Не удалось связаться с Health Connect. Попробуйте ещё раз чуть позже.</string>
+    <string name="hc_imported_none">Копировать нечего: в днях без ваших записей нет месячных из других приложений.</string>
+    <plurals name="hc_imported">
+        <item quantity="one">Из Health Connect скопирован %d день месячных.</item>
+        <item quantity="few">Из Health Connect скопировано %d дня месячных.</item>
+        <item quantity="many">Из Health Connect скопировано %d дней месячных.</item>
+        <item quantity="other">Из Health Connect скопировано %d дня месячных.</item>
+    </plurals>
+    <string name="hc_ok">ОК</string>
+
+    <string name="hc_rationale_title">Cadence и Health Connect</string>
+    <string name="hc_rationale_what">Если вы включите передачу данных в настройках Cadence, приложение будет записывать в Health Connect на этом телефоне дни, когда вы отмечали месячные, и интенсивность выделений. Cadence читает данные о менструации, только когда вы просите скопировать месячные из других приложений.</string>
+    <string name="hc_rationale_others">Health Connect хранит данные на вашем телефоне. Любое приложение, которому вы дали доступ в Health Connect, может их читать, а некоторые — выгружать в интернет, поэтому давайте доступ только тем приложениям, которым доверяете. У самого Cadence нет доступа в интернет.</string>
+    <string name="hc_rationale_off">Если выключить передачу в Cadence, приложение потеряет доступ. Уже переданные данные останутся в Health Connect, пока вы не удалите их там.</string>
+</resources>

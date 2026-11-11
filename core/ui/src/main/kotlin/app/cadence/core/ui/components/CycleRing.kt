@@ -1,5 +1,8 @@
 package app.cadence.core.ui.components
 
+import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
@@ -8,6 +11,8 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
@@ -45,9 +50,18 @@ fun CycleRing(
     modifier: Modifier = Modifier,
     center: @Composable BoxScope.() -> Unit = {},
 ) {
-    val track = MaterialTheme.colorScheme.surfaceContainerHighest
-    val markerFill = MaterialTheme.colorScheme.surface
+    val track = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.08f)
+    val markerFill = MaterialTheme.colorScheme.surfaceContainerLowest
     val markerStroke = MaterialTheme.colorScheme.onSurface
+    // The marker travels from the start of the cycle to today when the ring first appears.
+    // (With animations turned off in system settings it simply appears in place.)
+    val position = remember { Animatable(0f) }
+    LaunchedEffect(today, cycleLength) {
+        position.animateTo(
+            today.coerceIn(1, cycleLength) - 0.5f,
+            tween(durationMillis = 700, easing = FastOutSlowInEasing),
+        )
+    }
     Box(
         modifier =
             modifier
@@ -84,7 +98,7 @@ fun CycleRing(
             }
 
             // Marker in the middle of today's slot; a late period pins it at the end of the ring.
-            val dayPosition = (today.coerceIn(1, cycleLength) - 0.5f) * degreesPerDay
+            val dayPosition = position.value * degreesPerDay
             val angle = Math.toRadians((-90f + dayPosition).toDouble())
             val radius = diameter / 2
             val centre =
@@ -92,6 +106,8 @@ fun CycleRing(
                     size.width / 2 + radius * cos(angle).toFloat(),
                     size.height / 2 + radius * sin(angle).toFloat(),
                 )
+            // A soft halo lifts the marker off the ring.
+            drawCircle(markerStroke.copy(alpha = 0.12f), markerRadius * 1.35f, centre)
             drawCircle(markerFill, markerRadius, centre)
             drawCircle(markerStroke, markerRadius, centre, style = Stroke(markerRadius * MARKER_OUTLINE_FRACTION))
         }
@@ -99,7 +115,7 @@ fun CycleRing(
     }
 }
 
-private const val STROKE_FRACTION = 18f / 280f
+private const val STROKE_FRACTION = 16f / 280f
 private const val MARKER_FRACTION = 13f / 280f
 private const val MARKER_OUTLINE_FRACTION = 3f / 13f
 

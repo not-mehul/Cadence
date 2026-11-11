@@ -25,6 +25,7 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
@@ -36,6 +37,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.compose.LifecycleResumeEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewModelScope
+import app.cadence.core.ui.components.GroupCard
 import app.cadence.core.ui.components.SectionHeader
 import app.cadence.core.ui.theme.CadenceTheme
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -150,42 +152,47 @@ internal fun HealthConnectRows(
 ) {
     if (state.availability == HealthConnectAvailability.UNAVAILABLE) return
     val gutter = CadenceTheme.spacing.screenGutter
-    val itemColors = ListItemDefaults.colors(containerColor = MaterialTheme.colorScheme.surface)
-    Column {
-        SectionHeader(stringResource(R.string.hc_title), Modifier.padding(horizontal = gutter))
-        if (state.availability == HealthConnectAvailability.NEEDS_UPDATE) {
-            Text(
-                stringResource(R.string.hc_needs_update),
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                modifier = Modifier.padding(horizontal = gutter, vertical = CadenceTheme.spacing.sm),
-            )
-            return@Column
-        }
-        ListItem(
-            headlineContent = { Text(stringResource(R.string.hc_share)) },
-            supportingContent = { Text(stringResource(R.string.hc_share_detail)) },
-            trailingContent = { Switch(checked = state.connected, onCheckedChange = null) },
-            colors = itemColors,
-            modifier =
-                Modifier.toggleable(
-                    value = state.connected,
-                    enabled = !state.busy,
-                    role = Role.Switch,
-                    onValueChange = onConnectChange,
-                ),
+    val itemColors = ListItemDefaults.colors(containerColor = Color.Transparent)
+    Column(Modifier.padding(top = CadenceTheme.spacing.sm)) {
+        SectionHeader(
+            stringResource(R.string.hc_title),
+            Modifier.padding(horizontal = gutter + CadenceTheme.spacing.xs),
         )
-        if (state.connected) {
+        GroupCard(Modifier.padding(horizontal = gutter)) {
+            if (state.availability == HealthConnectAvailability.NEEDS_UPDATE) {
+                Text(
+                    stringResource(R.string.hc_needs_update),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.padding(horizontal = gutter, vertical = CadenceTheme.spacing.sm),
+                )
+                return@GroupCard
+            }
             ListItem(
-                headlineContent = { Text(stringResource(R.string.hc_import)) },
-                supportingContent = { Text(stringResource(R.string.hc_import_detail)) },
+                headlineContent = { Text(stringResource(R.string.hc_share)) },
+                supportingContent = { Text(stringResource(R.string.hc_share_detail)) },
+                trailingContent = { Switch(checked = state.connected, onCheckedChange = null) },
                 colors = itemColors,
                 modifier =
-                    Modifier
-                        .toggleable(value = false, enabled = !state.busy, role = Role.Button, onValueChange = {
-                            onImport()
-                        }),
+                    Modifier.toggleable(
+                        value = state.connected,
+                        enabled = !state.busy,
+                        role = Role.Switch,
+                        onValueChange = onConnectChange,
+                    ),
             )
+            if (state.connected) {
+                ListItem(
+                    headlineContent = { Text(stringResource(R.string.hc_import)) },
+                    supportingContent = { Text(stringResource(R.string.hc_import_detail)) },
+                    colors = itemColors,
+                    modifier =
+                        Modifier
+                            .toggleable(value = false, enabled = !state.busy, role = Role.Button, onValueChange = {
+                                onImport()
+                            }),
+                )
+            }
         }
     }
     state.message?.let { message ->

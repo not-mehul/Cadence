@@ -5,6 +5,7 @@ import android.text.format.DateFormat
 import app.cadence.core.domain.cycles.CycleSnapshot
 import app.cadence.core.domain.cycles.CycleStatus
 import app.cadence.core.domain.model.UserSettings
+import app.cadence.core.ui.format.formatHeading
 import java.time.format.DateTimeFormatter
 import java.util.Locale
 
@@ -40,7 +41,7 @@ object WidgetContent {
             val pattern = DateFormat.getBestDateTimePattern(locale, "EEEEdMMMM")
             return WidgetText(
                 context.getString(R.string.widget_day, day),
-                DateTimeFormatter.ofPattern(pattern, locale).format(snapshot.today),
+                DateTimeFormatter.ofPattern(pattern, locale).formatHeading(snapshot.today),
             )
         }
         val res = context.resources

@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="widget_label">Сегодня</string>
+    <string name="widget_description">Сегодняшний день цикла или упаковки. Без подробностей, пока вы не отключите скрытные уведомления.</string>
+    <string name="widget_preview_primary">День 12</string>
+    <string name="widget_preview_secondary">Пятница, 20 марта</string>
+
+    <string name="widget_locked">Заблокировано</string>
+    <string name="widget_locked_detail">Откройте приложение, чтобы увидеть сегодняшний день</string>
+    <string name="widget_start">Сегодня</string>
+    <string name="widget_start_detail">Нажмите, чтобы отметить</string>
+    <string name="widget_day">День %1$d</string>
+
+    <!-- Detailed (discreet notifications off). -->
+    <string name="widget_on_period">Месячные, день %1$d</string>
+    <plurals name="widget_period_in">
+        <item quantity="one">Месячные через %d день</item>
+        <item quantity="few">Месячные через %d дня</item>
+        <item quantity="many">Месячные через %d дней</item>
+        <item quantity="other">Месячные через %d дня</item>
+    </plurals>
+    <string name="widget_period_today">Месячные ожидаются сегодня</string>
+    <string name="widget_period_due">Месячные со дня на день</string>
+    <plurals name="widget_period_late">
+        <item quantity="one">Задержка %d день</item>
+        <item quantity="few">Задержка %d дня</item>
+        <item quantity="many">Задержка %d дней</item>
+        <item quantity="other">Задержка %d дня</item>
+    </plurals>
+    <plurals name="widget_break_in">
+        <item quantity="one">Перерыв через %d день</item>
+        <item quantity="few">Перерыв через %d дня</item>
+        <item quantity="many">Перерыв через %d дней</item>
+        <item quantity="other">Перерыв через %d дня</item>
+    </plurals>
+    <string name="widget_break_day">Перерыв: день %1$d из %2$d</string>
+    <string name="widget_cycle_day">День цикла: %1$d</string>
+    <string name="widget_pack_day">День упаковки: %1$d</string>
+</resources>

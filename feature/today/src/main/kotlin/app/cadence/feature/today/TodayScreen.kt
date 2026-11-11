@@ -30,6 +30,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
@@ -39,13 +40,23 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import app.cadence.core.domain.contraception.DoseStatus
 import app.cadence.core.domain.cycles.CycleStatus
+import app.cadence.core.domain.cycles.FertileWindow
+import app.cadence.core.domain.model.CyclePhase
 import app.cadence.core.domain.model.Goal
 import app.cadence.core.ui.components.CadenceCard
+import app.cadence.core.ui.components.CadenceEmblem
+import app.cadence.core.ui.components.CardHeader
+import app.cadence.core.ui.components.HeroCard
+import app.cadence.core.ui.components.PhaseChip
+import app.cadence.core.ui.components.PhaseStyles
 import app.cadence.core.ui.components.PrimaryButton
 import app.cadence.core.ui.format.DateSkeletons
+import app.cadence.core.ui.format.formatHeading
 import app.cadence.core.ui.format.rememberDateFormatter
 import app.cadence.core.ui.theme.CadenceTheme
 import java.time.LocalDate
+import java.time.LocalTime
+import app.cadence.core.ui.R as UiR
 
 @Composable
 fun TodayScreen(
@@ -131,27 +142,29 @@ fun TodayContent(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(spacing.md),
     ) {
-        Text(
-            text = rememberDateFormatter(DateSkeletons.WEEKDAY_DAY_MONTH).format(snapshot.today),
-            style = MaterialTheme.typography.titleMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-        )
+        TodayHeader(snapshot.today)
 
-        if (birthControl != null && pack != null) {
-            PackRing(birthControl.schedule, pack, Modifier.widthIn(max = 280.dp).fillMaxWidth())
-        } else {
-            TodayRing(snapshot, Modifier.widthIn(max = 280.dp).fillMaxWidth())
+        // The hero takes on the colour of where you are in your cycle (or pack).
+        HeroCard(heroStyle(snapshot, birthControl != null)) {
+            heroLabel(snapshot, birthControl)?.let { PhaseChip(it, heroStyle(snapshot, birthControl != null)) }
+            val ringModifier = Modifier.widthIn(max = 248.dp).fillMaxWidth()
+            when {
+                birthControl != null && pack != null -> PackRing(birthControl.schedule, pack, ringModifier)
+
+                snapshot.timeline != null -> TodayRing(snapshot, ringModifier)
+
+                // Nothing logged yet: the emblem stands in for the ring.
+                else -> CadenceEmblem(Modifier.widthIn(max = 168.dp).fillMaxWidth())
+            }
+            Text(
+                text = headline(snapshot.status),
+                style = MaterialTheme.typography.headlineMedium,
+                textAlign = TextAlign.Center,
+                modifier = Modifier.semantics { heading() },
+            )
+            if (pack != null) PackSupportingText(pack) else SupportingText(snapshot)
         }
 
-        Text(
-            text = headline(snapshot.status),
-            style = MaterialTheme.typography.headlineMedium,
-            textAlign = TextAlign.Center,
-            modifier = Modifier.semantics { heading() },
-        )
-        if (pack != null) PackSupportingText(pack) else SupportingText(snapshot)
-
-        Spacer(Modifier.height(spacing.xs))
         if (snapshot.status is CycleStatus.OnPeriod) {
             PrimaryButton(
                 stringResource(R.string.today_action_end),
@@ -165,7 +178,6 @@ fun TodayContent(
             TextButton(onClick = onLogToday) { Text(stringResource(R.string.today_action_extend)) }
         }
 
-        Spacer(Modifier.height(spacing.xs))
         if (birthControl != null) {
             DoseCard(birthControl, snapshot.today, onRecordDose)
             if (birthControl.missed.isNotEmpty()) MissedDosesCard(birthControl.missed, onRecordDose)
@@ -173,6 +185,7 @@ fun TodayContent(
         if (state.goal == Goal.BIRTH_CONTROL && birthControl == null) SetUpBirthControlCard(onOpenSettings)
         if (state.medications.isNotEmpty()) MedicationsCard(state.medications, onMedicationTakenChange)
         TodayLogCard(entry = state.todayEntry, onOpen = onOpenLog, tagLabels = state.tagLabels)
+        snapshot.fertileWindow?.let { FertileWindowCard(it) }
         PhaseCard(snapshot = snapshot, goal = state.goal)
     }
 
@@ -230,32 +243,65 @@ private fun SupportingText(snapshot: app.cadence.core.domain.cycles.CycleSnapsho
                 textAlign = TextAlign.Center,
             )
         }
-        snapshot.fertileWindow?.let { fertile ->
-            Text(
-                text =
-                    stringResource(
-                        R.string.today_fertile_window,
-                        dateFormat.format(fertile.window.start),
-                        dateFormat.format(fertile.window.end),
-                    ),
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.tertiary,
-                textAlign = TextAlign.Center,
-            )
-            Text(
-                text = stringResource(R.string.today_fertile_disclaimer),
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                textAlign = TextAlign.Center,
-            )
-        }
     }
 }
 
+/** The estimated fertile window, kept apart from the period prediction so neither crowds the other. */
 @Composable
-private fun CadenceCardTitle(text: String) {
-    Text(text, style = MaterialTheme.typography.titleMedium, modifier = Modifier.semantics { heading() })
+private fun FertileWindowCard(fertile: FertileWindow) {
+    val dateFormat = rememberDateFormatter(DateSkeletons.DAY_MONTH_SHORT)
+    val style = PhaseStyles.of(CyclePhase.OVULATORY)
+    CadenceCard {
+        CardHeader(
+            stringResource(R.string.today_fertile_title),
+            icon = painterResource(style.icon),
+            accent = style.color,
+            accentContainer = style.tint,
+        )
+        Text(
+            text =
+                stringResource(
+                    R.string.today_fertile_window,
+                    dateFormat.format(fertile.window.start),
+                    dateFormat.format(fertile.window.end),
+                ),
+            style = MaterialTheme.typography.bodyLarge,
+        )
+        Text(
+            text = stringResource(R.string.today_fertile_disclaimer),
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            modifier = Modifier.padding(top = CadenceTheme.spacing.xs),
+        )
+    }
 }
+
+/** A greeting for the time of day, and the date, in the display typeface. */
+@Composable
+private fun TodayHeader(today: LocalDate) {
+    val greeting =
+        remember {
+            when (LocalTime.now().hour) {
+                in MORNING_HOURS -> R.string.today_greeting_morning
+                in AFTERNOON_HOURS -> R.string.today_greeting_afternoon
+                else -> R.string.today_greeting_evening
+            }
+        }
+    Column(Modifier.fillMaxWidth()) {
+        Text(
+            stringResource(greeting),
+            style = MaterialTheme.typography.titleSmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
+        Text(
+            text = rememberDateFormatter(DateSkeletons.WEEKDAY_DAY_MONTH).formatHeading(today),
+            style = MaterialTheme.typography.headlineSmall,
+        )
+    }
+}
+
+private val MORNING_HOURS = 5..11
+private val AFTERNOON_HOURS = 12..17
 
 @Composable
 private fun PhaseCard(
@@ -265,9 +311,34 @@ private fun PhaseCard(
     val (title, body) = phaseCopy(snapshot, goal)
     val details = phaseDetails(title)
     var expanded by rememberSaveable(title) { mutableStateOf(false) }
+    val pack = snapshot.pack
+    val style =
+        when {
+            pack != null -> {
+                PhaseStyles.pack(pack.inBreak)
+            }
+
+            snapshot.phase != null -> {
+                PhaseStyles.of(snapshot.phase)
+            }
+
+            snapshot.status is CycleStatus.Late || snapshot.status is CycleStatus.Due -> {
+                PhaseStyles.neutral(
+                    UiR.drawable.ic_clock,
+                )
+            }
+
+            else -> {
+                PhaseStyles.neutral(UiR.drawable.ic_pattern)
+            }
+        }
     CadenceCard {
-        CadenceCardTitle(stringResource(title))
-        Spacer(Modifier.height(CadenceTheme.spacing.xs))
+        CardHeader(
+            stringResource(title),
+            icon = painterResource(style.icon),
+            accent = style.color,
+            accentContainer = style.tint,
+        )
         Text(stringResource(body), style = MaterialTheme.typography.bodyMedium)
         if (details != null) {
             if (expanded) {

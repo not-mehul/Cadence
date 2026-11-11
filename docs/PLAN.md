@@ -381,6 +381,18 @@ The look is calm and warm, not stereotypically pink. Every role is a fixed Mater
 
 Every state also has a non-colour cue (a fill pattern, icon or label) for colour-blind users. Predicted periods use a dashed outline, while logged ones use a solid fill.
 
+### 6.2 Visual identity (as built after Phase 7)
+
+The first seven phases left the app correct but plain: stock Material components on a tinted background. The redesign gives it one idea to hang on, **cadence as rhythm**, and applies it everywhere.
+
+- **Typeface:** headings, the cycle day and the big numbers are set in **Lora**, a warm serif with Cyrillic, bundled as one variable font (SIL Open Font License; the licence ships in the APK and About credits it). Body text stays in the system font, so long text and 200% scaling behave as before.
+- **Each phase has a colour, a soft tint and a glyph:** a drop (menstrual), a sprout (follicular), a sun (ovulatory) and a moon (luteal). Birth control uses a pill. Unit tests check text and the phase colour against every tint for WCAG AA.
+- **Today leads with a hero card** in the current phase's tint, with faint concentric ripples behind the ring. It holds a phase chip, the ring, the headline and the prediction. The screen opens with a greeting and the date. The ring's marker glides to today's position.
+- **Cards** are white with a hairline border and an icon header (log, fertile window, phase, birth control, medications, patterns, history). The fertile window has its own card with its "not contraception" caveat, instead of sharing the hero.
+- **Settings** is grouped into cards: Your cycle, Daily logging, Medications, Reminders, Appearance, Privacy, Health Connect, Your data, About.
+- **An emblem** (the four phase arcs around a drop) appears on the welcome screen, the lock screen and Today before anything is logged.
+- **Calendar** sits in a card with a serif month title, and day cells are at least 48dp wide on a 360dp phone.
+
 ---
 
 ## 7. Phased delivery plan
@@ -517,11 +529,15 @@ Each phase ends with a **working, shippable app**. Phases are sized for one deve
   - TalkBack, Switch Access and Accessibility Scanner still need a pass on a real phone. That's manual by nature and should happen before a 1.0 tag.
 - **Localization:**
   - All text is in string resources.
-  - The per-app language list (Android 13+) is generated from the translations that exist; English is the only one so far.
+  - The per-app language list (Android 13+) is generated from the translations that exist: English and Russian.
   - Debug builds include the pseudolocales en-XA and ar-XB.
   - Right-to-left layouts are covered by tests.
   - Weeks start on the locale's first day, and dates and times use the locale's formats.
-  - No translations ship yet: health wording needs a careful human translator, not machine translation.
+  - **Russian** was added after Phase 7, covering every screen, notifications, the widget, Health Connect and the clinician report.
+    - Plurals have all four Russian forms. Sentences are worded so that an inserted number, date or name stays grammatical, and dates that stand alone start with a capital.
+    - Settings → Appearance → Language chooses between the phone's language, English and Русский on Android 13 and later. On Android 8–12 the app follows the phone's language, and the row opens the phone's language settings. (An in-app switch on those versions would need AppCompat or hand-rolled locale wrapping; not worth it for this.)
+    - Tests cover the plural forms, the widget text, language switching, and the main screens in Russian on a 360dp phone at normal and 200% text. Lint fails the build on a missing translation or plural form.
+    - The translation was not written by a native speaker. The health wording in particular should be reviewed by one before a 1.0 release.
 - **Educational cards:** each phase card on Today, and the birth control card, has a "Learn more" with a few well-established facts and the NHS page they come from. There are no links, since the app has no internet access.
 - **Widget:**
   - It's a plain `AppWidgetProvider` rather than Jetpack Glance. Glance runs on WorkManager, which would add wake-lock, foreground-service and other permissions for what is two lines of text.

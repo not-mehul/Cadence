@@ -35,7 +35,9 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import app.cadence.core.ui.components.CadenceSurface
 import app.cadence.core.ui.format.DateSkeletons
+import app.cadence.core.ui.format.formatHeading
 import app.cadence.core.ui.format.rememberDateFormatter
 import app.cadence.core.ui.theme.CadenceTheme
 import kotlinx.coroutines.launch
@@ -69,6 +71,9 @@ fun CalendarScreen(
 /** Months either side of today the pager can reach. */
 private const val MONTH_RANGE = 120
 
+/** Narrower than the usual gutter: seven 48dp days need 336dp, and the smallest phones are 360dp wide. */
+private val CALENDAR_GUTTER = 8.dp
+
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun CalendarContent(
@@ -89,41 +94,56 @@ fun CalendarContent(
             modifier
                 .fillMaxSize()
                 .verticalScroll(rememberScrollState())
-                .padding(horizontal = spacing.screenGutter, vertical = spacing.lg),
+                .padding(horizontal = CALENDAR_GUTTER, vertical = spacing.lg),
         verticalArrangement = Arrangement.spacedBy(spacing.md),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
-        Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.widthIn(max = 480.dp).fillMaxWidth()) {
-            IconButton(onClick = { scope.launch { pagerState.animateScrollToPage(pagerState.currentPage - 1) } }) {
-                Icon(painterResource(UiR.drawable.ic_chevron_left), stringResource(R.string.calendar_previous_month))
-            }
-            Text(
-                text = rememberDateFormatter(DateSkeletons.MONTH_YEAR).format(visibleMonth),
-                style = MaterialTheme.typography.titleLarge,
-                textAlign = TextAlign.Center,
-                modifier = Modifier.weight(1f).semantics { heading() },
-            )
-            IconButton(onClick = { scope.launch { pagerState.animateScrollToPage(pagerState.currentPage + 1) } }) {
-                Icon(painterResource(UiR.drawable.ic_chevron_right), stringResource(R.string.calendar_next_month))
-            }
-        }
+        // The month sits in its own card, nearly edge to edge, so every day is a full-size touch target.
+        CadenceSurface(Modifier.widthIn(max = 480.dp)) {
+            Column(Modifier.padding(vertical = spacing.sm, horizontal = spacing.xs)) {
+                Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
+                    IconButton(
+                        onClick = { scope.launch { pagerState.animateScrollToPage(pagerState.currentPage - 1) } },
+                    ) {
+                        Icon(
+                            painterResource(UiR.drawable.ic_chevron_left),
+                            stringResource(R.string.calendar_previous_month),
+                        )
+                    }
+                    Text(
+                        text = rememberDateFormatter(DateSkeletons.MONTH_YEAR).formatHeading(visibleMonth),
+                        style = MaterialTheme.typography.headlineSmall,
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier.weight(1f).semantics { heading() },
+                    )
+                    IconButton(
+                        onClick = { scope.launch { pagerState.animateScrollToPage(pagerState.currentPage + 1) } },
+                    ) {
+                        Icon(
+                            painterResource(UiR.drawable.ic_chevron_right),
+                            stringResource(R.string.calendar_next_month),
+                        )
+                    }
+                }
 
-        HorizontalPager(
-            state = pagerState,
-            modifier = Modifier.widthIn(max = 480.dp).fillMaxWidth(),
-            verticalAlignment = Alignment.Top,
-            beyondViewportPageCount = 1,
-        ) { page ->
-            val month = currentMonth.plusMonths((page - MONTH_RANGE).toLong())
-            MonthGrid(
-                month = month,
-                marks = state.marksFor(month),
-                today = state.today,
-                state = state,
-                editPeriods = editPeriods,
-                onToggle = onToggle,
-                onOpenLog = onOpenLog,
-            )
+                HorizontalPager(
+                    state = pagerState,
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.Top,
+                    beyondViewportPageCount = 1,
+                ) { page ->
+                    val month = currentMonth.plusMonths((page - MONTH_RANGE).toLong())
+                    MonthGrid(
+                        month = month,
+                        marks = state.marksFor(month),
+                        today = state.today,
+                        state = state,
+                        editPeriods = editPeriods,
+                        onToggle = onToggle,
+                        onOpenLog = onOpenLog,
+                    )
+                }
+            }
         }
 
         if (visibleMonth != currentMonth) {
@@ -131,13 +151,17 @@ fun CalendarContent(
                 Text(stringResource(R.string.calendar_jump_today))
             }
         }
-        Legend(showFertileWindow = state.showsFertileWindow, modifier = Modifier.widthIn(max = 480.dp).fillMaxWidth())
+        Legend(
+            showFertileWindow = state.showsFertileWindow,
+            modifier = Modifier.widthIn(max = 480.dp).fillMaxWidth().padding(horizontal = spacing.sm),
+        )
         if (state.showsFertileWindow) {
             Text(
                 stringResource(R.string.calendar_fertile_disclaimer),
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 textAlign = TextAlign.Center,
+                modifier = Modifier.padding(horizontal = spacing.sm),
             )
         }
         FilterChip(

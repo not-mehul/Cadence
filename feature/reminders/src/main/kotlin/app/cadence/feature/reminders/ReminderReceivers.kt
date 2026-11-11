@@ -38,14 +38,15 @@ private const val TAG = "CadenceReminders"
 
 /** Runs [block] off the main thread while keeping the broadcast alive until it finishes. */
 private fun BroadcastReceiver.runAsync(block: suspend () -> Unit) {
-    val pending = goAsync()
+    // Null when the receiver is called directly rather than by a broadcast, as tests do.
+    val pending: BroadcastReceiver.PendingResult? = goAsync()
     CoroutineScope(Dispatchers.Default).launch {
         try {
             block()
         } catch (e: Exception) {
             Log.w(TAG, "Reminder work failed", e)
         } finally {
-            pending.finish()
+            pending?.finish()
         }
     }
 }

@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="log_today">Сегодня</string>
+    <string name="log_autosave">Изменения сохраняются автоматически</string>
+    <string name="log_done">Готово</string>
+    <string name="log_symptoms_hint">Нажмите ещё раз, чтобы указать, насколько сильно.</string>
+    <string name="log_pain_low">Нет боли</string>
+    <string name="log_pain_high">Очень сильная</string>
+    <string name="log_rating_low">Низко</string>
+    <string name="log_rating_high">Высоко</string>
+    <string name="log_sleep_low">Плохо</string>
+    <string name="log_sleep_high">Отлично</string>
+    <string name="log_note_placeholder">Что ещё стоит запомнить?</string>
+    <string name="log_note_count">%1$d / %2$d</string>
+    <string name="log_symptom_state_off">Не отмечено</string>
+
+    <string name="log_birth_control">Контрацепция</string>
+    <string name="log_dose_taken">Сделано</string>
+    <string name="log_dose_missed">Пропущено</string>
+    <string name="log_tag_new">+ Новая метка</string>
+    <string name="log_tag_new_title">Новая метка</string>
+    <string name="log_tag_label">Метка</string>
+    <string name="log_tag_add">Добавить</string>
+    <string name="log_cancel">Отмена</string>
+</resources>

@@ -5,6 +5,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalConfiguration
 import java.time.format.DateTimeFormatter
+import java.time.temporal.TemporalAccessor
 import java.util.Locale
 
 /**
@@ -29,6 +30,15 @@ fun dateFormatter(
     skeleton: String,
     locale: Locale,
 ): DateTimeFormatter = DateTimeFormatter.ofPattern(DateFormat.getBestDateTimePattern(locale, skeleton), locale)
+
+/**
+ * Formats a date that stands on its own (a screen title, the start of a line). Some languages, Russian
+ * among them, write weekday and month names in lower case, which looks unfinished as a heading.
+ */
+fun DateTimeFormatter.formatHeading(temporal: TemporalAccessor): String {
+    val locale = locale ?: Locale.getDefault()
+    return format(temporal).replaceFirstChar { it.titlecase(locale) }
+}
 
 /** The user's primary locale, observed so date formats update when the language changes. */
 @Composable

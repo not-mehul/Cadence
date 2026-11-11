@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="stepper_decrease">Уменьшить: %1$s</string>
+    <string name="stepper_increase">Увеличить: %1$s</string>
+    <plurals name="days_count">
+        <item quantity="one">%d день</item>
+        <item quantity="few">%d дня</item>
+        <item quantity="many">%d дней</item>
+        <item quantity="other">%d дня</item>
+    </plurals>
+    <!-- Flow: adjectives that agree with «выделения» (see flow_summary). -->
+    <string name="flow_none">Нет</string>
+    <string name="flow_spotting">Мажущие</string>
+    <string name="flow_light">Скудные</string>
+    <string name="flow_medium">Умеренные</string>
+    <string name="flow_heavy">Обильные</string>
+    <string name="flow_summary">%1$s выделения</string>
+
+    <!-- Severity: adverbs, so they fit a symptom of any gender or number. -->
+    <string name="severity_mild">слабо</string>
+    <string name="severity_moderate">умеренно</string>
+    <string name="severity_severe">сильно</string>
+    <string name="symptom_with_severity">%1$s (%2$s)</string>
+
+    <!-- Symptoms -->
+    <string name="symptom_cramps">Спазмы</string>
+    <string name="symptom_headache">Головная боль</string>
+    <string name="symptom_bloating">Вздутие</string>
+    <string name="symptom_breast_tenderness">Болезненность груди</string>
+    <string name="symptom_back_pain">Боль в спине</string>
+    <string name="symptom_acne">Акне</string>
+    <string name="symptom_fatigue">Усталость</string>
+    <string name="symptom_nausea">Тошнота</string>
+    <string name="symptom_cravings">Тяга к еде</string>
+    <string name="symptom_insomnia">Бессонница</string>
+    <string name="symptom_dizziness">Головокружение</string>
+    <string name="symptom_diarrhea">Диарея</string>
+    <string name="symptom_constipation">Запор</string>
+    <string name="symptom_hot_flashes">Приливы</string>
+
+    <!-- Moods -->
+    <string name="mood_happy">Радость</string>
+    <string name="mood_calm">Спокойствие</string>
+    <string name="mood_energetic">Бодрость</string>
+    <string name="mood_sensitive">Чувствительность</string>
+    <string name="mood_irritable">Раздражительность</string>
+    <string name="mood_anxious">Тревога</string>
+    <string name="mood_sad">Грусть</string>
+    <string name="mood_mood_swings">Перепады настроения</string>
+
+    <!-- Sex -->
+    <string name="sex_none">Не было</string>
+    <string name="sex_protected">Защищённый</string>
+    <string name="sex_unprotected">Незащищённый</string>
+    <string name="sex_summary_protected">Защищённый секс</string>
+    <string name="sex_summary_unprotected">Незащищённый секс</string>
+
+    <!-- Categories -->
+    <string name="category_flow">Выделения</string>
+    <string name="category_symptoms">Симптомы</string>
+    <string name="category_mood">Настроение</string>
+    <string name="category_pain">Боль</string>
+    <string name="category_energy">Энергия</string>
+    <string name="category_sleep">Качество сна</string>
+    <string name="category_stress">Стресс</string>
+    <string name="category_sex">Секс</string>
+    <string name="category_notes">Заметки</string>
+    <string name="category_tags">Метки</string>
+    <string name="category_medications">Лекарства</string>
+
+    <!-- Summaries -->
+    <string name="summary_pain">Боль %1$d/10</string>
+    <string name="summary_rating">%1$s %2$d/5</string>
+    <string name="summary_note">Заметка</string>
+
+    <!-- Scale -->
+    <string name="scale_value">%1$s, %2$d из %3$d</string>
+
+    <!-- Birth control -->
+    <string name="bc_method_pill">Таблетки</string>
+    <string name="bc_method_patch">Пластырь</string>
+    <string name="bc_method_ring">Кольцо</string>
+    <string name="bc_task_pill">Принять сегодняшнюю таблетку</string>
+    <string name="bc_task_placebo">Принять сегодняшнюю таблетку-плацебо</string>
+    <string name="bc_task_new_patch">Наклеить новый пластырь</string>
+    <string name="bc_task_remove_patch">Снять пластырь</string>
+    <string name="bc_task_new_ring">Ввести новое кольцо</string>
+    <string name="bc_task_remove_ring">Извлечь кольцо</string>
+    <string name="bc_noun_pill">Таблетка</string>
+    <string name="bc_noun_placebo">Таблетка-плацебо</string>
+    <string name="bc_noun_new_patch">Новый пластырь</string>
+    <string name="bc_noun_remove_patch">Снять пластырь</string>
+    <string name="bc_noun_new_ring">Новое кольцо</string>
+    <string name="bc_noun_remove_ring">Извлечь кольцо</string>
+    <string name="bc_done_pill">Таблетка принята</string>
+    <string name="bc_done_placebo">Таблетка-плацебо принята</string>
+    <string name="bc_done_new_patch">Новый пластырь наклеен</string>
+    <string name="bc_done_remove_patch">Пластырь снят</string>
+    <string name="bc_done_new_ring">Новое кольцо введено</string>
+    <string name="bc_done_remove_ring">Кольцо извлечено</string>
+    <string name="bc_layout_continuous">непрерывно, без перерыва</string>
+    <plurals name="bc_layout_break">
+        <item quantity="one">%1$s, затем перерыв %2$d день</item>
+        <item quantity="few">%1$s, затем перерыв %2$d дня</item>
+        <item quantity="many">%1$s, затем перерыв %2$d дней</item>
+        <item quantity="other">%1$s, затем перерыв %2$d дня</item>
+    </plurals>
+    <plurals name="bc_layout_placebo">
+        <item quantity="one">%1$s, затем %2$d день плацебо</item>
+        <item quantity="few">%1$s, затем %2$d дня плацебо</item>
+        <item quantity="many">%1$s, затем %2$d дней плацебо</item>
+        <item quantity="other">%1$s, затем %2$d дня плацебо</item>
+    </plurals>
+    <string name="bc_summary">%1$s · %2$s</string>
+</resources>

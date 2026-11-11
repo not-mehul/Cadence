@@ -1,0 +1,184 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Rows -->
+    <string name="backup_export">Создать резервную копию</string>
+    <string name="backup_export_detail">Сохранить все данные в файл: для нового телефона или на всякий случай</string>
+    <string name="backup_import">Восстановить из резервной копии</string>
+    <string name="backup_import_detail">Вернуть данные из файла резервной копии</string>
+    <string name="backup_csv">Экспорт в таблицу</string>
+    <string name="backup_csv_detail">Файл CSV, по одной строке на день</string>
+    <string name="backup_report">Отчёт для врача</string>
+    <string name="backup_report_detail">PDF со сводкой ваших циклов, симптомов и боли</string>
+
+    <!-- Export dialog -->
+    <string name="backup_password_title">Защитить резервную копию?</string>
+    <string name="backup_password_body">Добавьте пароль, чтобы зашифровать файл. Без пароля его сможет прочитать любой, у кого он окажется. Если вы забудете пароль, открыть резервную копию будет невозможно.</string>
+    <string name="backup_password_label">Пароль (необязательно)</string>
+    <string name="backup_password_confirm_label">Повторите пароль</string>
+    <string name="backup_password_mismatch">Пароли не совпадают</string>
+    <string name="backup_password_too_short">Нужно не меньше 8 символов</string>
+    <string name="backup_continue">Выбрать место сохранения</string>
+    <string name="backup_cancel">Отмена</string>
+
+    <!-- Import dialogs -->
+    <string name="backup_enter_password_title">Резервная копия зашифрована</string>
+    <string name="backup_enter_password_label">Пароль</string>
+    <string name="backup_unlock">Открыть копию</string>
+    <string name="backup_mode_title">Восстановить эту резервную копию?</string>
+    <plurals name="backup_mode_body">
+        <item quantity="one">В резервной копии %d день с записями.</item>
+        <item quantity="few">В резервной копии %d дня с записями.</item>
+        <item quantity="many">В резервной копии %d дней с записями.</item>
+        <item quantity="other">В резервной копии %d дня с записями.</item>
+    </plurals>
+    <string name="backup_mode_replace">Заменить всё</string>
+    <string name="backup_mode_replace_detail">Стереть данные на этом телефоне, затем восстановить копию вместе с настройками</string>
+    <string name="backup_mode_merge">Объединить</string>
+    <string name="backup_mode_merge_detail">Оставить текущие данные; дни из копии заменят те же дни здесь</string>
+
+    <!-- Results -->
+    <string name="backup_ok">ОК</string>
+    <string name="backup_done_export">Резервная копия сохранена.</string>
+    <string name="backup_done_csv">Таблица сохранена.</string>
+    <string name="backup_done_report">Отчёт сохранён. Поделиться им можно из приложения «Файлы».</string>
+    <plurals name="backup_done_import">
+        <item quantity="one">Восстановлен %d день.</item>
+        <item quantity="few">Восстановлено %d дня.</item>
+        <item quantity="many">Восстановлено %d дней.</item>
+        <item quantity="other">Восстановлено %d дня.</item>
+    </plurals>
+    <string name="backup_error_write">Не удалось сохранить файл. Попробуйте другое место.</string>
+    <string name="backup_error_restore">Не удалось восстановить резервную копию. Ваши текущие данные не изменились.</string>
+    <string name="backup_error_read">Не удалось открыть файл.</string>
+    <string name="backup_error_not_backup">Это не файл резервной копии Cadence.</string>
+    <string name="backup_error_newer">Эта резервная копия создана в более новой версии Cadence. Обновите приложение и попробуйте снова.</string>
+    <string name="backup_error_password">Этот пароль не подходит к резервной копии.</string>
+    <string name="backup_error_invalid">Резервная копия повреждена, восстановить её нельзя.</string>
+    <string name="backup_working">Подождите…</string>
+
+    <!-- Onboarding -->
+    <string name="backup_restore_onboarding">Восстановить из резервной копии</string>
+
+    <!-- Clinician report (PDF) -->
+    <string name="report_title">Отчёт о цикле</string>
+    <string name="report_generated">Создан %1$s</string>
+    <string name="report_covers">Период: с %1$s по %2$s</string>
+    <string name="report_summary">Сводка</string>
+    <string name="report_mode">Режим</string>
+    <string name="report_mode_track">Естественный цикл</string>
+    <string name="report_mode_birth_control">Гормональная контрацепция</string>
+    <string name="report_cycles_recorded">Циклов в сводке</string>
+    <string name="report_average_cycle">Средняя длина цикла</string>
+    <string name="report_cycle_range">От самого короткого до самого длинного</string>
+    <string name="report_average_period">Средняя длительность месячных</string>
+    <string name="report_next_period">Следующие месячные ожидаются</string>
+    <plurals name="report_days">
+        <item quantity="one">%1$d день</item>
+        <item quantity="few">%1$d дня</item>
+        <item quantity="many">%1$d дней</item>
+        <item quantity="other">%1$d дня</item>
+    </plurals>
+    <string name="report_days_decimal">%1$s дня</string>
+    <plurals name="report_range">
+        <item quantity="one">%1$d–%2$d день</item>
+        <item quantity="few">%1$d–%2$d дня</item>
+        <item quantity="many">%1$d–%2$d дней</item>
+        <item quantity="other">%1$d–%2$d дня</item>
+    </plurals>
+    <string name="report_none">Недостаточно данных</string>
+    <string name="report_cycles">Последние циклы</string>
+    <string name="report_col_start">Начало</string>
+    <string name="report_col_cycle">Длина цикла</string>
+    <string name="report_col_period">Месячные</string>
+    <string name="report_col_note">Примечание</string>
+    <string name="report_excluded">Исключён пользователем</string>
+    <string name="report_symptoms">Самые частые симптомы (за 6 месяцев)</string>
+    <plurals name="report_symptom_days">
+        <item quantity="one">%1$d день</item>
+        <item quantity="few">%1$d дня</item>
+        <item quantity="many">%1$d дней</item>
+        <item quantity="other">%1$d дня</item>
+    </plurals>
+    <string name="report_pain">Боль</string>
+    <plurals name="report_pain_average">
+        <item quantity="one">Средняя боль в дни месячных: %1$s из 10 (дней с записями: %2$d)</item>
+        <item quantity="few">Средняя боль в дни месячных: %1$s из 10 (дней с записями: %2$d)</item>
+        <item quantity="many">Средняя боль в дни месячных: %1$s из 10 (дней с записями: %2$d)</item>
+        <item quantity="other">Средняя боль в дни месячных: %1$s из 10 (дней с записями: %2$d)</item>
+    </plurals>
+    <string name="report_pain_none">В дни месячных боль не отмечалась.</string>
+    <string name="report_flags">Показатели вне типичных диапазонов (FIGO)</string>
+    <plurals name="report_flag_short">
+        <item quantity="one">Средняя длина цикла: %1$d день (обычно 24–38)</item>
+        <item quantity="few">Средняя длина цикла: %1$d дня (обычно 24–38)</item>
+        <item quantity="many">Средняя длина цикла: %1$d дней (обычно 24–38)</item>
+        <item quantity="other">Средняя длина цикла: %1$d дня (обычно 24–38)</item>
+    </plurals>
+    <plurals name="report_flag_long">
+        <item quantity="one">Средняя длина цикла: %1$d день (обычно 24–38)</item>
+        <item quantity="few">Средняя длина цикла: %1$d дня (обычно 24–38)</item>
+        <item quantity="many">Средняя длина цикла: %1$d дней (обычно 24–38)</item>
+        <item quantity="other">Средняя длина цикла: %1$d дня (обычно 24–38)</item>
+    </plurals>
+    <plurals name="report_flag_irregular">
+        <item quantity="one">Разброс длины цикла: %1$d день (обычно до 7–9)</item>
+        <item quantity="few">Разброс длины цикла: %1$d дня (обычно до 7–9)</item>
+        <item quantity="many">Разброс длины цикла: %1$d дней (обычно до 7–9)</item>
+        <item quantity="other">Разброс длины цикла: %1$d дня (обычно до 7–9)</item>
+    </plurals>
+    <plurals name="report_flag_long_period">
+        <item quantity="one">Месячные длительностью %1$d день, начало %2$s (обычно до 8)</item>
+        <item quantity="few">Месячные длительностью %1$d дня, начало %2$s (обычно до 8)</item>
+        <item quantity="many">Месячные длительностью %1$d дней, начало %2$s (обычно до 8)</item>
+        <item quantity="other">Месячные длительностью %1$d дня, начало %2$s (обычно до 8)</item>
+    </plurals>
+    <plurals name="report_flag_no_period">
+        <item quantity="one">Месячные не отмечались в течение %1$d дня</item>
+        <item quantity="few">Месячные не отмечались в течение %1$d дней</item>
+        <item quantity="many">Месячные не отмечались в течение %1$d дней</item>
+        <item quantity="other">Месячные не отмечались в течение %1$d дня</item>
+    </plurals>
+    <plurals name="report_flag_pain">
+        <item quantity="one">Боль 7 и выше из 10 в течение нескольких дней; число последних месячных с такой болью: %1$d</item>
+        <item quantity="few">Боль 7 и выше из 10 в течение нескольких дней; число последних месячных с такой болью: %1$d</item>
+        <item quantity="many">Боль 7 и выше из 10 в течение нескольких дней; число последних месячных с такой болью: %1$d</item>
+        <item quantity="other">Боль 7 и выше из 10 в течение нескольких дней; число последних месячных с такой болью: %1$d</item>
+    </plurals>
+    <string name="report_flags_none">Не обнаружено.</string>
+    <string name="report_footer">Создано в Cadence по записям пользователя. Не является диагнозом.</string>
+    <string name="report_page">Страница %1$d</string>
+
+    <string name="report_birth_control">Контрацепция</string>
+    <string name="report_bc_pill">Таблетки</string>
+    <string name="report_bc_patch">Пластырь</string>
+    <string name="report_bc_ring">Кольцо</string>
+    <string name="report_bc_break">%1$s (упаковка: %2$d + %3$d, с перерывом)</string>
+    <string name="report_bc_placebo">%1$s с таблетками-плацебо (упаковка: %2$d + %3$d)</string>
+    <string name="report_bc_continuous">%1$s, непрерывно (упаковка: %2$d)</string>
+    <string name="report_missed_doses">Доз, отмеченных как пропущенные (за 90 дней)</string>
+    <string name="report_medications">Лекарства (за 6 месяцев)</string>
+    <string name="report_medication_daily">Каждый день</string>
+    <string name="report_medication_as_needed">По необходимости</string>
+    <string name="report_medication_stopped">(приём прекращён)</string>
+    <plurals name="report_medication_days">
+        <item quantity="one">дней приёма: %d</item>
+        <item quantity="few">дней приёма: %d</item>
+        <item quantity="many">дней приёма: %d</item>
+        <item quantity="other">дней приёма: %d</item>
+    </plurals>
+    <string name="report_patterns">Закономерности в записях пользователя</string>
+    <string name="report_pattern_during">Во время месячных</string>
+    <plurals name="report_pattern_before">
+        <item quantity="one">Примерно за %d день до месячных</item>
+        <item quantity="few">Примерно за %d дня до месячных</item>
+        <item quantity="many">Примерно за %d дней до месячных</item>
+        <item quantity="other">Примерно за %d дня до месячных</item>
+    </plurals>
+    <string name="report_pattern_cycle_day">Примерно на %1$d-й день цикла</string>
+    <plurals name="report_pattern_cycles">
+        <item quantity="one">%1$d из %2$d цикла</item>
+        <item quantity="few">%1$d из %2$d циклов</item>
+        <item quantity="many">%1$d из %2$d циклов</item>
+        <item quantity="other">%1$d из %2$d цикла</item>
+    </plurals>
+</resources>

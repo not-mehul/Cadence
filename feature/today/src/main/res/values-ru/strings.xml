@@ -1,0 +1,137 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="today_title">Сегодня</string>
+
+    <!-- Headlines -->
+    <string name="today_headline_no_data">Отметьте месячные, чтобы начать</string>
+    <string name="today_headline_on_period">%1$d-й день месячных</string>
+    <string name="today_headline_expected_today">Месячные ожидаются сегодня</string>
+    <plurals name="today_headline_period_in">
+        <item quantity="one">Месячные через %d день</item>
+        <item quantity="few">Месячные через %d дня</item>
+        <item quantity="many">Месячные через %d дней</item>
+        <item quantity="other">Месячные через %d дня</item>
+    </plurals>
+    <string name="today_headline_due">Месячные могут начаться в любой день</string>
+    <plurals name="today_headline_late">
+        <item quantity="one">Задержка %d день</item>
+        <item quantity="few">Задержка %d дня</item>
+        <item quantity="many">Задержка %d дней</item>
+        <item quantity="other">Задержка %d дня</item>
+    </plurals>
+
+    <!-- Supporting text -->
+    <string name="today_no_data_body">Нажмите «Месячные начались» в первый день месячных. Прошлые месячные можно добавить в календаре.</string>
+    <string name="today_next_expected">Следующие месячные ожидаются %1$s</string>
+    <string name="today_was_expected">Ожидались %1$s</string>
+    <string name="today_likely_range">Скорее всего, с %1$s по %2$s</string>
+    <string name="today_basis_with_confidence">%1$s · %2$s</string>
+    <string name="today_confidence_high">высокая точность</string>
+    <string name="today_confidence_medium">средняя точность</string>
+    <string name="today_confidence_low">низкая точность</string>
+    <string name="today_fertile_window">Примерное фертильное окно: с %1$s по %2$s</string>
+    <string name="today_fertile_disclaimer">Это лишь оценка. На неё нельзя полагаться для предохранения от беременности.</string>
+    <string name="today_basis_typical">Прогноз основан на вашем обычном цикле. Чем больше месячных вы отметите, тем точнее он станет.</string>
+    <plurals name="today_basis_history">
+        <item quantity="one">По данным последнего %d цикла</item>
+        <item quantity="few">По данным последних %d циклов</item>
+        <item quantity="many">По данным последних %d циклов</item>
+        <item quantity="other">По данным последних %d цикла</item>
+    </plurals>
+
+    <!-- Ring -->
+    <string name="today_ring_day_label">День цикла</string>
+    <string name="today_ring_of_about">из примерно %1$d</string>
+    <string name="today_ring_description">День цикла: %1$d из примерно %2$d.</string>
+    <string name="today_ring_description_phase">День цикла: %1$d из примерно %2$d. %3$s.</string>
+
+    <!-- Actions -->
+    <string name="today_action_start">Месячные начались</string>
+    <string name="today_action_end">Месячные закончились</string>
+    <string name="today_action_extend">Месячные ещё идут? Отметить сегодня</string>
+    <string name="today_logged">Месячные отмечены</string>
+    <string name="today_undo">Отменить</string>
+    <string name="today_end_title">Когда закончились месячные?</string>
+    <string name="today_end_today">Сегодня</string>
+    <string name="today_end_yesterday">Вчера</string>
+    <string name="today_cancel">Отмена</string>
+
+    <!-- Today's log -->
+    <string name="today_log_title">Записи дня</string>
+    <string name="today_log_empty">Как вы себя чувствуете? Отметьте симптомы, настроение, энергию и другое.</string>
+    <string name="today_log_add">Добавить</string>
+    <string name="today_log_edit">Изменить</string>
+
+    <!-- Phase cards -->
+    <string name="phase_menstrual">Менструальная фаза</string>
+    <string name="phase_menstrual_body">Уровень гормонов сейчас самый низкий, сил может быть меньше. При спазмах помогают отдых, тепло и лёгкая физическая активность.</string>
+    <string name="phase_follicular">Фолликулярная фаза</string>
+    <string name="phase_follicular_body">Уровень эстрогена растёт: организм готовится к выходу яйцеклетки. Многие замечают прилив сил и улучшение настроения.</string>
+    <string name="phase_ovulatory">Овуляторная фаза (оценка)</string>
+    <string name="phase_ovulatory_body">Примерное время овуляции. Некоторые замечают более прозрачные и тягучие выделения или покалывание с одной стороны. Это лишь оценка, на неё нельзя полагаться для предохранения от беременности.</string>
+    <string name="phase_luteal">Лютеиновая фаза</string>
+    <string name="phase_luteal_body">После овуляции растёт уровень прогестерона. За несколько дней до месячных возможны вздутие, болезненность груди и перепады настроения.</string>
+    <string name="phase_birth_control">Гормональная контрацепция</string>
+    <string name="phase_birth_control_body">Большинство гормональных контрацептивов подавляют овуляцию, поэтому Cadence не показывает фазы цикла и оценки овуляции. Вы по-прежнему можете отмечать кровотечения и видеть, когда их ожидать.</string>
+    <string name="phase_due">Со дня на день</string>
+    <string name="phase_due_body">Месячные ожидались примерно сейчас. Длина цикла естественным образом меняется на несколько дней от месяца к месяцу.</string>
+    <string name="phase_late">Задержка</string>
+    <string name="phase_late_body">Цикл может меняться по многим причинам: стресс, болезнь, поездки, изменение веса или физических нагрузок. Если возможна беременность, тест даст точный ответ.</string>
+    <string name="phase_welcome">Как работает Cadence</string>
+    <string name="phase_welcome_body">Каждый раз, когда вы отмечаете месячные, Cadence лучше узнаёт ваш ритм. После двух циклов прогнозы строятся на вашей собственной истории.</string>
+
+    <!-- Birth control and medications -->
+    <plurals name="today_headline_break_in">
+        <item quantity="one">Перерыв через %d день</item>
+        <item quantity="few">Перерыв через %d дня</item>
+        <item quantity="many">Перерыв через %d дней</item>
+        <item quantity="other">Перерыв через %d дня</item>
+    </plurals>
+    <string name="today_headline_pack_day">%1$d-й день упаковки</string>
+    <string name="today_headline_break_day">Перерыв: день %1$d из %2$d</string>
+    <string name="today_pack_ring_description">День %1$d упаковки из %2$d дней</string>
+    <string name="today_pack_of">из %1$d</string>
+    <string name="today_pack_break_label">Перерыв</string>
+    <string name="today_pack_continuous">При непрерывном приёме перерыва нет, поэтому Cadence не прогнозирует кровотечения. Отмечайте любые кровотечения как обычно.</string>
+    <string name="today_pack_in_break">Во время перерыва обычно бывает кровотечение отмены. Оно может быть скудным или не наступить вовсе.</string>
+    <string name="today_pack_next_break">Следующий перерыв: с %1$s по %2$s, в это время вероятно кровотечение</string>
+    <string name="today_dose_title">Контрацепция</string>
+    <string name="today_dose_nothing">Сегодня ничего делать не нужно.</string>
+    <string name="today_dose_done">✓ %1$s</string>
+    <string name="today_dose_mark_done">Готово</string>
+    <string name="today_dose_next">Далее: %1$s, %2$s</string>
+    <plurals name="today_missed_title">
+        <item quantity="one">%d доза не отмечена</item>
+        <item quantity="few">%d дозы не отмечены</item>
+        <item quantity="many">%d доз не отмечено</item>
+        <item quantity="other">%d дозы не отмечено</item>
+    </plurals>
+    <string name="today_missed_item">%1$s · %2$s</string>
+    <string name="today_missed_taken">Сделано</string>
+    <string name="today_missed_missed">Пропущено</string>
+    <string name="today_missed_advice">Если вы пропустили дозу, посмотрите инструкцию к препарату или спросите фармацевта, что делать. Может понадобиться дополнительная защита.</string>
+    <string name="today_medications_title">Лекарства</string>
+    <string name="today_medications_as_needed">По необходимости</string>
+    <string name="today_bc_setup_title">Используете таблетки, пластырь или кольцо?</string>
+    <string name="today_bc_setup_body">Добавьте их в настройках, чтобы отмечать приём, получать напоминания и видеть, когда вероятно кровотечение во время перерыва.</string>
+    <string name="today_bc_setup_action">Открыть настройки</string>
+
+    <!-- Educational cards: conservative, well-established facts only, with their source. -->
+    <string name="phase_learn_more">Подробнее</string>
+    <string name="phase_show_less">Свернуть</string>
+    <string name="phase_menstrual_more">Месячные обычно длятся от 2 до 7 дней, и большинство людей теряет всего несколько столовых ложек крови. Если кровотечение длится больше 7 дней или прокладку либо тампон приходится менять каждый час-два, об этом стоит рассказать врачу.</string>
+    <string name="phase_follicular_more">Эта фаза начинается в первый день месячных, когда в яичниках начинают созревать фолликулы. Её длительность меняется сильнее всего, поэтому циклы различаются у разных людей и от месяца к месяцу.</string>
+    <string name="phase_ovulatory_more">Яйцеклетка живёт около суток после выхода, а сперматозоиды могут сохраняться несколько дней, поэтому самые фертильные дни приходятся на время прямо перед овуляцией. Овуляция может смещаться от цикла к циклу, поэтому дата в Cadence — лишь оценка.</string>
+    <string name="phase_luteal_more">Эта фаза самая постоянная: обычно около 12–14 дней. Предменструальные симптомы, как правило, ослабевают с началом месячных. Если они мешают повседневной жизни, врач может помочь.</string>
+    <string name="phase_birth_control_more">Комбинированные таблетки, пластыри и кольца действуют в основном за счёт подавления овуляции. Кровотечение во время перерыва — это кровотечение отмены, вызванное снижением уровня гормонов, а не настоящие месячные. Многим можно безопасно пропускать перерывы, но прежде чем менять схему приёма, посоветуйтесь с врачом или фармацевтом.</string>
+    <string name="phase_source_periods">Источник: NHS (Национальная служба здравоохранения Великобритании), статьи «Periods» и «Heavy periods».</string>
+    <string name="phase_source_fertility">Источник: NHS (Национальная служба здравоохранения Великобритании), статья «Periods and fertility in the menstrual cycle».</string>
+    <string name="phase_source_pms">Источник: NHS (Национальная служба здравоохранения Великобритании), статьи «Periods and fertility in the menstrual cycle» и «PMS (premenstrual syndrome)».</string>
+    <string name="phase_source_contraception">Источник: NHS (Национальная служба здравоохранения Великобритании), статьи «Combined pill», «Contraceptive patch» и «Vaginal ring».</string>
+
+    <string name="today_greeting_morning">Доброе утро</string>
+    <string name="today_greeting_afternoon">Добрый день</string>
+    <string name="today_greeting_evening">Добрый вечер</string>
+    <string name="today_pack_day_label">День упаковки</string>
+    <string name="today_fertile_title">Фертильное окно</string>
+</resources>

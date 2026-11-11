@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="calendar_title">Календарь</string>
+    <string name="calendar_previous_month">Предыдущий месяц</string>
+    <string name="calendar_next_month">Следующий месяц</string>
+    <string name="calendar_jump_today">Сегодня</string>
+    <string name="calendar_hint">Нажмите на день, чтобы добавить или убрать день месячных.</string>
+    <string name="calendar_hint_log">Нажмите на день, чтобы посмотреть или изменить записи.</string>
+    <string name="calendar_edit_periods">Изменить дни месячных</string>
+    <string name="calendar_legend_logged">Есть записи</string>
+    <string name="calendar_legend_fertile">Фертильное окно (оценка)</string>
+    <string name="calendar_legend_ovulation">Овуляция (оценка)</string>
+    <string name="calendar_desc_fertile">примерное фертильное окно</string>
+    <string name="calendar_desc_ovulation">примерная овуляция</string>
+    <string name="calendar_fertile_disclaimer">Фертильное окно и овуляция рассчитаны приблизительно. На них нельзя полагаться для предохранения от беременности.</string>
+    <string name="calendar_desc_has_log">есть записи</string>
+    <string name="calendar_open_log">Открыть записи</string>
+    <string name="calendar_legend_period">Месячные</string>
+    <string name="calendar_legend_predicted">Прогноз месячных</string>
+    <string name="calendar_legend_today">Сегодня</string>
+    <string name="calendar_state_period">День месячных</string>
+    <string name="calendar_state_not_period">Не день месячных</string>
+    <string name="calendar_desc_predicted">прогноз месячных</string>
+    <string name="calendar_desc_today">сегодня</string>
+</resources>

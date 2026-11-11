@@ -117,4 +117,10 @@
     <string name="phase_source_fertility">Source: NHS, \"Periods and fertility in the menstrual cycle\".</string>
     <string name="phase_source_pms">Source: NHS, \"Periods and fertility in the menstrual cycle\" and \"PMS (premenstrual syndrome)\".</string>
     <string name="phase_source_contraception">Source: NHS, \"Combined pill\", \"Contraceptive patch\" and \"Vaginal ring\".</string>
+    <!-- Redesign -->
+    <string name="today_greeting_morning">Good morning</string>
+    <string name="today_greeting_afternoon">Good afternoon</string>
+    <string name="today_greeting_evening">Good evening</string>
+    <string name="today_pack_day_label">Pack day</string>
+    <string name="today_fertile_title">Fertile window</string>
 </resources>

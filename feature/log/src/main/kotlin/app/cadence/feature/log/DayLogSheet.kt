@@ -43,6 +43,7 @@ import app.cadence.core.domain.model.MenstrualFlow
 import app.cadence.core.ui.components.ScaleSelector
 import app.cadence.core.ui.components.SectionHeader
 import app.cadence.core.ui.format.DateSkeletons
+import app.cadence.core.ui.format.formatHeading
 import app.cadence.core.ui.format.rememberDateFormatter
 import app.cadence.core.ui.log.LogLabels
 import app.cadence.core.ui.theme.CadenceTheme
@@ -180,7 +181,7 @@ private fun Header(
                             R.string.log_today,
                         )
                     } else {
-                        rememberDateFormatter(DateSkeletons.WEEKDAY_DAY_MONTH).format(date)
+                        rememberDateFormatter(DateSkeletons.WEEKDAY_DAY_MONTH).formatHeading(date)
                     },
                 style = MaterialTheme.typography.titleLarge,
                 modifier = Modifier.semantics { heading() },

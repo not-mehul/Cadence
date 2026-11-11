@@ -1,0 +1,166 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="settings_title">Настройки</string>
+
+    <string name="settings_section_cycle">Ваш цикл</string>
+    <string name="settings_cycle_length">Обычная длина цикла</string>
+    <string name="settings_period_length">Обычная длительность месячных</string>
+    <string name="settings_cycle_defaults_note">Используется для прогнозов, пока вы не отметите два цикла.</string>
+    <string name="settings_cycle_length_label">длина цикла</string>
+    <string name="settings_period_length_label">длительность месячных</string>
+    <string name="settings_mode">Режим</string>
+    <string name="settings_mode_track">Отслеживание естественного цикла</string>
+    <string name="settings_mode_track_detail">Показывает фазы цикла и примерную дату овуляции.</string>
+    <string name="settings_mode_birth_control">Гормональная контрацепция</string>
+    <string name="settings_mode_birth_control_detail">Скрывает оценки овуляции и фазы: при контрацепции они неприменимы.</string>
+
+    <string name="settings_section_log">Ежедневные записи</string>
+    <string name="settings_log_categories">Что отслеживать</string>
+    <plurals name="settings_log_categories_value">
+        <item quantity="one">Показано: %1$d из %2$d категории</item>
+        <item quantity="few">Показано: %1$d из %2$d категорий</item>
+        <item quantity="many">Показано: %1$d из %2$d категорий</item>
+        <item quantity="other">Показано: %1$d из %2$d категории</item>
+    </plurals>
+    <string name="settings_log_categories_note">Скрытые категории не показываются в ежедневных записях. Всё, что вы уже отметили, сохраняется.</string>
+
+    <string name="settings_section_reminders">Напоминания</string>
+    <string name="settings_reminder_period">Скоро месячные</string>
+    <plurals name="settings_reminder_period_detail">
+        <item quantity="one">Напоминание за %d день до ожидаемой даты</item>
+        <item quantity="few">Напоминание за %d дня до ожидаемой даты</item>
+        <item quantity="many">Напоминание за %d дней до ожидаемой даты</item>
+        <item quantity="other">Напоминание за %d дня до ожидаемой даты</item>
+    </plurals>
+    <string name="settings_reminder_days_before">За сколько дней</string>
+    <plurals name="settings_reminder_days_value">
+        <item quantity="one">%d день</item>
+        <item quantity="few">%d дня</item>
+        <item quantity="many">%d дней</item>
+        <item quantity="other">%d дня</item>
+    </plurals>
+    <string name="settings_reminder_late">Задержка месячных</string>
+    <string name="settings_reminder_late_detail">Напоминание, если месячные не начались в ожидаемый срок</string>
+    <string name="settings_reminder_period_time">Время напоминаний о месячных</string>
+    <string name="settings_reminder_daily">Ежедневное напоминание</string>
+    <string name="settings_reminder_daily_detail">Напомнит отметить самочувствие</string>
+    <string name="settings_reminder_daily_time">Время напоминания</string>
+    <string name="settings_reminder_discreet">Скрытные уведомления и виджет</string>
+    <string name="settings_reminder_discreet_detail">В уведомлениях написано только «Пора заглянуть», а виджет показывает только номер дня, поэтому на экране нет ничего личного</string>
+    <string name="settings_reminder_notifications_off">Уведомления для Cadence отключены, поэтому напоминания не появятся.</string>
+    <string name="settings_reminder_open_settings">Включить уведомления</string>
+    <string name="settings_reminder_battery">Некоторые телефоны приостанавливают приложения в фоне, из-за чего напоминания могут приходить с опозданием.</string>
+    <string name="settings_reminder_battery_action">Настройки батареи</string>
+
+    <string name="settings_section_appearance">Оформление</string>
+    <string name="settings_theme">Тема</string>
+    <string name="settings_theme_system">Как в системе</string>
+    <string name="settings_theme_light">Светлая</string>
+    <string name="settings_theme_dark">Тёмная</string>
+
+    <string name="settings_section_privacy">Приватность</string>
+    <string name="settings_section_data">Ваши данные</string>
+    <string name="settings_privacy_statement">Все ваши записи хранятся только на этом телефоне, в зашифрованной базе данных. У Cadence нет доступа в интернет, аккаунтов и аналитики.</string>
+    <string name="settings_lock">Блокировка приложения</string>
+    <string name="settings_lock_detail">Запрашивать отпечаток пальца, лицо или блокировку экрана при открытии Cadence</string>
+    <string name="settings_lock_prompt">Подтвердите, что это вы</string>
+    <string name="settings_lock_timeout">Блокировать снова</string>
+    <string name="settings_lock_immediately">Сразу после выхода из приложения</string>
+    <string name="settings_lock_1_minute">Через 1 минуту после выхода</string>
+    <string name="settings_lock_5_minutes">Через 5 минут после выхода</string>
+    <string name="settings_lock_unavailable_title">Сначала настройте блокировку экрана</string>
+    <string name="settings_lock_unavailable_body">Блокировка приложения использует отпечаток пальца, лицо или блокировку экрана вашего телефона. Настройте один из способов в настройках телефона и попробуйте снова.</string>
+    <string name="settings_block_screenshots">Запретить снимки экрана</string>
+    <string name="settings_block_screenshots_detail">Также скрывает Cadence в списке недавних приложений</string>
+    <string name="settings_privacy_explainer">Как Cadence защищает ваши данные</string>
+    <string name="settings_privacy_explainer_detail">Что хранится, где и кто может это увидеть</string>
+    <string name="settings_ok">ОК</string>
+    <string name="privacy_point_device">Все ваши записи остаются на этом телефоне. Нет ни аккаунта, ни сервера, поэтому ничего никуда не отправляется.</string>
+    <string name="privacy_point_encrypted">Данные хранятся в зашифрованной базе. Ключ находится в защищённом аппаратном хранилище телефона и никогда его не покидает.</string>
+    <string name="privacy_point_no_internet">У Cadence вообще нет разрешения на доступ в интернет, поэтому приложение не может передать ваши данные даже по ошибке. Рекламы и аналитики нет.</string>
+    <string name="privacy_point_no_backup">Cadence исключён из облачного резервного копирования Android и переноса данных между телефонами. Чтобы перейти на новый телефон, экспортируйте файл резервной копии и восстановите данные из него.</string>
+    <string name="privacy_point_lock">Блокировка приложения запрашивает отпечаток пальца, лицо или блокировку экрана. Снимки экрана и предпросмотр в недавних приложениях запрещены, пока вы это не отключите.</string>
+    <string name="privacy_point_notifications">Напоминания по умолчанию скрытные: в них написано только «Пора заглянуть», а на экране блокировки никогда не показывается больше.</string>
+    <string name="privacy_point_widget">Виджет на главном экране показывает только номер дня, пока вы не отключите скрытный режим, и ничего не показывает при включённой блокировке приложения. Можно также сменить значок на нейтральный «Ежедневник».</string>
+    <string name="privacy_point_health_connect">Передача данных в Health Connect выключена, пока вы её не включите. Когда она включена, Cadence копирует дни месячных в Health Connect на этом телефоне, где их могут читать приложения, которым вы это разрешили.</string>
+    <string name="privacy_point_exports">Резервные копии, таблицы и отчёты — это файлы, место сохранения которых выбираете вы. Резервную копию без пароля может прочитать любой, у кого есть файл.</string>
+    <string name="privacy_point_delete">«Удалить все данные» стирает всё, что Cadence хранит на этом телефоне.</string>
+
+    <string name="settings_delete_all">Удалить все данные</string>
+    <string name="settings_delete_all_detail">Стереть все месячные и настройки на этом телефоне</string>
+    <string name="settings_delete_title">Удалить все данные?</string>
+    <string name="settings_delete_body">Все месячные и настройки, которые Cadence хранит на этом телефоне, будут стёрты навсегда. Это действие нельзя отменить.</string>
+    <string name="settings_delete_confirm">Удалить всё</string>
+
+    <string name="settings_section_about">О приложении</string>
+    <string name="settings_version">Версия %1$s</string>
+    <string name="settings_updates">Cadence не может проверять обновления: у приложения нет доступа в интернет. Новые версии публикуются на GitHub. Чтобы обновиться, установите новый APK поверх текущего — ваши данные сохранятся.</string>
+    <string name="settings_updates_open">Открыть страницу с версиями</string>
+    <string name="settings_certificate">Сертификат подписи (SHA-256). В описании каждой версии указан тот же отпечаток, поэтому вы можете проверить подлинность APK:</string>
+    <string name="settings_disclaimer">Cadence не является медицинским изделием, и его нельзя использовать как средство контрацепции. Прогнозы приблизительны. По любым вопросам о здоровье обращайтесь к врачу.</string>
+
+    <string name="settings_save">Сохранить</string>
+    <string name="settings_cancel">Отмена</string>
+
+    <!-- Birth control, medications, custom tags -->
+    <string name="settings_bc">Ваша контрацепция</string>
+    <string name="settings_bc_none">Таблетки, пластырь или кольцо не указаны. Нажмите, чтобы настроить.</string>
+    <string name="settings_bc_reminder">Напоминание о контрацепции</string>
+    <string name="settings_bc_reminder_detail">В дни, когда нужно принять таблетку или сменить пластырь либо кольцо</string>
+    <string name="settings_bc_reminder_time">Время напоминания о контрацепции</string>
+    <string name="settings_bc_other">Другое (спираль, имплант, инъекции)</string>
+    <string name="settings_bc_other_detail">Cadence не будет следовать схеме приёма. Оценки овуляции останутся выключены, а месячные прогнозируются по отмеченным кровотечениям.</string>
+    <string name="settings_bc_patch_free_week">Неделя без пластыря после 3 пластырей</string>
+    <string name="settings_bc_active_pills">Активные таблетки в упаковке</string>
+    <string name="settings_bc_ring_days">Дни с кольцом</string>
+    <string name="settings_bc_break_days">Дни перерыва или плацебо</string>
+    <string name="settings_bc_placebo">Таблетки-плацебо во время перерыва</string>
+    <string name="settings_bc_day_today">Какой сегодня день упаковки?</string>
+    <string name="settings_bc_day_value">День %1$d</string>
+    <string name="settings_bc_break_note">Во время перерыва обычно бывает кровотечение отмены, поэтому Cadence ожидает его в это время, а не строит прогноз по вашим циклам. Принимайте препарат по инструкции или по рекомендации врача.</string>
+    <string name="settings_bc_continuous_note">Без перерыва кровотечения не идут по расписанию, поэтому Cadence их не прогнозирует. Отмечайте любые кровотечения как обычно.</string>
+    <string name="settings_reminder_on_schedule">Напоминания о месячных отключены, пока Cadence следует схеме приёма таблеток, пластыря или кольца: кровотечения зависят от упаковки.</string>
+
+    <string name="settings_section_medications">Лекарства</string>
+    <string name="settings_medication_add">Добавить лекарство</string>
+    <string name="settings_medication_add_detail">Обезболивающие, витамины и всё, что вы хотите отслеживать</string>
+    <string name="settings_medication_edit">Изменить лекарство</string>
+    <string name="settings_medication_name">Название</string>
+    <string name="settings_medication_daily">Каждый день</string>
+    <string name="settings_medication_daily_at">Каждый день, напоминание в %1$s</string>
+    <string name="settings_medication_as_needed">По необходимости</string>
+    <string name="settings_medication_stopped">Сейчас не принимаю</string>
+    <string name="settings_medication_reminder">Ежедневное напоминание</string>
+    <string name="settings_medication_reminder_at">Напоминать в %1$s</string>
+    <string name="settings_medication_active">Принимаю сейчас</string>
+    <string name="settings_medication_delete">Удалить лекарство</string>
+    <string name="settings_medication_delete_title">Удалить «%1$s»?</string>
+    <string name="settings_medication_delete_body">Дни, когда вы его отмечали, тоже будут удалены. Чтобы сохранить их, просто отключите «Принимаю сейчас».</string>
+
+    <string name="settings_tags">Ваши метки</string>
+    <string name="settings_tags_none">Пока нет. Добавьте свои, например «Поездка» или «Спортзал».</string>
+    <plurals name="settings_tags_count">
+        <item quantity="one">%d метка</item>
+        <item quantity="few">%d метки</item>
+        <item quantity="many">%d меток</item>
+        <item quantity="other">%d метки</item>
+    </plurals>
+    <string name="settings_tags_detail">Добавленные метки появляются в ежедневных записях рядом с симптомами и настроением.</string>
+    <string name="settings_tags_new">Новая метка</string>
+    <string name="settings_tags_edit">Изменить метку</string>
+    <string name="settings_tags_label">Метка</string>
+    <string name="settings_tags_delete">Удалить метку</string>
+    <string name="settings_tags_delete_title">Удалить «%1$s»?</string>
+    <string name="settings_tags_delete_body">Она будет убрана из всех дней, где вы её отмечали.</string>
+    <string name="settings_delete">Удалить</string>
+    <string name="settings_done">Готово</string>
+    <string name="settings_app_icon">Значок приложения</string>
+    <string name="settings_app_icon_standard">Cadence</string>
+    <string name="settings_app_icon_standard_detail">Обычные значок и название</string>
+    <string name="settings_app_icon_discreet">Скрытный: «Ежедневник»</string>
+    <string name="settings_app_icon_discreet_detail">Нейтральный значок блокнота с названием «Ежедневник». Главному экрану может понадобиться немного времени на обновление, и значок, возможно, придётся добавить заново.</string>
+    <string name="settings_font_credit">Заголовки набраны шрифтом Lora, который распространяется по лицензии SIL Open Font License.</string>
+    <string name="settings_language">Язык</string>
+    <string name="settings_language_system">Как на телефоне</string>
+    <string name="settings_language_follows_phone">Используется язык телефона. Нажмите, чтобы открыть языковые настройки телефона.</string>
+</resources>

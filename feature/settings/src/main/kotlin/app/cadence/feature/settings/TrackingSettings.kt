@@ -266,11 +266,7 @@ internal fun MedicationsSection(
 ) {
     // Null: closed; id 0: adding a new one.
     var editingId by rememberSaveable { mutableStateOf<Long?>(null) }
-    Column {
-        SectionHeader(
-            stringResource(R.string.settings_section_medications),
-            Modifier.padding(horizontal = CadenceTheme.spacing.screenGutter),
-        )
+    SettingsSection(stringResource(R.string.settings_section_medications)) {
         medications.forEach { medication ->
             SettingRow(title = medication.name, value = medicationSummary(medication), onClick = {
                 editingId =

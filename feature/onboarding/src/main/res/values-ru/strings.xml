@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="onboarding_progress">Шаг %1$d из %2$d</string>
+    <string name="onboarding_back">Назад</string>
+    <string name="onboarding_next">Далее</string>
+    <string name="onboarding_finish">Готово</string>
+
+    <string name="onboarding_welcome_title">Добро пожаловать в Cadence</string>
+    <string name="onboarding_welcome_body">Отслеживайте месячные и узнавайте, когда, скорее всего, начнутся следующие.</string>
+    <string name="onboarding_welcome_private_title">Приватность по умолчанию</string>
+    <string name="onboarding_welcome_private_body">Все данные хранятся только на этом телефоне в зашифрованном виде. У Cadence нет доступа в интернет, аккаунтов и рекламы.</string>
+    <string name="onboarding_welcome_disclaimer">Cadence показывает приблизительные оценки, а не медицинские рекомендации. Его нельзя использовать как средство контрацепции.</string>
+    <string name="onboarding_get_started">Начать</string>
+
+    <string name="onboarding_last_period_title">Когда начались последние месячные?</string>
+    <string name="onboarding_last_period_body">Выберите первый день кровотечения. Можно примерно.</string>
+    <string name="onboarding_last_period_skip">Не помню</string>
+
+    <string name="onboarding_cycle_title">Сколько обычно длится ваш цикл?</string>
+    <string name="onboarding_cycle_body">Считайте от первого дня одних месячных до первого дня следующих. Чаще всего цикл длится от 24 до 38 дней.</string>
+    <string name="onboarding_cycle_label">длина цикла</string>
+
+    <string name="onboarding_period_title">Сколько дней обычно длятся месячные?</string>
+    <string name="onboarding_period_body">Чаще всего месячные длятся от 2 до 8 дней.</string>
+    <string name="onboarding_period_label">длительность месячных</string>
+
+    <string name="onboarding_not_sure">Не знаю</string>
+
+    <string name="onboarding_goal_title">Вы используете гормональную контрацепцию?</string>
+    <string name="onboarding_goal_body">Например, таблетки, пластырь, кольцо, имплант, инъекции или гормональную спираль. Это можно изменить позже в настройках.</string>
+    <string name="onboarding_goal_track">Нет, отслеживать естественный цикл</string>
+    <string name="onboarding_goal_track_detail">Вы увидите фазы цикла и примерную дату овуляции.</string>
+    <string name="onboarding_goal_birth_control">Да, я использую гормональную контрацепцию</string>
+    <string name="onboarding_goal_birth_control_detail">Оценки овуляции скрыты, потому что они к вам не относятся.</string>
+</resources>

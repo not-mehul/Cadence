@@ -1,12 +1,16 @@
 package app.cadence.feature.insights
 
+import androidx.annotation.DrawableRes
 import androidx.annotation.StringRes
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.selection.toggleable
@@ -22,6 +26,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
@@ -35,6 +40,8 @@ import app.cadence.core.domain.cycles.PredictionBasis
 import app.cadence.core.domain.patterns.PatternTiming
 import app.cadence.core.domain.patterns.SymptomPattern
 import app.cadence.core.ui.components.CadenceCard
+import app.cadence.core.ui.components.CardHeader
+import app.cadence.core.ui.components.ScreenTitle
 import app.cadence.core.ui.format.DateSkeletons
 import app.cadence.core.ui.format.rememberDateFormatter
 import app.cadence.core.ui.log.LogLabels
@@ -70,11 +77,7 @@ fun InsightsContent(
             .padding(horizontal = spacing.screenGutter, vertical = spacing.lg),
         verticalArrangement = Arrangement.spacedBy(spacing.lg),
     ) {
-        Text(
-            stringResource(R.string.insights_title),
-            style = MaterialTheme.typography.headlineMedium,
-            modifier = Modifier.semantics { heading() },
-        )
+        ScreenTitle(stringResource(R.string.insights_title))
         if (state.cycles.isEmpty()) {
             EmptyState(hasPeriod = state.currentCycle != null)
         } else {
@@ -90,7 +93,10 @@ fun InsightsContent(
 @Composable
 private fun EmptyState(hasPeriod: Boolean) {
     CadenceCard {
-        CardTitle(stringResource(if (hasPeriod) R.string.insights_first_cycle_title else R.string.insights_empty_title))
+        CardTitle(
+            stringResource(if (hasPeriod) R.string.insights_first_cycle_title else R.string.insights_empty_title),
+            UiR.drawable.ic_pattern,
+        )
         Text(
             stringResource(if (hasPeriod) R.string.insights_first_cycle_body else R.string.insights_empty_body),
             style = MaterialTheme.typography.bodyMedium,
@@ -99,11 +105,15 @@ private fun EmptyState(hasPeriod: Boolean) {
 }
 
 @Composable
-private fun CardTitle(text: String) {
-    Text(
+private fun CardTitle(
+    text: String,
+    @DrawableRes icon: Int,
+) {
+    CardHeader(
         text,
-        style = MaterialTheme.typography.titleMedium,
-        modifier = Modifier.padding(bottom = CadenceTheme.spacing.xs).semantics { heading() },
+        icon = painterResource(icon),
+        accent = MaterialTheme.colorScheme.secondary,
+        accentContainer = MaterialTheme.colorScheme.secondaryContainer,
     )
 }
 
@@ -116,7 +126,10 @@ private fun SummaryTiles(state: InsightsUiState.Ready) {
     val none = stringResource(R.string.insights_no_value)
     val prediction = state.prediction
     Column(verticalArrangement = Arrangement.spacedBy(CadenceTheme.spacing.md)) {
-        Row(horizontalArrangement = Arrangement.spacedBy(CadenceTheme.spacing.md)) {
+        Row(
+            Modifier.height(IntrinsicSize.Max),
+            horizontalArrangement = Arrangement.spacedBy(CadenceTheme.spacing.md),
+        ) {
             StatTile(
                 label = stringResource(R.string.insights_average_cycle),
                 value = stats.averageCycleLength?.let { days(it.roundToInt()) } ?: none,
@@ -135,7 +148,10 @@ private fun SummaryTiles(state: InsightsUiState.Ready) {
                 modifier = Modifier.weight(1f),
             )
         }
-        Row(horizontalArrangement = Arrangement.spacedBy(CadenceTheme.spacing.md)) {
+        Row(
+            Modifier.height(IntrinsicSize.Max),
+            horizontalArrangement = Arrangement.spacedBy(CadenceTheme.spacing.md),
+        ) {
             StatTile(
                 label = stringResource(R.string.insights_variation),
                 value = stats.variation?.let { days(it) } ?: none,
@@ -174,9 +190,9 @@ private fun StatTile(
     detail: String?,
     modifier: Modifier = Modifier,
 ) {
-    CadenceCard(modifier) {
+    CadenceCard(modifier.fillMaxHeight()) {
         Text(label, style = MaterialTheme.typography.labelLarge, color = MaterialTheme.colorScheme.onSurfaceVariant)
-        Text(value, style = MaterialTheme.typography.headlineSmall)
+        Text(value, style = MaterialTheme.typography.headlineSmall, color = MaterialTheme.colorScheme.primary)
         if (detail != null) {
             Text(detail, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
         }
@@ -191,7 +207,7 @@ private fun ChartCard(cycles: List<CycleRow>) {
     val description =
         stringResource(R.string.insights_chart_description, cycles.joinToString(", ") { it.lengthDays.toString() })
     CadenceCard {
-        CardTitle(stringResource(R.string.insights_chart_title))
+        CardTitle(stringResource(R.string.insights_chart_title), UiR.drawable.ic_chart)
         CycleLengthChart(
             cycles = cycles,
             selectedIndex = selected,
@@ -218,7 +234,7 @@ private fun ChartCard(cycles: List<CycleRow>) {
 @Composable
 private fun FlagsCard(flags: List<HealthFlag>) {
     CadenceCard {
-        CardTitle(stringResource(R.string.insights_flags_title))
+        CardTitle(stringResource(R.string.insights_flags_title), UiR.drawable.ic_notice)
         Column(verticalArrangement = Arrangement.spacedBy(CadenceTheme.spacing.md)) {
             flags.forEach { flag ->
                 val (title, body) = flagCopy(flag)
@@ -276,7 +292,7 @@ private fun HistoryCard(
 ) {
     val dateFormat = rememberDateFormatter(DateSkeletons.DAY_MONTH_SHORT)
     CadenceCard {
-        CardTitle(stringResource(R.string.insights_history_title))
+        CardTitle(stringResource(R.string.insights_history_title), UiR.drawable.ic_history)
         state.currentCycle?.let { current ->
             Text(stringResource(R.string.insights_current_cycle), style = MaterialTheme.typography.bodyLarge)
             Text(
@@ -342,7 +358,7 @@ private fun PatternsCard(
     tagLabels: Map<Long, String>,
 ) {
     CadenceCard {
-        CardTitle(stringResource(R.string.insights_patterns_title))
+        CardTitle(stringResource(R.string.insights_patterns_title), UiR.drawable.ic_pattern)
         if (patterns.isEmpty()) {
             Text(stringResource(R.string.insights_patterns_empty), style = MaterialTheme.typography.bodyMedium)
             return@CadenceCard

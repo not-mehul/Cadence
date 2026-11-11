@@ -17,6 +17,7 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.heading
@@ -31,11 +32,16 @@ import app.cadence.core.domain.log.DayEntry
 import app.cadence.core.domain.model.CyclePhase
 import app.cadence.core.domain.model.Goal
 import app.cadence.core.ui.components.CadenceCard
+import app.cadence.core.ui.components.CardHeader
 import app.cadence.core.ui.components.CycleRing
+import app.cadence.core.ui.components.PhaseStyle
+import app.cadence.core.ui.components.PhaseStyles
 import app.cadence.core.ui.components.RingSegment
+import app.cadence.core.ui.contraception.ContraceptionLabels
 import app.cadence.core.ui.log.LogLabels
 import app.cadence.core.ui.theme.CadenceTheme
 import app.cadence.core.ui.theme.CycleColors
+import app.cadence.core.ui.R as UiR
 
 @Composable
 internal fun headline(status: CycleStatus): String =
@@ -223,14 +229,73 @@ internal fun TodayRing(
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
-            if (phase != null) {
-                Text(
-                    stringResource(phaseName(phase)),
-                    style = MaterialTheme.typography.labelLarge,
-                    color = MaterialTheme.colorScheme.primary,
-                    modifier = Modifier.padding(top = CadenceTheme.spacing.xs),
-                )
-            }
+        }
+    }
+}
+
+/** The look of the hero: the current phase, the pack, or neutral when neither applies. */
+@Composable
+internal fun heroStyle(
+    snapshot: CycleSnapshot,
+    onSchedule: Boolean,
+): PhaseStyle {
+    val pack = snapshot.pack
+    return when {
+        snapshot.phase != null -> {
+            PhaseStyles.of(snapshot.phase)
+        }
+
+        onSchedule && pack != null -> {
+            PhaseStyles.pack(pack.inBreak)
+        }
+
+        snapshot.status is CycleStatus.Late || snapshot.status is CycleStatus.Due -> {
+            PhaseStyles.neutral(
+                UiR.drawable.ic_clock,
+            )
+        }
+
+        else -> {
+            PhaseStyles.neutral()
+        }
+    }
+}
+
+/** The chip above the ring; null when there's nothing to name yet. */
+@Composable
+internal fun heroLabel(
+    snapshot: CycleSnapshot,
+    birthControl: BirthControlToday?,
+): String? {
+    val phase = snapshot.phase
+    val pack = snapshot.pack
+    return when {
+        phase != null -> {
+            stringResource(phaseName(phase))
+        }
+
+        birthControl != null && pack != null -> {
+            stringResource(
+                if (pack.inBreak) {
+                    R.string.today_pack_break_label
+                } else {
+                    ContraceptionLabels.method(
+                        birthControl.schedule.method,
+                    )
+                },
+            )
+        }
+
+        snapshot.status is CycleStatus.Late -> {
+            stringResource(R.string.phase_late)
+        }
+
+        snapshot.status is CycleStatus.Due -> {
+            stringResource(R.string.phase_due)
+        }
+
+        else -> {
+            null
         }
     }
 }
@@ -272,12 +337,12 @@ internal fun TodayLogCard(
 ) {
     val items = LogLabels.summary(entry, tagLabels)
     CadenceCard(modifier) {
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            Text(
-                stringResource(R.string.today_log_title),
-                style = MaterialTheme.typography.titleMedium,
-                modifier = Modifier.weight(1f).semantics { heading() },
-            )
+        CardHeader(
+            stringResource(R.string.today_log_title),
+            icon = painterResource(UiR.drawable.ic_log),
+            accent = MaterialTheme.colorScheme.tertiary,
+            accentContainer = MaterialTheme.colorScheme.tertiaryContainer,
+        ) {
             TextButton(onClick = onOpen) {
                 Text(stringResource(if (items.isEmpty()) R.string.today_log_add else R.string.today_log_edit))
             }

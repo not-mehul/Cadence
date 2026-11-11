@@ -6,10 +6,11 @@ A simple, private period-tracking companion app for **Android**, built natively 
 - **Encrypted:** data is stored in a SQLCipher database whose key is protected by the Android Keystore.
 - **Two modes:** cycle tracking, and hormonal birth control (follows your pill, patch or ring schedule, with dose check-off and reminders).
 - **Sideloaded:** distributed as an APK; no Play Store required.
+- **In English and Russian:** it follows your phone's language, and on Android 13 and later you can choose one for Cadence alone in Settings → Appearance → Language.
 
-> **Status:** Phases 0 (foundation), 1 (MVP: onboarding, one-tap period logging, predictions, calendar, settings) 2 (daily logging: symptoms, mood, pain, energy, sleep, stress, sex, notes) 3 (confidence-ranged predictions, fertile window, Insights with health flags), 4 (discreet reminders) 5 (app lock, screenshot blocking, password-protected backup and restore, CSV export, clinician PDF report) 6 (pill, patch and ring schedules with dose check-off, missed-dose prompts and reminders; medications; custom tags; symptom patterns) and 7 (signed release pipeline, accessibility and localization pass, phase cards, discreet widget and icon, Health Connect) are done. See [`docs/PLAN.md`](docs/PLAN.md) for the feature inventory, architecture, data model, prediction engine and phased roadmap.
+> **Status:** Phases 0 (foundation), 1 (MVP: onboarding, one-tap period logging, predictions, calendar, settings) 2 (daily logging: symptoms, mood, pain, energy, sleep, stress, sex, notes) 3 (confidence-ranged predictions, fertile window, Insights with health flags), 4 (discreet reminders) 5 (app lock, screenshot blocking, password-protected backup and restore, CSV export, clinician PDF report) 6 (pill, patch and ring schedules with dose check-off, missed-dose prompts and reminders; medications; custom tags; symptom patterns) and 7 (signed release pipeline, accessibility and localization pass, phase cards, discreet widget and icon, Health Connect) are done, followed by a visual redesign and a Russian translation. See [`docs/PLAN.md`](docs/PLAN.md) for the feature inventory, architecture, data model, prediction engine and phased roadmap.
 
-![Phase 7: a phase card with its source, Settings with the app icon choice and About, and the widget, discreet and detailed](docs/images/phase7-ui.png)
+![Today in the luteal and menstrual phases and in the dark theme, the calendar, Insights, and Today and Settings in Russian](docs/images/redesign-ui.png)
 
 ## Project layout
 
@@ -18,7 +19,7 @@ A simple, private period-tracking companion app for **Android**, built natively 
 | `:app` | Activity, navigation shell, Hilt setup, manifest and privacy settings |
 | `:core:domain` | Pure Kotlin cycle logic (no Android dependency), 100% coverage enforced |
 | `:core:data` | Room on SQLCipher, Keystore-wrapped database key, DAOs, migrations |
-| `:core:ui` | Cadence theme (fixed palette, contrast-tested), cycle ring, stepper, shared composables |
+| `:core:ui` | Cadence theme (fixed palette, contrast-tested, Lora headings), phase styles and glyphs, hero card, cycle ring, cards, shared composables |
 | `:core:testing` | Fake repositories and test rules shared by feature and app tests |
 | `:feature:*` | Onboarding, Today, Calendar, daily log sheet, Insights, Settings, reminders (alarms and notifications), backup (backup and restore, CSV, clinician PDF), home-screen widget, Health Connect |
 | `build-logic/` | Gradle convention plugins shared by all modules |
@@ -52,7 +53,7 @@ CI (`.github/workflows/ci.yml`) runs all of the above. It also runs device tests
    After installing, **Settings → About** shows the signing certificate's fingerprint. It must match the one in the release notes, and it is the same for every release.
 3. Open the APK on your phone, and allow your browser or file manager to **install unknown apps** when Android asks. You can turn that permission off again afterwards.
 4. **To update**, install a newer APK over the existing one. Your data is kept. Cadence can't check for updates itself, because it has no internet access, so look at the Releases page now and then.
-5. **To move to a new phone**, use **Settings → Privacy and data → Export a backup**, copy the file across, and tap **Restore from a backup** on the new phone's welcome screen. Android's own cloud backup and phone transfer deliberately skip Cadence.
+5. **To move to a new phone**, use **Settings → Your data → Export a backup**, copy the file across, and tap **Restore from a backup** on the new phone's welcome screen. Android's own cloud backup and phone transfer deliberately skip Cadence.
 
 Debug builds (from CI or `assembleDebug`) install as **Cadence (debug)** with the ID `app.cadence.debug`, so they can sit alongside a release build.
 

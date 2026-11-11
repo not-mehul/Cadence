@@ -15,6 +15,7 @@ import androidx.annotation.StringRes
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -63,6 +64,8 @@ import app.cadence.core.domain.model.UserSettings
 import app.cadence.core.domain.reminders.ReminderSettings
 import app.cadence.core.domain.security.SecuritySettings
 import app.cadence.core.ui.components.DayCountStepper
+import app.cadence.core.ui.components.GroupCard
+import app.cadence.core.ui.components.ScreenTitle
 import app.cadence.core.ui.components.SectionHeader
 import app.cadence.core.ui.log.LogLabels
 import app.cadence.core.ui.security.DeviceAuth
@@ -213,7 +216,7 @@ private fun readReminderStatus(context: Context): ReminderStatus {
     )
 }
 
-private fun Context.openSettings(intent: Intent) {
+internal fun Context.openSettings(intent: Intent) {
     try {
         startActivity(intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
     } catch (_: ActivityNotFoundException) {
@@ -249,96 +252,111 @@ fun SettingsContent(
     val defaults = settings.cycleDefaults
     val gutter = CadenceTheme.spacing.screenGutter
 
-    Column(modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(vertical = CadenceTheme.spacing.lg)) {
-        SectionHeader(stringResource(R.string.settings_section_cycle), Modifier.padding(horizontal = gutter))
-        SettingRow(
-            title = stringResource(R.string.settings_cycle_length),
-            value = pluralStringResource(UiR.plurals.days_count, defaults.cycleLength, defaults.cycleLength),
-            onClick = { dialog = SettingsDialog.CYCLE_LENGTH },
-        )
-        SettingRow(
-            title = stringResource(R.string.settings_period_length),
-            value = pluralStringResource(UiR.plurals.days_count, defaults.periodLength, defaults.periodLength),
-            onClick = { dialog = SettingsDialog.PERIOD_LENGTH },
-        )
-        Note(stringResource(R.string.settings_cycle_defaults_note))
-        SettingRow(
-            title = stringResource(R.string.settings_mode),
-            value = stringResource(goalLabel(settings.goal)),
-            onClick = { dialog = SettingsDialog.MODE },
-        )
-        if (settings.goal == Goal.BIRTH_CONTROL) {
-            BirthControlRows(settings.contraception, tracking.today, actions, reminderStatus.notificationsAllowed)
+    Column(
+        modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(vertical = CadenceTheme.spacing.lg),
+        verticalArrangement = Arrangement.spacedBy(CadenceTheme.spacing.sm),
+    ) {
+        ScreenTitle(stringResource(R.string.settings_title), Modifier.padding(horizontal = gutter))
+
+        SettingsSection(stringResource(R.string.settings_section_cycle)) {
+            SettingRow(
+                title = stringResource(R.string.settings_cycle_length),
+                value = pluralStringResource(UiR.plurals.days_count, defaults.cycleLength, defaults.cycleLength),
+                onClick = { dialog = SettingsDialog.CYCLE_LENGTH },
+            )
+            SettingRow(
+                title = stringResource(R.string.settings_period_length),
+                value = pluralStringResource(UiR.plurals.days_count, defaults.periodLength, defaults.periodLength),
+                onClick = { dialog = SettingsDialog.PERIOD_LENGTH },
+            )
+            Note(stringResource(R.string.settings_cycle_defaults_note))
+            SettingRow(
+                title = stringResource(R.string.settings_mode),
+                value = stringResource(goalLabel(settings.goal)),
+                onClick = { dialog = SettingsDialog.MODE },
+            )
+            if (settings.goal == Goal.BIRTH_CONTROL) {
+                BirthControlRows(settings.contraception, tracking.today, actions, reminderStatus.notificationsAllowed)
+            }
         }
 
-        Divider()
-        SectionHeader(stringResource(R.string.settings_section_log), Modifier.padding(horizontal = gutter))
-        val hideable = LogCategory.entries.filter { it.canBeHidden }
-        val shown = hideable.count { it !in settings.hiddenCategories }
-        SettingRow(
-            title = stringResource(R.string.settings_log_categories),
-            value = pluralStringResource(R.plurals.settings_log_categories_value, hideable.size, shown, hideable.size),
-            onClick = { dialog = SettingsDialog.CATEGORIES },
-        )
-        TagsRow(tracking.tags, actions)
+        SettingsSection(stringResource(R.string.settings_section_log)) {
+            val hideable = LogCategory.entries.filter { it.canBeHidden }
+            val shown = hideable.count { it !in settings.hiddenCategories }
+            SettingRow(
+                title = stringResource(R.string.settings_log_categories),
+                value =
+                    pluralStringResource(
+                        R.plurals.settings_log_categories_value,
+                        hideable.size,
+                        shown,
+                        hideable.size,
+                    ),
+                onClick = { dialog = SettingsDialog.CATEGORIES },
+            )
+            TagsRow(tracking.tags, actions)
+        }
 
-        Divider()
         MedicationsSection(tracking.medications, actions, reminderStatus.notificationsAllowed)
 
-        Divider()
         RemindersSection(settings.reminders, reminderStatus, actions, onSchedule = settings.activeSchedule != null)
 
-        Divider()
-        SectionHeader(stringResource(R.string.settings_section_appearance), Modifier.padding(horizontal = gutter))
-        SettingRow(
-            title = stringResource(R.string.settings_theme),
-            value = stringResource(themeLabel(settings.theme)),
-            onClick = { dialog = SettingsDialog.THEME },
-        )
-        SettingRow(
-            title = stringResource(R.string.settings_app_icon),
-            value = stringResource(appIconLabel(appIcon)),
-            onClick = { dialog = SettingsDialog.APP_ICON },
-        )
-
-        Divider()
-        SectionHeader(stringResource(R.string.settings_section_privacy), Modifier.padding(horizontal = gutter))
-        Note(stringResource(R.string.settings_privacy_statement))
-        val security = settings.security
-        SwitchRow(
-            title = stringResource(R.string.settings_lock),
-            detail = stringResource(R.string.settings_lock_detail),
-            checked = security.lockEnabled,
-            onCheckedChange = actions.onLockChange,
-        )
-        if (security.lockEnabled) {
+        SettingsSection(stringResource(R.string.settings_section_appearance)) {
             SettingRow(
-                title = stringResource(R.string.settings_lock_timeout),
-                value = stringResource(lockTimeoutLabel(security.lockTimeoutMinutes)),
-                onClick = { dialog = SettingsDialog.LOCK_TIMEOUT },
+                title = stringResource(R.string.settings_theme),
+                value = stringResource(themeLabel(settings.theme)),
+                onClick = { dialog = SettingsDialog.THEME },
+            )
+            LanguageRow()
+            SettingRow(
+                title = stringResource(R.string.settings_app_icon),
+                value = stringResource(appIconLabel(appIcon)),
+                onClick = { dialog = SettingsDialog.APP_ICON },
             )
         }
-        SwitchRow(
-            title = stringResource(R.string.settings_block_screenshots),
-            detail = stringResource(R.string.settings_block_screenshots_detail),
-            checked = security.blockScreenshots,
-            onCheckedChange = actions.onBlockScreenshots,
-        )
-        SettingRow(
-            title = stringResource(R.string.settings_privacy_explainer),
-            value = stringResource(R.string.settings_privacy_explainer_detail),
-            onClick = { dialog = SettingsDialog.PRIVACY },
-        )
-        backupRows()
-        healthConnectRows()
-        SettingRow(
-            title = stringResource(R.string.settings_delete_all),
-            value = stringResource(R.string.settings_delete_all_detail),
-            onClick = { dialog = SettingsDialog.DELETE },
-            titleColor = MaterialTheme.colorScheme.error,
-        )
 
-        Divider()
+        SettingsSection(stringResource(R.string.settings_section_privacy)) {
+            Note(stringResource(R.string.settings_privacy_statement))
+            val security = settings.security
+            SwitchRow(
+                title = stringResource(R.string.settings_lock),
+                detail = stringResource(R.string.settings_lock_detail),
+                checked = security.lockEnabled,
+                onCheckedChange = actions.onLockChange,
+            )
+            if (security.lockEnabled) {
+                SettingRow(
+                    title = stringResource(R.string.settings_lock_timeout),
+                    value = stringResource(lockTimeoutLabel(security.lockTimeoutMinutes)),
+                    onClick = { dialog = SettingsDialog.LOCK_TIMEOUT },
+                )
+            }
+            SwitchRow(
+                title = stringResource(R.string.settings_block_screenshots),
+                detail = stringResource(R.string.settings_block_screenshots_detail),
+                checked = security.blockScreenshots,
+                onCheckedChange = actions.onBlockScreenshots,
+            )
+            SettingRow(
+                title = stringResource(R.string.settings_privacy_explainer),
+                value = stringResource(R.string.settings_privacy_explainer_detail),
+                onClick = { dialog = SettingsDialog.PRIVACY },
+            )
+        }
+
+        // Backups, exports and erasing: everything about taking your data out, in one place.
+        SettingsSection(stringResource(R.string.settings_section_data)) {
+            backupRows()
+            SettingRow(
+                title = stringResource(R.string.settings_delete_all),
+                value = stringResource(R.string.settings_delete_all_detail),
+                onClick = { dialog = SettingsDialog.DELETE },
+                titleColor = MaterialTheme.colorScheme.error,
+            )
+        }
+
+        healthConnectRows()
+
         AboutSection()
     }
 
@@ -514,7 +532,7 @@ internal fun SettingRow(
     ListItem(
         headlineContent = { Text(title, color = titleColor) },
         supportingContent = { Text(value) },
-        colors = ListItemDefaults.colors(containerColor = MaterialTheme.colorScheme.surface),
+        colors = ListItemDefaults.colors(containerColor = Color.Transparent),
         modifier = Modifier.selectable(selected = false, onClick = onClick, role = Role.Button),
     )
 }
@@ -528,9 +546,6 @@ internal fun Note(text: String) {
         modifier = Modifier.padding(horizontal = CadenceTheme.spacing.screenGutter, vertical = CadenceTheme.spacing.sm),
     )
 }
-
-@Composable
-private fun Divider() = HorizontalDivider(Modifier.padding(vertical = CadenceTheme.spacing.sm))
 
 @Composable
 internal fun StepperDialog(
@@ -561,7 +576,7 @@ internal fun StepperDialog(
 }
 
 @Composable
-private fun <T> ChoiceDialog(
+internal fun <T> ChoiceDialog(
     title: String,
     options: List<T>,
     selected: T,
@@ -696,4 +711,18 @@ private fun PrivacyExplainerDialog(onDismiss: () -> Unit) {
         },
         confirmButton = { TextButton(onClick = onDismiss) { Text(stringResource(R.string.settings_ok)) } },
     )
+}
+
+/** A titled group of settings: the title above, the rows together in one card. */
+@Composable
+internal fun SettingsSection(
+    title: String,
+    modifier: Modifier = Modifier,
+    content: @Composable ColumnScope.() -> Unit,
+) {
+    val gutter = CadenceTheme.spacing.screenGutter
+    Column(modifier.fillMaxWidth().padding(top = CadenceTheme.spacing.sm)) {
+        SectionHeader(title, Modifier.padding(horizontal = gutter + CadenceTheme.spacing.xs))
+        GroupCard(Modifier.padding(horizontal = gutter), content = content)
+    }
 }

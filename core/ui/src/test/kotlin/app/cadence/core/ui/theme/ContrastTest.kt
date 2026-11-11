@@ -79,6 +79,22 @@ class ContrastTest {
         assertContrast("onPeriod/period", c.onPeriod, c.period, TEXT_MIN)
         assertContrast("onPeriodContainer/periodContainer", c.onPeriodContainer, c.periodContainer, TEXT_MIN)
         assertContrast("onFertileWindow/fertileWindow", c.onFertileWindow, c.fertileWindow, TEXT_MIN)
+
+        // Phase washes sit behind text: body text, secondary text, and the phase's own colour.
+        listOf(
+            "menstrual" to (c.menstrualTint to c.menstrualPhase),
+            "follicular" to (c.follicularTint to c.follicularPhase),
+            "ovulatory" to (c.ovulatoryTint to c.ovulatoryPhase),
+            "luteal" to (c.lutealTint to c.lutealPhase),
+            "neutral" to (c.neutralTint to s.primary),
+        ).forEach { (name, pair) ->
+            val (tint, accent) = pair
+            assertContrast("onSurface/${name}Tint", s.onSurface, tint, TEXT_MIN)
+            assertContrast("onSurfaceVariant/${name}Tint", s.onSurfaceVariant, tint, TEXT_MIN)
+            assertContrast("${name}Phase/${name}Tint", accent, tint, TEXT_MIN)
+            assertContrast("primary/${name}Tint", s.primary, tint, TEXT_MIN)
+            assertContrast("tertiary/${name}Tint", s.tertiary, tint, TEXT_MIN)
+        }
     }
 
     private fun assertContrast(

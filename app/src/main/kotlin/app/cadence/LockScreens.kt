@@ -31,6 +31,7 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.fragment.app.FragmentActivity
+import app.cadence.core.ui.components.CadenceEmblem
 import app.cadence.core.ui.components.CycleRing
 import app.cadence.core.ui.components.PrimaryButton
 import app.cadence.core.ui.components.RingSegment
@@ -106,13 +107,7 @@ private fun CenteredMessage(
             verticalArrangement = Arrangement.spacedBy(spacing.lg, Alignment.CenterVertically),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
-            CycleRing(
-                cycleLength = 28,
-                today = 9,
-                segments = listOf(RingSegment(1, 9, MaterialTheme.colorScheme.primary)),
-                contentDescription = null,
-                modifier = Modifier.size(72.dp),
-            )
+            CadenceEmblem(Modifier.size(160.dp))
             Text(
                 title,
                 style = MaterialTheme.typography.headlineSmall,

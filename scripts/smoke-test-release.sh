@@ -9,7 +9,8 @@ apk="${1:?usage: $0 <apk>}"
 package=app.cadence
 
 adb install -r "$apk"
-adb logcat -c
+# Some emulator images refuse to clear a log buffer; old lines are harmless because the crash check filters by package.
+adb logcat -c || true
 adb shell am start -W -a android.intent.action.MAIN -c android.intent.category.LAUNCHER -p "$package"
 
 # Wait for the first screen. Onboarding is only shown once settings have been read from the
@@ -23,9 +24,10 @@ for _ in $(seq 1 30); do
   sleep 2
 done
 
-if adb logcat -d | grep -E "FATAL EXCEPTION|AndroidRuntime" | grep -q .; then
+# A crash is logged by AndroidRuntime as "FATAL EXCEPTION" followed by "Process: <package>".
+if adb logcat -d -s AndroidRuntime:E | grep -A 2 "FATAL EXCEPTION" | grep -q "Process: $package"; then
   echo "The app crashed:" >&2
-  adb logcat -d | grep -A 30 "FATAL EXCEPTION" >&2 || true
+  adb logcat -d -s AndroidRuntime:E >&2 || true
   exit 1
 fi
 if [[ -z "${found:-}" ]]; then

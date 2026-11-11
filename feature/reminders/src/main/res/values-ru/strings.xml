@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="reminder_channel_period">Напоминания о месячных</string>
+    <string name="reminder_channel_period_description">Перед ожидаемыми месячными и при задержке.</string>
+    <string name="reminder_channel_checkin">Ежедневное напоминание</string>
+    <string name="reminder_channel_checkin_description">Ежедневно напоминает отметить самочувствие.</string>
+
+    <!-- Discreet text: used on the lock screen always, and everywhere when discreet notifications are on. -->
+    <string name="reminder_discreet_title">Cadence</string>
+    <string name="reminder_discreet_text">Пора заглянуть</string>
+
+    <string name="reminder_upcoming_title">Скоро месячные</string>
+    <plurals name="reminder_upcoming_text">
+        <item quantity="one">Месячные, вероятно, начнутся через %d день.</item>
+        <item quantity="few">Месячные, вероятно, начнутся через %d дня.</item>
+        <item quantity="many">Месячные, вероятно, начнутся через %d дней.</item>
+        <item quantity="other">Месячные, вероятно, начнутся через %d дня.</item>
+    </plurals>
+    <string name="reminder_late_title">Месячные задерживаются</string>
+    <string name="reminder_late_text">Месячные позже ожидаемого срока. Нажмите, чтобы отметить их, когда они начнутся.</string>
+    <string name="reminder_daily_title">Ежедневное напоминание</string>
+    <string name="reminder_daily_text">Как вы себя чувствуете сегодня? Нажмите, чтобы отметить.</string>
+
+    <string name="reminder_channel_medication">Контрацепция и лекарства</string>
+    <string name="reminder_channel_medication_description">Таблетки, пластырь или кольцо и лекарства, которые вы принимаете каждый день.</string>
+    <string name="reminder_action_done">Готово</string>
+    <string name="reminder_dose_title">Контрацепция</string>
+    <string name="reminder_dose_pill">Пора принять сегодняшнюю таблетку.</string>
+    <string name="reminder_dose_placebo">Пора принять сегодняшнюю таблетку (плацебо).</string>
+    <string name="reminder_dose_new_patch">Пора сменить пластырь.</string>
+    <string name="reminder_dose_remove_patch">Пора снять пластырь: начинается неделя без пластыря.</string>
+    <string name="reminder_dose_new_ring">Пора ввести новое кольцо.</string>
+    <string name="reminder_dose_remove_ring">Пора извлечь кольцо: начинается неделя без кольца.</string>
+    <string name="reminder_medication_title">Лекарство</string>
+    <string name="reminder_medication_text">Пора принять: %1$s.</string>
+</resources>

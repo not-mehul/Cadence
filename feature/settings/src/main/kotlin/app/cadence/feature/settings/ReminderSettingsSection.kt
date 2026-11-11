@@ -20,6 +20,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
@@ -59,8 +60,7 @@ internal fun RemindersSection(
         if (turnedOn) actions.onRequestNotificationPermission()
     }
 
-    Column {
-        SectionHeader(stringResource(R.string.settings_section_reminders), Modifier.padding(horizontal = gutter))
+    SettingsSection(stringResource(R.string.settings_section_reminders)) {
         if (onSchedule) {
             // Bleeds follow the pack, so period reminders don't apply; the birth control reminder is above.
             Text(
@@ -157,7 +157,7 @@ internal fun SwitchRow(
         headlineContent = { Text(title) },
         supportingContent = { Text(detail) },
         trailingContent = { Switch(checked = checked, onCheckedChange = null) },
-        colors = ListItemDefaults.colors(containerColor = MaterialTheme.colorScheme.surface),
+        colors = ListItemDefaults.colors(containerColor = Color.Transparent),
         modifier = Modifier.toggleable(value = checked, role = Role.Switch, onValueChange = onCheckedChange),
     )
 }
@@ -173,7 +173,7 @@ internal fun ValueRow(
         trailingContent = {
             Text(value, style = MaterialTheme.typography.bodyLarge, color = MaterialTheme.colorScheme.primary)
         },
-        colors = ListItemDefaults.colors(containerColor = MaterialTheme.colorScheme.surface),
+        colors = ListItemDefaults.colors(containerColor = Color.Transparent),
         modifier = Modifier.toggleable(value = false, role = Role.Button, onValueChange = { onClick() }),
     )
 }

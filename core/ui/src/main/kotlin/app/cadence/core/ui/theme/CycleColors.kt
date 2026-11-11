@@ -28,6 +28,12 @@ data class CycleColors(
     val follicularPhase: Color,
     val ovulatoryPhase: Color,
     val lutealPhase: Color,
+    /** Soft washes behind content, one per phase; [neutralTint] when no phase applies. */
+    val menstrualTint: Color,
+    val follicularTint: Color,
+    val ovulatoryTint: Color,
+    val lutealTint: Color,
+    val neutralTint: Color,
 )
 
 internal val LightCycleColors =
@@ -45,6 +51,11 @@ internal val LightCycleColors =
             follicularPhase = AmberLight,
             ovulatoryPhase = TealLight,
             lutealPhase = PlumLight,
+            menstrualTint = RoseTintLight,
+            follicularTint = AmberTintLight,
+            ovulatoryTint = TealTintLight,
+            lutealTint = PlumTintLight,
+            neutralTint = NeutralTintLight,
         )
     }
 
@@ -63,6 +74,11 @@ internal val DarkCycleColors =
             follicularPhase = AmberDark,
             ovulatoryPhase = TealDark,
             lutealPhase = PlumDark,
+            menstrualTint = RoseTintDark,
+            follicularTint = AmberTintDark,
+            ovulatoryTint = TealTintDark,
+            lutealTint = PlumTintDark,
+            neutralTint = NeutralTintDark,
         )
     }
 

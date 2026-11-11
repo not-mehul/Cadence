@@ -1,5 +1,6 @@
 package app.cadence.feature.today
 
+import androidx.annotation.DrawableRes
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -15,6 +16,7 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
@@ -27,13 +29,16 @@ import app.cadence.core.domain.contraception.PackDay
 import app.cadence.core.domain.contraception.PendingDose
 import app.cadence.core.domain.medication.MedicationUse
 import app.cadence.core.ui.components.CadenceCard
+import app.cadence.core.ui.components.CardHeader
 import app.cadence.core.ui.components.CycleRing
 import app.cadence.core.ui.components.RingSegment
 import app.cadence.core.ui.contraception.ContraceptionLabels
 import app.cadence.core.ui.format.DateSkeletons
+import app.cadence.core.ui.format.formatHeading
 import app.cadence.core.ui.format.rememberDateFormatter
 import app.cadence.core.ui.theme.CadenceTheme
 import java.time.LocalDate
+import app.cadence.core.ui.R as UiR
 
 /** The pack as a ring: active days, then the break (when a bleed is expected). */
 @Composable
@@ -57,7 +62,7 @@ internal fun PackRing(
     ) {
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
             Text(
-                stringResource(ContraceptionLabels.method(schedule.method)),
+                stringResource(R.string.today_pack_day_label),
                 style = MaterialTheme.typography.labelLarge,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
@@ -67,14 +72,6 @@ internal fun PackRing(
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
-            if (pack.inBreak) {
-                Text(
-                    stringResource(R.string.today_pack_break_label),
-                    style = MaterialTheme.typography.labelLarge,
-                    color = MaterialTheme.colorScheme.primary,
-                    modifier = Modifier.padding(top = CadenceTheme.spacing.xs),
-                )
-            }
         }
     }
 }
@@ -121,7 +118,7 @@ internal fun DoseCard(
     val action = birthControl.schedule.actionOn(today)
     val dateFormat = rememberDateFormatter(DateSkeletons.WEEKDAY_DAY_MONTH)
     CadenceCard(modifier) {
-        CardTitle(stringResource(R.string.today_dose_title))
+        CardTitle(stringResource(R.string.today_dose_title), UiR.drawable.ic_pill)
         when {
             action == null -> {
                 Text(stringResource(R.string.today_dose_nothing), style = MaterialTheme.typography.bodyMedium)
@@ -174,13 +171,13 @@ internal fun MissedDosesCard(
 ) {
     val dateFormat = rememberDateFormatter(DateSkeletons.WEEKDAY_DAY_MONTH)
     CadenceCard(modifier) {
-        CardTitle(pluralStringResource(R.plurals.today_missed_title, missed.size, missed.size))
+        CardTitle(pluralStringResource(R.plurals.today_missed_title, missed.size, missed.size), UiR.drawable.ic_clock)
         missed.forEach { dose ->
             Column(Modifier.padding(top = CadenceTheme.spacing.sm)) {
                 Text(
                     stringResource(
                         R.string.today_missed_item,
-                        dateFormat.format(dose.date),
+                        dateFormat.formatHeading(dose.date),
                         stringResource(ContraceptionLabels.noun(dose.action)),
                     ),
                     style = MaterialTheme.typography.bodyMedium,
@@ -212,7 +209,7 @@ internal fun MedicationsCard(
     modifier: Modifier = Modifier,
 ) {
     CadenceCard(modifier) {
-        CardTitle(stringResource(R.string.today_medications_title))
+        CardTitle(stringResource(R.string.today_medications_title), UiR.drawable.ic_pill)
         medications.forEach { (medication, taken) ->
             Row(
                 verticalAlignment = Alignment.CenterVertically,
@@ -249,17 +246,21 @@ internal fun SetUpBirthControlCard(
     modifier: Modifier = Modifier,
 ) {
     CadenceCard(modifier) {
-        CardTitle(stringResource(R.string.today_bc_setup_title))
+        CardTitle(stringResource(R.string.today_bc_setup_title), UiR.drawable.ic_pill)
         Text(stringResource(R.string.today_bc_setup_body), style = MaterialTheme.typography.bodyMedium)
         TextButton(onClick = onOpenSettings) { Text(stringResource(R.string.today_bc_setup_action)) }
     }
 }
 
 @Composable
-private fun CardTitle(text: String) {
-    Text(
+private fun CardTitle(
+    text: String,
+    @DrawableRes icon: Int,
+) {
+    CardHeader(
         text,
-        style = MaterialTheme.typography.titleMedium,
-        modifier = Modifier.padding(bottom = CadenceTheme.spacing.xs).semantics { heading() },
+        icon = painterResource(icon),
+        accent = MaterialTheme.colorScheme.secondary,
+        accentContainer = MaterialTheme.colorScheme.secondaryContainer,
     )
 }

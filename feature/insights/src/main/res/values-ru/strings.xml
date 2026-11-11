@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="insights_title">Обзор</string>
+
+    <!-- Empty states -->
+    <string name="insights_empty_title">Пока нечего показать</string>
+    <string name="insights_empty_body">Отмечайте месячные, и здесь появится статистика вашего цикла.</string>
+    <string name="insights_first_cycle_title">Идёт ваш первый цикл</string>
+    <string name="insights_first_cycle_body">Статистика появится, когда вы отметите начало следующих месячных.</string>
+
+    <!-- Summary tiles -->
+    <string name="insights_average_cycle">Средний цикл</string>
+    <string name="insights_average_period">Средние месячные</string>
+    <string name="insights_variation">Разброс цикла</string>
+    <string name="insights_prediction">Точность прогноза</string>
+    <string name="insights_range">%1$s – %2$s</string>
+    <string name="insights_shortest_to_longest">От короткого до длинного</string>
+    <string name="insights_plus_minus">± %1$s</string>
+    <string name="insights_no_value">–</string>
+    <string name="insights_confidence_high">Высокая</string>
+    <string name="insights_confidence_medium">Средняя</string>
+    <string name="insights_confidence_low">Низкая</string>
+    <string name="insights_based_on_typical">По вашему обычному циклу</string>
+
+    <!-- Chart -->
+    <string name="insights_chart_title">Длина цикла</string>
+    <string name="insights_chart_caption">Закрашенная полоса — типичный диапазон, от 24 до 38 дней. Нажмите на столбец, чтобы увидеть подробности.</string>
+    <string name="insights_chart_description">Длина циклов в днях, от старых к новым: %1$s.</string>
+    <string name="insights_chart_selected">Цикл с %1$s: %2$s</string>
+    <string name="insights_chart_selected_excluded">Цикл с %1$s: %2$s, не учитывается в прогнозах</string>
+
+    <!-- Health flags -->
+    <string name="insights_flags_title">Стоит обсудить с врачом</string>
+    <string name="insights_flags_footer">Это закономерности в ваших записях, а не диагноз. Cadence не является медицинским изделием. Диапазоны взяты из рекомендаций Международной федерации гинекологии и акушерства (FIGO).</string>
+    <string name="flag_short_title">Короткие циклы</string>
+    <string name="flag_short_body">Средняя длина ваших последних циклов: %1$s. Циклы короче 24 дней встречаются реже, и о них стоит рассказать врачу.</string>
+    <string name="flag_long_title">Длинные циклы</string>
+    <string name="flag_long_body">Средняя длина ваших последних циклов: %1$s. Циклы длиннее 38 дней встречаются реже, и о них стоит рассказать врачу.</string>
+    <string name="flag_irregular_title">Длина цикла сильно меняется</string>
+    <string name="flag_irregular_body">Разница между самым коротким и самым длинным из последних циклов: %1$s. О разнице больше 7–9 дней стоит рассказать врачу.</string>
+    <string name="flag_long_period_title">Долгие месячные</string>
+    <string name="flag_long_period_body">Месячные, начавшиеся %1$s, длились %2$s. О кровотечении дольше 8 дней стоит рассказать врачу.</string>
+    <string name="flag_no_period_title">Давно не было месячных</string>
+    <string name="flag_no_period_body">Времени с последних отмеченных месячных: %1$s. Если вы не забыли их отметить, об этом стоит рассказать врачу. Тест на беременность поможет её исключить.</string>
+    <string name="flag_pain_title">Сильная боль при месячных</string>
+    <string name="flag_pain_body">Число последних месячных, во время которых вы несколько дней отмечали боль 7 и выше из 10: %1$s. Если боль мешает повседневной жизни, о ней стоит рассказать врачу: существуют эффективные методы лечения.</string>
+
+    <!-- Cycle history -->
+    <string name="insights_history_title">Ваши циклы</string>
+    <string name="insights_history_help">Отключите цикл, который был для вас нетипичным (например, из-за болезни или поездки), чтобы он не искажал прогнозы.</string>
+    <string name="insights_current_cycle">Текущий цикл</string>
+    <string name="insights_current_cycle_detail">Начался %1$s · день %2$d</string>
+    <string name="insights_cycle_dates">%1$s – %2$s</string>
+    <string name="insights_cycle_detail">Цикл %1$s · месячные %2$s</string>
+    <string name="insights_cycle_excluded">Не учитывается в прогнозах</string>
+    <plurals name="insights_day_length">
+        <item quantity="one">%d день</item>
+        <item quantity="few">%d дня</item>
+        <item quantity="many">%d дней</item>
+        <item quantity="other">%d дня</item>
+    </plurals>
+
+    <!-- Symptom patterns -->
+    <string name="insights_patterns_title">Закономерности</string>
+    <string name="insights_patterns_empty">Отмечайте симптомы, настроение или метки на протяжении трёх и более циклов, и здесь появятся закономерности.</string>
+    <string name="insights_patterns_note">То, что вы обычно отмечаете в одно и то же время цикла. Это наблюдения по вашим записям, а не диагноз.</string>
+    <string name="insights_pattern_line">%1$s, %2$s</string>
+    <string name="insights_pattern_during">во время месячных</string>
+    <plurals name="insights_pattern_before">
+        <item quantity="one">примерно за %d день до месячных</item>
+        <item quantity="few">примерно за %d дня до месячных</item>
+        <item quantity="many">примерно за %d дней до месячных</item>
+        <item quantity="other">примерно за %d дня до месячных</item>
+    </plurals>
+    <string name="insights_pattern_cycle_day">примерно на %1$d-й день цикла</string>
+    <plurals name="insights_pattern_cycles">
+        <item quantity="one">в %1$d из %2$d цикла</item>
+        <item quantity="few">в %1$d из %2$d циклов</item>
+        <item quantity="many">в %1$d из %2$d циклов</item>
+        <item quantity="other">в %1$d из %2$d цикла</item>
+    </plurals>
+</resources>

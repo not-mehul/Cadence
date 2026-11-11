@@ -103,4 +103,10 @@ jobs:
       - name: Publish to GitHub Releases
         env:
           GH_TOKEN: ${{ github.token }}
-        run: gh release create "$GITHUB_REF_NAME" "${{ steps.apk.outputs.file }}" "${{ steps.apk.outputs.file }}.sha256" --title "Cadence ${{ steps.version.outputs.version }}" --notes-file notes.md --verify-tag
+        run: |
+          if gh release view "$GITHUB_REF_NAME" >/dev/null 2>&1; then
+            gh release upload "$GITHUB_REF_NAME" "${{ steps.apk.outputs.file }}" "${{ steps.apk.outputs.file }}.sha256" --clobber
+            gh release edit "$GITHUB_REF_NAME" --title "Cadence ${{ steps.version.outputs.version }}" --notes-file notes.md
+          else
+            gh release create "$GITHUB_REF_NAME" "${{ steps.apk.outputs.file }}" "${{ steps.apk.outputs.file }}.sha256" --title "Cadence ${{ steps.version.outputs.version }}" --notes-file notes.md --verify-tag
+          fi

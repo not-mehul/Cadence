@@ -29,6 +29,7 @@ import app.cadence.core.domain.cycles.PredictionBasis
 import app.cadence.core.domain.log.DayEntry
 import app.cadence.core.domain.model.CyclePhase
 import app.cadence.core.domain.model.Goal
+import app.cadence.core.domain.patterns.HeadsUp
 import app.cadence.core.ui.components.CadenceCard
 import app.cadence.core.ui.components.CardHeader
 import app.cadence.core.ui.components.CycleRing
@@ -36,7 +37,9 @@ import app.cadence.core.ui.components.PhaseStyle
 import app.cadence.core.ui.components.PhaseStyles
 import app.cadence.core.ui.components.RingSegment
 import app.cadence.core.ui.contraception.ContraceptionLabels
+import app.cadence.core.ui.log.LogIcons
 import app.cadence.core.ui.log.LogLabels
+import app.cadence.core.ui.log.LogSummaryItem
 import app.cadence.core.ui.log.LoggedChips
 import app.cadence.core.ui.theme.CadenceTheme
 import app.cadence.core.ui.theme.CycleColors
@@ -356,5 +359,45 @@ internal fun TodayLogCard(
         } else {
             LoggedChips(items)
         }
+    }
+}
+
+/**
+ * Heads-up: what the user tends to log around now or tomorrow, found in their own past cycles.
+ * Grouped by when, with the same icon chips as the log.
+ */
+@Composable
+internal fun HeadsUpCard(
+    headsUp: List<HeadsUp>,
+    tagLabels: Map<Long, String>,
+    modifier: Modifier = Modifier,
+) {
+    CadenceCard(modifier) {
+        CardHeader(
+            stringResource(R.string.today_heads_up_title),
+            icon = painterResource(UiR.drawable.ms_auto_awesome),
+            accent = MaterialTheme.colorScheme.tertiary,
+            accentContainer = MaterialTheme.colorScheme.tertiaryContainer,
+        )
+        Text(stringResource(R.string.today_heads_up_body), style = MaterialTheme.typography.bodyMedium)
+        headsUp.groupBy { it.inDays }.toSortedMap().forEach { (inDays, group) ->
+            Text(
+                stringResource(if (inDays == 0) R.string.today_heads_up_now else R.string.today_heads_up_tomorrow),
+                style = MaterialTheme.typography.labelLarge,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.padding(top = CadenceTheme.spacing.md, bottom = CadenceTheme.spacing.xs),
+            )
+            LoggedChips(
+                group.map { h ->
+                    LogSummaryItem(LogLabels.item(h.pattern.itemId, tagLabels), LogIcons.item(h.pattern.itemId))
+                },
+            )
+        }
+        Text(
+            stringResource(R.string.today_heads_up_note),
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            modifier = Modifier.padding(top = CadenceTheme.spacing.md),
+        )
     }
 }

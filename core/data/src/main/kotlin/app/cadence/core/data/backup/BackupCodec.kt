@@ -3,6 +3,7 @@ package app.cadence.core.data.backup
 import app.cadence.core.domain.contraception.ContraceptiveMethod
 import app.cadence.core.domain.contraception.ContraceptiveSchedule
 import app.cadence.core.domain.contraception.DoseStatus
+import app.cadence.core.domain.contraception.PackSupply
 import app.cadence.core.domain.log.CustomTag
 import app.cadence.core.domain.log.DayEntry
 import app.cadence.core.domain.log.LogCategory
@@ -257,6 +258,8 @@ object BackupCodec {
                                 since = c.since.toString(),
                                 reminderEnabled = c.reminderEnabled,
                                 reminderTime = c.reminderTime.toString(),
+                                supplyPacks = c.supply?.packs,
+                                supplyCountedOn = c.supply?.countedOn?.toString(),
                             )
                         },
                 ),
@@ -324,6 +327,10 @@ object BackupCodec {
                             since = LocalDate.parse(c.since),
                             reminderEnabled = c.reminderEnabled,
                             reminderTime = LocalTime.parse(c.reminderTime),
+                            supply =
+                                c.supplyPacks?.let { packs ->
+                                    c.supplyCountedOn?.let { PackSupply(packs, LocalDate.parse(it)) }
+                                },
                         )
                     },
             )

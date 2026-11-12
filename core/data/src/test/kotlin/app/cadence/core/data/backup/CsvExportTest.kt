@@ -74,4 +74,22 @@ class CsvExportTest {
             csv.split("\r\n").drop(1).filter { it.isNotEmpty() },
         )
     }
+
+    @Test
+    fun `text that a spreadsheet would run as a formula is kept as text`() {
+        assertEquals("'=HYPERLINK(\"x\")", CsvExport.defuse("=HYPERLINK(\"x\")"))
+        assertEquals("'+1 cramps", CsvExport.defuse("+1 cramps"))
+        assertEquals("'-rest", CsvExport.defuse("-rest"))
+        assertEquals("'@home", CsvExport.defuse("@home"))
+        assertEquals("'\tTab", CsvExport.defuse("\tTab"))
+        assertEquals("-3", CsvExport.defuse("-3"), "numbers stay numbers")
+        assertEquals("ok = fine", CsvExport.defuse("ok = fine"))
+        assertEquals("", CsvExport.defuse(""))
+
+        val csv =
+            CsvExport.write(
+                BackupData(UserSettings(), listOf(DayEntry(LocalDate.of(2026, 3, 3), note = "=1+1")), emptySet()),
+            )
+        assertEquals("2026-03-03,,,,,,,,,'=1+1,,,", csv.lines()[1].trimEnd('\r'))
+    }
 }

@@ -44,6 +44,10 @@ data class BackupContraception(
     val reminderEnabled: Boolean = false,
     /** "HH:mm" */
     val reminderTime: String = "09:00",
+    /** Packs on hand, for refill reminders (added without a format change: older files just lack it). */
+    val supplyPacks: Int? = null,
+    /** ISO date the packs were counted. */
+    val supplyCountedOn: String? = null,
 )
 
 @Serializable

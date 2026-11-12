@@ -2,6 +2,7 @@ package app.cadence.feature.backup
 
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsNotEnabled
+import androidx.compose.ui.test.assertIsSelected
 import androidx.compose.ui.test.hasSetTextAction
 import androidx.compose.ui.test.junit4.v2.createComposeRule
 import androidx.compose.ui.test.onNodeWithText
@@ -109,5 +110,26 @@ class BackupDialogsTest {
         compose.onNodeWithText("newer", substring = true).assertIsDisplayed()
         compose.onNodeWithText("OK").performClick()
         assertEquals(1, dismissed)
+    }
+
+    @Test
+    fun `the report asks how far back to look, six months by default`() {
+        var chosen: ReportRange? = null
+        compose.setContent {
+            CadenceTheme {
+                ReportRangeDialog(
+                    initial = ReportRange.DEFAULT,
+                    onContinue = { chosen = it },
+                    onDismiss = {},
+                )
+            }
+        }
+
+        compose.onNodeWithText("What should the report cover?").assertIsDisplayed()
+        compose.onNodeWithText("The last 6 months").assertIsSelected()
+        compose.onNodeWithText("The last 12 months").performClick()
+        compose.onNodeWithText("Choose where to save").performClick()
+
+        assertEquals(ReportRange.MONTHS_12, chosen)
     }
 }

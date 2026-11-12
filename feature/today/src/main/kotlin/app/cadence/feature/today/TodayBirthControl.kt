@@ -14,6 +14,7 @@ import androidx.compose.material3.Checkbox
 import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -24,6 +25,7 @@ import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.dp
 import app.cadence.core.domain.contraception.ContraceptiveSchedule
 import app.cadence.core.domain.contraception.DoseStatus
 import app.cadence.core.domain.contraception.PackDay
@@ -39,6 +41,7 @@ import app.cadence.core.ui.format.formatHeading
 import app.cadence.core.ui.format.rememberDateFormatter
 import app.cadence.core.ui.theme.CadenceTheme
 import java.time.LocalDate
+import java.time.temporal.ChronoUnit
 import app.cadence.core.ui.R as UiR
 
 /** The pack as a ring: active days, then the break (when a bleed is expected). */
@@ -115,6 +118,7 @@ internal fun DoseCard(
     today: LocalDate,
     onRecord: (LocalDate, DoseStatus?) -> Unit,
     modifier: Modifier = Modifier,
+    onUpdatePacks: () -> Unit = {},
 ) {
     val action = birthControl.schedule.actionOn(today)
     val dateFormat = rememberDateFormatter(DateSkeletons.WEEKDAY_DAY_MONTH)
@@ -167,8 +171,52 @@ internal fun DoseCard(
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
         }
+        SupplyNote(birthControl.schedule, today, onUpdatePacks)
     }
 }
+
+/** When the counted packs are about to run out (or have), a nudge to pick up more and update the count. */
+@Composable
+private fun SupplyNote(
+    schedule: ContraceptiveSchedule,
+    today: LocalDate,
+    onUpdatePacks: () -> Unit,
+) {
+    val runsOut = schedule.runsOutOn() ?: return
+    val days = ChronoUnit.DAYS.between(today, runsOut).toInt()
+    if (days > SUPPLY_WARNING_DAYS) return
+    Surface(
+        shape = MaterialTheme.shapes.medium,
+        color = MaterialTheme.colorScheme.tertiaryContainer,
+        contentColor = MaterialTheme.colorScheme.onTertiaryContainer,
+        modifier = Modifier.fillMaxWidth().padding(top = CadenceTheme.spacing.md),
+    ) {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(CadenceTheme.spacing.sm),
+            modifier = Modifier.padding(start = CadenceTheme.spacing.md, end = CadenceTheme.spacing.xs),
+        ) {
+            Icon(
+                painterResource(UiR.drawable.ms_medication),
+                contentDescription = null,
+                modifier = Modifier.size(20.dp),
+            )
+            Text(
+                if (days > 0) {
+                    pluralStringResource(R.plurals.today_supply_runs_out, days, days)
+                } else {
+                    stringResource(R.string.today_supply_ran_out)
+                },
+                style = MaterialTheme.typography.bodyMedium,
+                modifier = Modifier.weight(1f).padding(vertical = CadenceTheme.spacing.sm),
+            )
+            TextButton(onClick = onUpdatePacks) { Text(stringResource(R.string.today_supply_update)) }
+        }
+    }
+}
+
+/** The note appears this many days before the packs run out. */
+private const val SUPPLY_WARNING_DAYS = 7
 
 /** Doses in the last week that weren't checked off. */
 @Composable

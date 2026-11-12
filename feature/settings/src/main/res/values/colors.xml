@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Launcher shortcut icons: rosewood on its container, as the app's primary colours. -->
+    <color name="shortcut_background">#FFFFD9E0</color>
+    <color name="shortcut_foreground">#FF9A3B53</color>
+</resources>

@@ -1,6 +1,7 @@
 package app.cadence.feature.settings
 
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -33,13 +34,16 @@ import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import app.cadence.core.domain.contraception.ContraceptiveMethod
 import app.cadence.core.domain.contraception.ContraceptiveSchedule
+import app.cadence.core.domain.contraception.PackSupply
 import app.cadence.core.domain.log.CustomTag
 import app.cadence.core.domain.medication.Medication
 import app.cadence.core.domain.medication.MedicationUse
 import app.cadence.core.ui.components.DayCountStepper
 import app.cadence.core.ui.components.NumberStepper
 import app.cadence.core.ui.contraception.ContraceptionLabels
+import app.cadence.core.ui.format.DateSkeletons
 import app.cadence.core.ui.format.currentLocale
+import app.cadence.core.ui.format.rememberDateFormatter
 import app.cadence.core.ui.theme.CadenceTheme
 import java.time.LocalDate
 import java.time.LocalTime
@@ -81,6 +85,7 @@ internal fun BirthControlRows(
 ) {
     var editing by rememberSaveable { mutableStateOf(false) }
     var pickingTime by rememberSaveable { mutableStateOf(false) }
+    var countingPacks by rememberSaveable { mutableStateOf(false) }
     SettingRow(
         icon = UiR.drawable.ms_pill,
         title = stringResource(R.string.settings_bc),
@@ -106,6 +111,17 @@ internal fun BirthControlRows(
                 onClick = { pickingTime = true },
             )
         }
+        RefillRows(schedule, today, notificationsAllowed, actions, onCountPacks = { countingPacks = true })
+    }
+    if (countingPacks && schedule != null) {
+        PacksDialog(
+            initial = schedule.supply?.packs ?: DEFAULT_PACKS,
+            onSave = { packs ->
+                actions.onContraception(schedule.copy(supply = PackSupply(packs, today)))
+                countingPacks = false
+            },
+            onDismiss = { countingPacks = false },
+        )
     }
     if (editing) {
         BirthControlDialog(
@@ -613,3 +629,75 @@ private fun StepperField(
 }
 
 private val DEFAULT_MEDICATION_TIME: LocalTime = LocalTime.of(9, 0)
+
+/** Refill reminder: count the packs on hand, and be reminded before they run out. */
+@Composable
+private fun RefillRows(
+    schedule: ContraceptiveSchedule,
+    today: LocalDate,
+    notificationsAllowed: Boolean,
+    actions: SettingsActions,
+    onCountPacks: () -> Unit,
+) {
+    val supply = schedule.supply
+    SwitchRow(
+        icon = UiR.drawable.ms_medication,
+        title = stringResource(R.string.settings_bc_refill),
+        detail = stringResource(R.string.settings_bc_refill_detail),
+        checked = supply != null,
+        onCheckedChange = { on ->
+            actions.onContraception(schedule.copy(supply = if (on) PackSupply(DEFAULT_PACKS, today) else null))
+            if (on) {
+                onCountPacks()
+                if (!notificationsAllowed) actions.onRequestNotificationPermission()
+            }
+        },
+    )
+    val runsOut = schedule.runsOutOn()
+    if (supply != null && runsOut != null) {
+        val packsNow = schedule.packsLeftOn(today)
+        ValueRow(
+            icon = UiR.drawable.ms_event_busy,
+            title = stringResource(R.string.settings_bc_packs),
+            value =
+                stringResource(
+                    R.string.settings_bc_packs_value,
+                    pluralStringResource(R.plurals.settings_bc_packs_count, packsNow, packsNow),
+                    rememberDateFormatter(DateSkeletons.DAY_MONTH_SHORT).format(runsOut),
+                ),
+            onClick = onCountPacks,
+        )
+    }
+}
+
+@Composable
+private fun PacksDialog(
+    initial: Int,
+    onSave: (Int) -> Unit,
+    onDismiss: () -> Unit,
+) {
+    var packs by rememberSaveable { mutableIntStateOf(initial.coerceIn(PackSupply.PACKS_RANGE)) }
+    val label = stringResource(R.string.settings_bc_packs)
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text(label) },
+        text = {
+            Column(verticalArrangement = Arrangement.spacedBy(CadenceTheme.spacing.md)) {
+                Text(stringResource(R.string.settings_bc_packs_hint), style = MaterialTheme.typography.bodyMedium)
+                Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
+                    NumberStepper(
+                        value = packs,
+                        range = PackSupply.PACKS_RANGE,
+                        onValueChange = { packs = it.coerceIn(PackSupply.PACKS_RANGE) },
+                        label = label,
+                        valueText = pluralStringResource(R.plurals.settings_bc_packs_count, packs, packs),
+                    )
+                }
+            }
+        },
+        confirmButton = { TextButton(onClick = { onSave(packs) }) { Text(stringResource(R.string.settings_save)) } },
+        dismissButton = { TextButton(onClick = onDismiss) { Text(stringResource(R.string.settings_cancel)) } },
+    )
+}
+
+private const val DEFAULT_PACKS = 3

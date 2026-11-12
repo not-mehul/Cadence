@@ -4,12 +4,14 @@ import androidx.compose.ui.test.hasContentDescription
 import androidx.compose.ui.test.hasSetTextAction
 import androidx.compose.ui.test.junit4.v2.createComposeRule
 import androidx.compose.ui.test.onAllNodesWithText
+import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.test.performTextInput
 import app.cadence.core.domain.contraception.ContraceptiveMethod
 import app.cadence.core.domain.contraception.ContraceptiveSchedule
+import app.cadence.core.domain.contraception.PackSupply
 import app.cadence.core.domain.log.CustomTag
 import app.cadence.core.domain.medication.Medication
 import app.cadence.core.domain.medication.MedicationUse
@@ -127,6 +129,32 @@ class SettingsTrackingTest {
         compose.onNodeWithText("Something else (IUD, implant, injection)").performScrollTo().performClick()
         compose.onNodeWithText("Save").performClick()
         assertEquals(null, schedules.last())
+    }
+
+    @Test
+    fun `the refill reminder counts packs from today and shows when they run out`() {
+        val pill = ContraceptiveSchedule.typical(ContraceptiveMethod.PILL, LocalDate.of(2026, 3, 2))
+        show(UserSettings(goal = Goal.BIRTH_CONTROL, onboardingComplete = true, contraception = pill))
+
+        compose.onNodeWithText("Refill reminder").performScrollTo().performClick()
+        assertEquals(PackSupply(3, today), schedules.last()!!.supply)
+        // Turning it on asks for the count straight away.
+        compose.onNodeWithContentDescription("Increase Packs left").performClick()
+        compose.onNodeWithText("Save").performClick()
+        assertEquals(PackSupply(4, today), schedules.last()!!.supply)
+    }
+
+    @Test
+    fun `counted packs show how many are left and when they run out`() {
+        val pill =
+            ContraceptiveSchedule
+                .typical(ContraceptiveMethod.PILL, LocalDate.of(2026, 3, 2))
+                .copy(supply = PackSupply(2, LocalDate.of(2026, 3, 2)))
+        show(UserSettings(goal = Goal.BIRTH_CONTROL, onboardingComplete = true, contraception = pill))
+
+        compose.onNodeWithText("2 packs · run out Apr 27").performScrollTo().assertExists()
+        compose.onNodeWithText("Refill reminder").performScrollTo().performClick()
+        assertEquals(null, schedules.last()!!.supply)
     }
 
     @Test

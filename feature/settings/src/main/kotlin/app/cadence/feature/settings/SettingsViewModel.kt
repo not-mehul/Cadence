@@ -130,6 +130,8 @@ class SettingsViewModel
                         since = today,
                         reminderEnabled = previous?.reminderEnabled ?: false,
                         reminderTime = previous?.reminderTime ?: ContraceptiveSchedule.DEFAULT_REMINDER_TIME,
+                        // A count of pill packs means nothing for rings, so it only carries over with the method.
+                        supply = previous?.supply?.takeIf { previous.method == method },
                     )
                 val unchanged =
                     previous != null &&

@@ -86,6 +86,7 @@ fun InsightsContent(
         }
         if (state.flags.isNotEmpty()) FlagsCard(state.flags)
         if (state.currentCycle != null) PatternsCard(state.patterns, state.tagLabels)
+        state.heatmap?.takeIf { it.rows.isNotEmpty() }?.let { CycleDayCard(it, state.tagLabels) }
         if (state.currentCycle != null) HistoryCard(state, onIncludeChange)
     }
 }

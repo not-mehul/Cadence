@@ -3,4 +3,13 @@
     <color name="widget_background">#FF2C2225</color>
     <color name="widget_text">#FFF2DEE1</color>
     <color name="widget_text_secondary">#FFD6C2C5</color>
+    <color name="widget_ring_track">#FF4A3B3F</color>
+    <color name="widget_ring_period">#FFFFB1C1</color>
+    <color name="widget_ring_follicular">#FFFFB870</color>
+    <color name="widget_ring_fertile">#FF98D3CE</color>
+    <color name="widget_ring_luteal">#FFD7BAF5</color>
+    <color name="widget_ring_active">#FFD7BAF5</color>
+    <color name="widget_ring_progress">#FFFFB1C1</color>
+    <color name="widget_button">#FF7C263D</color>
+    <color name="widget_button_icon">#FFFFD9E0</color>
 </resources>

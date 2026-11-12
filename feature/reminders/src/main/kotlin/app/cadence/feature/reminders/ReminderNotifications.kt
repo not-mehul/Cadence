@@ -14,6 +14,7 @@ import androidx.core.content.ContextCompat
 import app.cadence.core.domain.contraception.DoseAction
 import app.cadence.core.domain.reminders.PlannedReminder
 import app.cadence.core.domain.reminders.ReminderKind
+import java.time.temporal.ChronoUnit
 
 /** Notification channels, so users can tune each kind of reminder in system settings. */
 object ReminderChannels {
@@ -48,7 +49,7 @@ object ReminderChannels {
         when (kind) {
             ReminderKind.UPCOMING_PERIOD, ReminderKind.LATE_PERIOD -> PERIOD
             ReminderKind.DAILY_LOG -> CHECK_IN
-            ReminderKind.CONTRACEPTIVE, ReminderKind.MEDICATION -> MEDICATION
+            ReminderKind.CONTRACEPTIVE, ReminderKind.MEDICATION, ReminderKind.REFILL -> MEDICATION
         }
 }
 
@@ -175,6 +176,15 @@ object ReminderNotifier {
             ReminderKind.MEDICATION -> {
                 context.getString(R.string.reminder_medication_title) to
                     context.getString(R.string.reminder_medication_text, medicationName ?: "")
+            }
+
+            ReminderKind.REFILL -> {
+                val days =
+                    reminder.runsOutOn
+                        ?.let { ChronoUnit.DAYS.between(reminder.date, it).toInt() }
+                        ?.coerceAtLeast(1) ?: 1
+                context.getString(R.string.reminder_refill_title) to
+                    context.resources.getQuantityString(R.plurals.reminder_refill_text, days, days)
             }
         }
 

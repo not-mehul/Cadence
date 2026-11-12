@@ -277,7 +277,7 @@ data class Settings(                    // single-row table in the encrypted dat
 data class CycleAnnotation(val startDate: LocalDate, val excludeFromPredictions: Boolean, val reason: String?)
 ```
 
-**As built (schema v3):** symptoms and moods live in a `day_tag` table (`date`, `tag_id`, `kind`, `severity`) keyed by ids from a built-in catalogue in `:core:domain` (`LogCatalog`). **Schema v7 (Phase 6):** custom tags are rows in `custom_tag`, logged in `day_tag` with kind `CUSTOM` and tag id `tag:<id>`. Medications are in `medication` and `medication_dose`. Birth control doses are in `contraceptive_dose`, one per day (`TAKEN` or `MISSED`). The pill, patch or ring schedule is a set of settings columns rather than the generic `Medication` sketched above, because it drives predictions. Discharge and pregnancy tests are not built yet.
+**As built (schema v3):** symptoms and moods live in a `day_tag` table (`date`, `tag_id`, `kind`, `severity`) keyed by ids from a built-in catalogue in `:core:domain` (`LogCatalog`). **Schema v7 (Phase 6):** custom tags are rows in `custom_tag`, logged in `day_tag` with kind `CUSTOM` and tag id `tag:<id>`. Medications are in `medication` and `medication_dose`. Birth control doses are in `contraceptive_dose`, one per day (`TAKEN` or `MISSED`). The pill, patch or ring schedule is a set of settings columns rather than the generic `Medication` sketched above, because it drives predictions. Discharge and pregnancy tests are not built yet. **Schema v8:** two nullable settings columns, `bc_supply_packs` and `bc_supply_counted_on`, for the pack refill reminder (auto-migration, with a test).
 
 **Deriving periods:** consecutive days with flow `LIGHT | MEDIUM | HEAVY` form a period. A gap of ≤ 1 day without flow is bridged. Spotting alone never *starts* a period.
 **Deriving cycles:** a cycle runs from one period's start to the day before the next period's start. The current cycle is open-ended.
@@ -410,6 +410,17 @@ A second pass to make the app cute and friendly while staying clean:
 - **Plain circles, one line at most:** logged period days are a solid pinkish peach (3:1 against the card and the page, with dark numbers at 5.7:1). Predicted days are soft pink with a dashed edge, fertile days light teal, and the ovulation estimate a solid deeper teal. The only lines are the predicted dash, a thin ring for today, and a ring for the selected day, and a day never shows two: the selection ring replaces today's ring and the predicted dash.
 - **Tap a day to see it:** the day is selected and a card below the month shows its date, where it sits ("Period · Cycle day 3", "Predicted period · Cycle day 2 (estimate)", or the pack day on birth control), and everything logged as icon chips plus the note. From there: add or edit details (opens the log sheet), and, for days up to today, period actions.
 - **Periods in the past:** "Period started" on any past day logs the expected number of days from there, the same way the button on Today does: the average of logged periods once there are some, otherwise the typical length from settings. Predictions, fertile windows and cycle days are recomputed from the new history, and a snackbar offers undo for exactly the days that were added. On a period day, "Period ended" clears the days after it and "Not a period day" removes that one day. "Edit period days" still toggles single days for quick backfilling.
+
+### 6.5 Additions after the audit (as built)
+
+- **Pack refill reminder:** on a pill, patch or ring schedule, Settings → Birth control → "Refill reminder" asks how many packs are left, counting the one in use. Cadence works out the day they run out and sends a reminder 5 days and 1 day before, at the dose reminder time, on the medication channel. Today's dose card says "Your packs run out in N days" in the last week, with a button to update the count. The count is kept in backups.
+- **Symptom heads-up:** in tracking mode, Today shows a card when the user's own patterns (the same ones Insights lists) say something usually comes around now or tomorrow, such as cramps on the first day of a period or headaches the day before. It is worded as what they have logged before, never as a health prediction, and shows at most four items.
+- **Insights by cycle day:** a grid on Insights with a row for each of the six most logged items and a column for each cycle day across the last six completed cycles. Darker cells mean the item was logged on that day in more cycles, and the period days are shaded behind it. Each row reads out which days it is most common on. It needs at least two completed cycles with something logged.
+- **Quick logging:** long-pressing the launcher icon offers "Log today" and "Period started" (or "Dose done" on a schedule); the Quick Settings tile "Log today" opens today's log; and the large widget has a log button. Each opens the app with an action that waits until the app is unlocked, then runs on Today: "Period started" and "Dose done" show a snackbar with undo, or say why there was nothing to do. The shortcuts are removed, and any pinned ones disabled, while the discreet icon is on. The tile doesn't name the app.
+- **Large widget:** a 4×2 widget with the cycle ring beside the day's status and a log button. It follows the same rules as the small one: nothing while app lock is on, a plain progress ring and the date when discreet, and the phase colours (or the pack and its break) otherwise. The ring is drawn to a bitmap, as widgets can't run Compose.
+- **Widget at midnight:** an inexact alarm that doesn't wake the phone redraws the widgets just after midnight, and they also redraw when the clock or time zone changes. The alarm is cancelled once no widget is left.
+- **Report date range:** the clinician report asks for the last 3, 6 or 12 months or everything. A start date inside a period moves back to that period's start, and predictions still use the whole history.
+- **Spreadsheet safety:** CSV fields starting with `=`, `+`, `-`, `@`, a tab or a carriage return get a leading apostrophe, so a spreadsheet won't run a note as a formula. Plain numbers such as `-3` are left alone.
 
 ---
 
@@ -560,7 +571,7 @@ Each phase ends with a **working, shippable app**. Phases are sized for one deve
 - **Widget:**
   - It's a plain `AppWidgetProvider` rather than Jetpack Glance. Glance runs on WorkManager, which would add wake-lock, foreground-service and other permissions for what is two lines of text.
   - It follows the "Discreet notifications and widget" setting. By default it shows only "Day N" and the date. With discreet mode off it shows "Period in 9 days" or "Break in 3 days". While app lock is on it shows nothing.
-  - It refreshes when data changes and hourly, for the change of day.
+  - It refreshes when data changes, hourly, and just after midnight (see §6.5).
 - **Discreet icon:** two launcher activity-aliases. Settings → App icon switches between Cadence's icon and a plain notepad called "Planner". `MainActivity` itself is no longer exported.
 - **Health Connect:**
   - Opt-in, from Settings. Only the menstruation read and write permissions are requested.

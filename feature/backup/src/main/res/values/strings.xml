@@ -84,7 +84,7 @@
     <string name="report_col_period">Period length</string>
     <string name="report_col_note">Note</string>
     <string name="report_excluded">Excluded by user</string>
-    <string name="report_symptoms">Most logged symptoms (last 6 months)</string>
+    <string name="report_symptoms">Most logged symptoms</string>
     <plurals name="report_symptom_days">
         <item quantity="one">%1$d day</item>
         <item quantity="other">%1$d days</item>
@@ -131,8 +131,8 @@
     <string name="report_bc_break">%1$s (pack: %2$d + %3$d, with a break)</string>
     <string name="report_bc_placebo">%1$s with placebo pills (pack: %2$d + %3$d)</string>
     <string name="report_bc_continuous">%1$s, continuous (pack: %2$d)</string>
-    <string name="report_missed_doses">Doses recorded as missed (last 90 days)</string>
-    <string name="report_medications">Medications (last 6 months)</string>
+    <string name="report_missed_doses">Doses recorded as missed</string>
+    <string name="report_medications">Medications</string>
     <string name="report_medication_daily">Every day</string>
     <string name="report_medication_as_needed">When needed</string>
     <string name="report_medication_stopped">(stopped)</string>
@@ -151,4 +151,9 @@
         <item quantity="one">%1$d of %2$d cycle</item>
         <item quantity="other">%1$d of %2$d cycles</item>
     </plurals>
+    <string name="backup_report_range_title">What should the report cover?</string>
+    <string name="backup_report_range_3">The last 3 months</string>
+    <string name="backup_report_range_6">The last 6 months</string>
+    <string name="backup_report_range_12">The last 12 months</string>
+    <string name="backup_report_range_all">Everything logged</string>
 </resources>

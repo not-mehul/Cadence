@@ -11,13 +11,17 @@ import app.cadence.core.domain.security.SecuritySettings
 import app.cadence.feature.healthconnect.HealthConnectSync
 import app.cadence.feature.reminders.ReminderChannels
 import app.cadence.feature.reminders.ReminderSync
+import app.cadence.feature.settings.AppIcons
+import app.cadence.feature.settings.QuickShortcuts
 import app.cadence.feature.widget.WidgetSync
 import dagger.hilt.android.HiltAndroidApp
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
 import javax.inject.Inject
 
@@ -56,6 +60,13 @@ class CadenceApplication : Application() {
         settings.settings
             .onEach { security = it.security }
             .catch { /* Unreadable data is handled on screen; keep the safe default. */ }
+            .launchIn(scope)
+        // Launcher shortcuts follow the settings (and never show with the discreet icon).
+        settings.settings
+            .map(QuickShortcuts::wanted)
+            .distinctUntilChanged()
+            .onEach { QuickShortcuts.publish(this, it, AppIcons.current(this)) }
+            .catch { /* As above; shortcuts are a convenience. */ }
             .launchIn(scope)
         ProcessLifecycleOwner.get().lifecycle.addObserver(
             object : DefaultLifecycleObserver {

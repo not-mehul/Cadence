@@ -7,6 +7,7 @@ import app.cadence.core.data.security.AppLock
 import app.cadence.core.data.security.DatabaseRecovery
 import app.cadence.core.domain.model.ThemePreference
 import app.cadence.core.domain.security.SecuritySettings
+import app.cadence.core.ui.quick.QuickAction
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -70,6 +71,19 @@ class MainViewModel
                             if (DatabaseRecovery.isUnreadableData(e)) emit(MainUiState.DataUnavailable) else throw e
                         }
                 }.stateIn(viewModelScope, SharingStarted.Eagerly, MainUiState.Loading)
+
+        private val pendingQuickAction = MutableStateFlow<QuickAction?>(null)
+
+        /** From a shortcut, the Quick Settings tile or the widget; waits here until the app is unlocked. */
+        val quickAction: StateFlow<QuickAction?> = pendingQuickAction
+
+        fun onQuickAction(action: QuickAction) {
+            pendingQuickAction.value = action
+        }
+
+        fun quickActionHandled() {
+            pendingQuickAction.value = null
+        }
 
         fun unlock() = appLock.unlock()
 

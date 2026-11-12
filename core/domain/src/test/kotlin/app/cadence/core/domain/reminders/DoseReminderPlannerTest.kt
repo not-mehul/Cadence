@@ -4,6 +4,7 @@ import app.cadence.core.domain.contraception.ContraceptiveMethod
 import app.cadence.core.domain.contraception.ContraceptiveSchedule
 import app.cadence.core.domain.contraception.DoseAction
 import app.cadence.core.domain.contraception.DoseStatus
+import app.cadence.core.domain.contraception.PackSupply
 import app.cadence.core.domain.d
 import app.cadence.core.domain.medication.Medication
 import app.cadence.core.domain.medication.MedicationUse
@@ -114,5 +115,23 @@ class DoseReminderPlannerTest {
         assertNull(daily.action)
         assertNull(daily.medicationId)
         assertEquals(LocalDate.of(2026, 3, 10), daily.date)
+    }
+
+    @Test
+    fun `refill reminders come five days and one day before the packs run out`() {
+        // Two rings counted on 10 March: this one (from 2 March) and one more, so they last until 26 April.
+        val tracked =
+            onRing.copy(contraception = ring.copy(supply = PackSupply(packs = 2, countedOn = d(2026, 3, 10))))
+        val refills = { now: LocalDateTime -> plan(now, tracked).filter { it.kind == ReminderKind.REFILL } }
+
+        assertEquals(
+            listOf(
+                PlannedReminder(ReminderKind.REFILL, LocalDateTime.of(2026, 4, 22, 21, 0), runsOutOn = d(2026, 4, 27)),
+            ),
+            refills(LocalDateTime.of(2026, 3, 10, 12, 0)),
+        )
+        assertEquals(LocalDateTime.of(2026, 4, 26, 21, 0), refills(LocalDateTime.of(2026, 4, 22, 22, 0)).single().at)
+        assertEquals(emptyList(), refills(LocalDateTime.of(2026, 4, 26, 22, 0)), "nothing once both have passed")
+        assertEquals(emptyList(), plan(LocalDateTime.of(2026, 3, 10, 12, 0)).filter { it.kind == ReminderKind.REFILL })
     }
 }

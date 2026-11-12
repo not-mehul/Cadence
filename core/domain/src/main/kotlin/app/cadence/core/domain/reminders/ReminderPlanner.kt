@@ -3,6 +3,7 @@ package app.cadence.core.domain.reminders
 import app.cadence.core.domain.contraception.ContraceptiveSchedule
 import app.cadence.core.domain.contraception.DoseAction
 import app.cadence.core.domain.contraception.DoseStatus
+import app.cadence.core.domain.contraception.PackSupply
 import app.cadence.core.domain.cycles.CycleHistory
 import app.cadence.core.domain.cycles.CyclePrediction
 import app.cadence.core.domain.cycles.CyclePredictor
@@ -27,6 +28,9 @@ enum class ReminderKind {
 
     /** A daily medication; one per medication, told apart by [PlannedReminder.medicationId]. */
     MEDICATION,
+
+    /** The packs on hand are about to run out. */
+    REFILL,
 }
 
 /** The next time a reminder should fire, in local wall-clock time. */
@@ -39,6 +43,8 @@ data class PlannedReminder(
     val action: DoseAction? = null,
     /** For a medication reminder: which medication. */
     val medicationId: Long? = null,
+    /** For a refill reminder: the first day with no pack left. */
+    val runsOutOn: LocalDate? = null,
 ) {
     /** The date the reminder is about (a dose is checked off against this day). */
     val date: LocalDate
@@ -86,7 +92,21 @@ object ReminderPlanner {
             medications.filter { it.remindsDaily }.forEach { medication ->
                 add(medicationReminder(medication, doses.medications, now))
             }
+            schedule?.let { refillReminder(it, now) }?.let(::add)
         }
+    }
+
+    /** The next of the refill nudges before the packs run out, at the dose reminder time. */
+    private fun refillReminder(
+        schedule: ContraceptiveSchedule,
+        now: LocalDateTime,
+    ): PlannedReminder? {
+        val runsOut = schedule.runsOutOn() ?: return null
+        return PackSupply.REMIND_DAYS_BEFORE
+            .map { runsOut.minusDays(it).atTime(schedule.reminderTime) }
+            .sorted()
+            .firstOrNull { it.isAfter(now) }
+            ?.let { PlannedReminder(ReminderKind.REFILL, it, runsOutOn = runsOut) }
     }
 
     private fun periodReminders(

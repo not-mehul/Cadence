@@ -9,6 +9,7 @@ import androidx.compose.ui.test.performScrollTo
 import app.cadence.core.domain.contraception.ContraceptiveMethod
 import app.cadence.core.domain.contraception.ContraceptiveSchedule
 import app.cadence.core.domain.contraception.DoseStatus
+import app.cadence.core.domain.contraception.PackSupply
 import app.cadence.core.domain.cycles.CycleSnapshot
 import app.cadence.core.domain.log.DayEntry
 import app.cadence.core.domain.medication.Medication
@@ -158,6 +159,27 @@ class TodayBirthControlTest {
         compose.onNodeWithText("Ibuprofen").performScrollTo().performClick()
         compose.onNodeWithText("Iron").performScrollTo().performClick()
         assertEquals(listOf(2L to true, 1L to false), taken)
+    }
+
+    @Test
+    fun `a nudge when the counted packs are about to run out, which leads to settings`() {
+        // One pack from 2 March: it runs out on 30 March, 10 days away. No nudge yet.
+        show(pill.copy(supply = PackSupply(1, LocalDate.of(2026, 3, 2))))
+        compose.onNodeWithText("Your packs run out", substring = true).assertDoesNotExist()
+    }
+
+    @Test
+    fun `the nudge counts down, and Update opens settings`() {
+        show(pill.copy(supply = PackSupply(1, LocalDate.of(2026, 3, 2))), day = LocalDate.of(2026, 3, 26))
+        compose.onNodeWithText("Your packs run out in 4 days").performScrollTo().assertIsDisplayed()
+        compose.onNodeWithText("Update").performScrollTo().performClick()
+        assertEquals(true, openedSettings)
+    }
+
+    @Test
+    fun `once they have run out, it says so`() {
+        show(pill.copy(supply = PackSupply(1, LocalDate.of(2026, 3, 2))), day = LocalDate.of(2026, 4, 2))
+        compose.onNodeWithText("Your counted packs have run out").performScrollTo().assertIsDisplayed()
     }
 }
 

@@ -154,6 +154,27 @@ class MigrationTest {
     }
 
     @Test
+    fun `v7 to v8 keeps the schedule and adds an untracked pack supply`() {
+        helper.createDatabase(TEST_DB, 7).use { db ->
+            db.execSQL(
+                "INSERT INTO settings (id, goal, cycle_length, period_length, luteal_phase_length, theme, " +
+                    "onboarding_complete, hidden_categories, bc_method, bc_pack_start) " +
+                    "VALUES (0, 'BIRTH_CONTROL', 28, 5, 14, 'SYSTEM', 1, '', 'PILL', 20500)",
+            )
+        }
+
+        helper.runMigrationsAndValidate(TEST_DB, 8, true, *ALL_MIGRATIONS).use { db ->
+            db.query("SELECT bc_method, bc_pack_start, bc_supply_packs, bc_supply_counted_on FROM settings").use { c ->
+                c.moveToFirst()
+                assertEquals("PILL", c.getString(0))
+                assertEquals(20500, c.getInt(1))
+                assertTrue(c.isNull(2))
+                assertTrue(c.isNull(3))
+            }
+        }
+    }
+
+    @Test
     fun `room opens a database created from the oldest schema`() {
         helper.createDatabase(TEST_DB, 1).close()
 

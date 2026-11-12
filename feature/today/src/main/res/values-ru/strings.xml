@@ -133,4 +133,22 @@
     <string name="today_greeting_evening">Добрый вечер</string>
     <string name="today_pack_day_label">День упаковки</string>
     <string name="today_fertile_title">Фертильное окно</string>
+    <plurals name="today_supply_runs_out">
+        <item quantity="one">Упаковки закончатся через %d день</item>
+        <item quantity="few">Упаковки закончатся через %d дня</item>
+        <item quantity="many">Упаковки закончатся через %d дней</item>
+        <item quantity="other">Упаковки закончатся через %d дня</item>
+    </plurals>
+    <string name="today_supply_ran_out">Посчитанные упаковки закончились</string>
+    <string name="today_supply_update">Обновить</string>
+    <string name="today_heads_up_title">Заранее</string>
+    <string name="today_heads_up_body">В прошлых циклах вы часто отмечали это примерно в такие дни.</string>
+    <string name="today_heads_up_now">Примерно сейчас</string>
+    <string name="today_heads_up_tomorrow">Завтра</string>
+    <string name="today_heads_up_note">По вашим собственным записям, это не прогноз о здоровье.</string>
+    <!-- Quick actions (shortcuts, Quick Settings tile, widget). -->
+    <string name="today_quick_dose_done">Отмечено на сегодня</string>
+    <string name="today_quick_already_period">Сегодня уже отмечено как день месячных</string>
+    <string name="today_quick_no_dose">Сегодня ничего не нужно</string>
+    <string name="today_quick_dose_already">Сегодняшний приём уже отмечен</string>
 </resources>

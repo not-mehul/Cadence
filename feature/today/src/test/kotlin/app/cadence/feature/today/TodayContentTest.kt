@@ -13,6 +13,9 @@ import app.cadence.core.domain.model.CycleDefaults
 import app.cadence.core.domain.model.Goal
 import app.cadence.core.domain.model.MenstrualFlow
 import app.cadence.core.domain.model.UserSettings
+import app.cadence.core.domain.patterns.HeadsUp
+import app.cadence.core.domain.patterns.PatternTiming
+import app.cadence.core.domain.patterns.SymptomPattern
 import app.cadence.core.ui.theme.CadenceTheme
 import org.junit.Rule
 import org.junit.Test
@@ -52,6 +55,31 @@ class TodayContentTest {
                 )
             }
         }
+    }
+
+    @Test
+    fun `a heads-up groups what tends to come around now and tomorrow`() {
+        val settings = UserSettings(cycleDefaults = CycleDefaults(28, 5), onboardingComplete = true)
+        val state =
+            TodayUiState.Ready(
+                CycleSnapshot.compute(period, settings, march1),
+                Goal.TRACK,
+                5,
+                DayEntry(march1),
+                tagLabels = mapOf(4L to "Travel"),
+                headsUp =
+                    listOf(
+                        HeadsUp(SymptomPattern("cramps", PatternTiming.DURING_PERIOD, null, 3, 3), 0),
+                        HeadsUp(SymptomPattern("tag:4", PatternTiming.BEFORE_PERIOD, 2, 3, 4), 1),
+                    ),
+            )
+        compose.setContent { CadenceTheme { TodayContent(state, {}, {}, {}, {}) } }
+
+        compose.onNodeWithText("Heads-up").performScrollTo().assertIsDisplayed()
+        compose.onNodeWithText("Around now").assertExists()
+        compose.onNodeWithText("Cramps").assertExists()
+        compose.onNodeWithText("Tomorrow").assertExists()
+        compose.onNodeWithText("Travel").assertExists()
     }
 
     @Test

@@ -10,6 +10,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteScaffold
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -25,6 +26,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import app.cadence.core.ui.quick.QuickAction
 import app.cadence.feature.calendar.CalendarScreen
 import app.cadence.feature.insights.InsightsScreen
 import app.cadence.feature.log.DayLogSheet
@@ -45,12 +47,19 @@ import java.time.LocalDate
 fun CadenceApp(
     modifier: Modifier = Modifier,
     navController: NavHostController = rememberNavController(),
+    quickAction: QuickAction? = null,
+    onConsumeQuickAction: () -> Unit = {},
 ) {
     val backStackEntry by navController.currentBackStackEntryAsState()
     val currentDestination = backStackEntry?.destination
     // The day whose log sheet is open, as an epoch day so it survives rotation and process death.
     var logEpochDay by rememberSaveable { mutableStateOf<Long?>(null) }
     val openLog: (LocalDate) -> Unit = { logEpochDay = it.toEpochDay() }
+
+    // Quick actions are taken on Today, which has the undo snackbar.
+    LaunchedEffect(quickAction) {
+        if (quickAction != null) navController.navigateToTopLevel(TopLevelDestination.TODAY)
+    }
 
     Surface(modifier = modifier, color = MaterialTheme.colorScheme.surface) {
         NavigationSuiteScaffold(
@@ -80,6 +89,8 @@ fun CadenceApp(
                     TodayScreen(
                         onOpenLog = openLog,
                         onOpenSettings = { navController.navigateToTopLevel(TopLevelDestination.SETTINGS) },
+                        quickAction = quickAction,
+                        onConsumeQuickAction = onConsumeQuickAction,
                     )
                 }
                 composable<CalendarRoute> { CalendarScreen(onOpenLog = openLog) }

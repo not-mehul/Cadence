@@ -15,6 +15,7 @@ import app.cadence.core.domain.cycles.CyclePredictor
 import app.cadence.core.domain.cycles.CycleStats
 import app.cadence.core.domain.cycles.HealthFlag
 import app.cadence.core.domain.log.CustomTag
+import app.cadence.core.domain.patterns.CycleDayHeatmap
 import app.cadence.core.domain.patterns.SymptomPattern
 import app.cadence.core.domain.patterns.SymptomPatterns
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -58,6 +59,8 @@ sealed interface InsightsUiState {
         val patterns: List<SymptomPattern> = emptyList(),
         /** Custom tag labels by id, for [patterns]. */
         val tagLabels: Map<Long, String> = emptyMap(),
+        /** What was logged on each cycle day across recent cycles; null until there are enough. */
+        val heatmap: CycleDayHeatmap? = null,
     ) : InsightsUiState {
         /** The chart shows the most recent cycles. */
         val chartCycles: List<CycleRow>
@@ -118,6 +121,7 @@ class InsightsViewModel
                     flags = CycleInsights.healthFlags(history, l.pain, s.goal, today),
                     patterns = SymptomPatterns.find(history, l.items),
                     tagLabels = l.tags.associate { it.id to it.label },
+                    heatmap = CycleDayHeatmap.build(history, l.items),
                 )
             }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), InsightsUiState.Loading)
 

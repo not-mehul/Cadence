@@ -8,6 +8,7 @@ import androidx.navigation.NavDestination.Companion.hasRoute
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import app.cadence.core.ui.quick.QuickAction
 import app.cadence.feature.onboarding.OnboardingScreen
 import kotlinx.serialization.Serializable
 
@@ -26,13 +27,15 @@ internal data object MainRoute
 fun CadenceRoot(
     onboardingComplete: Boolean,
     modifier: Modifier = Modifier,
+    quickAction: QuickAction? = null,
+    onConsumeQuickAction: () -> Unit = {},
 ) {
     val navController = rememberNavController()
     val startDestination: Any = remember { if (onboardingComplete) MainRoute else OnboardingRoute }
 
     NavHost(navController = navController, startDestination = startDestination, modifier = modifier) {
         composable<OnboardingRoute> { OnboardingScreen() }
-        composable<MainRoute> { CadenceApp() }
+        composable<MainRoute> { CadenceApp(quickAction = quickAction, onConsumeQuickAction = onConsumeQuickAction) }
     }
 
     LaunchedEffect(onboardingComplete) {

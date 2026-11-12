@@ -18,4 +18,6 @@
     <string name="recovery_confirm_title">Начать заново?</string>
     <string name="recovery_confirm_body">Нечитаемые данные будут удалены с этого телефона. Это действие нельзя отменить.</string>
     <string name="recovery_cancel">Отмена</string>
+    <!-- Quick Settings tile; no app name, so it stays discreet. -->
+    <string name="tile_log_today">Отметить сегодня</string>
 </resources>

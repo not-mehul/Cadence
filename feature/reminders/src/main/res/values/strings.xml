@@ -31,4 +31,9 @@
     <string name="reminder_dose_remove_ring">Time to take out your ring for the ring-free week.</string>
     <string name="reminder_medication_title">Medication</string>
     <string name="reminder_medication_text">Time for %1$s.</string>
+    <string name="reminder_refill_title">Time to refill</string>
+    <plurals name="reminder_refill_text">
+        <item quantity="one">Your packs run out in %d day. Time to pick up more.</item>
+        <item quantity="other">Your packs run out in %d days. Time to pick up more.</item>
+    </plurals>
 </resources>

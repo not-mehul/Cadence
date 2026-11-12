@@ -5,6 +5,7 @@ import androidx.room.Entity
 import androidx.room.PrimaryKey
 import app.cadence.core.domain.contraception.ContraceptiveMethod
 import app.cadence.core.domain.contraception.ContraceptiveSchedule
+import app.cadence.core.domain.contraception.PackSupply
 import app.cadence.core.domain.log.LogCategory
 import app.cadence.core.domain.model.CycleDefaults
 import app.cadence.core.domain.model.Goal
@@ -78,6 +79,11 @@ data class SettingsEntity(
     val bcReminderEnabled: Boolean = false,
     @ColumnInfo(name = "bc_reminder_minute", defaultValue = "540")
     val bcReminderMinute: Int = 540,
+    // Packs on hand for refill reminders, added in schema v8. Null means not tracked.
+    @ColumnInfo(name = "bc_supply_packs")
+    val bcSupplyPacks: Int? = null,
+    @ColumnInfo(name = "bc_supply_counted_on")
+    val bcSupplyCountedOn: LocalDate? = null,
 ) {
     fun toModel(): UserSettings =
         UserSettings(
@@ -120,8 +126,16 @@ data class SettingsEntity(
                 since = bcSince ?: packStart,
                 reminderEnabled = bcReminderEnabled,
                 reminderTime = minuteToTime(bcReminderMinute),
+                supply = supply(),
             )
         }.getOrNull()
+    }
+
+    /** A count out of range is dropped rather than losing the whole schedule. */
+    private fun supply(): PackSupply? {
+        val packs = bcSupplyPacks ?: return null
+        val countedOn = bcSupplyCountedOn ?: return null
+        return runCatching { PackSupply(packs, countedOn) }.getOrNull()
     }
 
     companion object {
@@ -161,6 +175,8 @@ data class SettingsEntity(
                     bcSince = schedule.since,
                     bcReminderEnabled = schedule.reminderEnabled,
                     bcReminderMinute = timeToMinute(schedule.reminderTime),
+                    bcSupplyPacks = schedule.supply?.packs,
+                    bcSupplyCountedOn = schedule.supply?.countedOn,
                 )
             }
 

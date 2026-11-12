@@ -47,11 +47,49 @@ class ReportContentTest {
     }
 
     @Test
-    fun `keeps at most twelve cycles`() {
-        val report = build(periods(count = 16))
+    fun `everything ever logged, up to the table's limit of cycles`() {
+        // 30 periods every 28 days, the last one starting 21 Feb 2026.
+        val start = LocalDate.of(2026, 2, 21).minusDays(29 * 28L)
+        val entries =
+            (0 until 30).flatMap { c ->
+                (0L until 5L).map { DayEntry(start.plusDays(c * 28L + it), flow = MenstrualFlow.MEDIUM) }
+            }
+        val report =
+            ReportContent.build(
+                BackupData(UserSettings(onboardingComplete = true), entries, emptySet()),
+                today,
+                ReportRange.ALL,
+            )
 
         assertEquals(ReportContent.MAX_CYCLES, report.cycles.size)
-        assertEquals(firstStart.plusDays(14 * 28L), report.cycles.first().start)
+        assertEquals(LocalDate.of(2026, 1, 24), report.cycles.first().start)
+        assertEquals(start, report.firstLogged)
+    }
+
+    @Test
+    fun `a shorter range covers fewer cycles and starts where it says`() {
+        val data = BackupData(UserSettings(onboardingComplete = true), periods(), emptySet())
+
+        val threeMonths = ReportContent.build(data, today, ReportRange.MONTHS_3)
+        assertEquals(listOf(LocalDate.of(2026, 1, 24), LocalDate.of(2025, 12, 27)), threeMonths.cycles.map { it.start })
+        assertEquals(LocalDate.of(2025, 12, 20), threeMonths.firstLogged)
+        assertEquals(4, ReportContent.build(data, today, ReportRange.MONTHS_6).cycles.size)
+    }
+
+    @Test
+    fun `a range that starts mid-period begins with that whole period`() {
+        // Three months before 26 Apr is 26 Jan, inside the period of 24 to 28 Jan.
+        val report =
+            ReportContent.build(
+                BackupData(UserSettings(onboardingComplete = true), periods(), emptySet()),
+                LocalDate.of(2026, 4, 26),
+                ReportRange.MONTHS_3,
+            )
+        assertEquals(LocalDate.of(2026, 1, 24), report.firstLogged)
+        assertEquals(
+            listOf(ReportContent.ReportCycle(LocalDate.of(2026, 1, 24), 28, 5, excluded = false)),
+            report.cycles,
+        )
     }
 
     @Test
@@ -68,7 +106,8 @@ class ReportContentTest {
         val report = build(entries)
 
         assertEquals(listOf("cramps" to 3, "acne" to 1, "headache" to 1), report.topSymptoms)
-        assertEquals(old, report.firstLogged)
+        // Older data exists, so the report says it covers the six months, not since the first day.
+        assertEquals(today.minusMonths(6), report.firstLogged)
     }
 
     @Test

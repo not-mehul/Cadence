@@ -61,6 +61,7 @@ import app.cadence.core.ui.expressive.BuddyFace
 import app.cadence.core.ui.format.DateSkeletons
 import app.cadence.core.ui.format.formatHeading
 import app.cadence.core.ui.format.rememberDateFormatter
+import app.cadence.core.ui.quick.QuickAction
 import app.cadence.core.ui.theme.CadenceTheme
 import java.time.LocalDate
 import java.time.LocalTime
@@ -71,12 +72,16 @@ fun TodayScreen(
     onOpenLog: (LocalDate) -> Unit,
     modifier: Modifier = Modifier,
     onOpenSettings: () -> Unit = {},
+    quickAction: QuickAction? = null,
+    onConsumeQuickAction: () -> Unit = {},
     viewModel: TodayViewModel = hiltViewModel(),
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
     val snackbarHostState = remember { SnackbarHostState() }
     val loggedMessage by rememberUpdatedState(stringResource(R.string.today_logged))
     val undoLabel by rememberUpdatedState(stringResource(R.string.today_undo))
+    val doseMessage by rememberUpdatedState(stringResource(R.string.today_quick_dose_done))
+    val notes by rememberUpdatedState(QuickNote.entries.associateWith { stringResource(it.message) })
 
     LaunchedEffect(viewModel) {
         viewModel.events.collect { event ->
@@ -90,8 +95,37 @@ fun TodayScreen(
                         )
                     if (result == SnackbarResult.ActionPerformed) viewModel.undoLogged(event.days)
                 }
+
+                is TodayEvent.DoseRecorded -> {
+                    val result =
+                        snackbarHostState.showSnackbar(
+                            message = doseMessage,
+                            actionLabel = undoLabel,
+                            duration = SnackbarDuration.Long,
+                        )
+                    if (result == SnackbarResult.ActionPerformed) viewModel.recordDose(event.date, event.previous)
+                }
+
+                is TodayEvent.NothingToDo -> {
+                    snackbarHostState.showSnackbar(notes.getValue(event.reason))
+                }
             }
         }
+    }
+
+    // A shortcut, the Quick Settings tile or the widget asked for something; take it once Today is ready.
+    val ready = state as? TodayUiState.Ready
+    val openLog by rememberUpdatedState(onOpenLog)
+    val consumeQuickAction by rememberUpdatedState(onConsumeQuickAction)
+    LaunchedEffect(quickAction, ready != null) {
+        val action = quickAction ?: return@LaunchedEffect
+        val today = ready?.snapshot?.today ?: return@LaunchedEffect
+        when (action) {
+            QuickAction.LOG_TODAY -> openLog(today)
+            QuickAction.PERIOD_STARTED -> viewModel.quickPeriodStarted()
+            QuickAction.DOSE_TAKEN -> viewModel.quickDoseTaken()
+        }
+        consumeQuickAction()
     }
 
     Scaffold(
@@ -121,6 +155,14 @@ fun TodayScreen(
         }
     }
 }
+
+private val QuickNote.message: Int
+    get() =
+        when (this) {
+            QuickNote.ALREADY_ON_PERIOD -> R.string.today_quick_already_period
+            QuickNote.NO_DOSE_TODAY -> R.string.today_quick_no_dose
+            QuickNote.DOSE_ALREADY_TAKEN -> R.string.today_quick_dose_already
+        }
 
 /** Stateless Today content, previewable and testable without a view model. */
 @Composable
@@ -215,11 +257,12 @@ fun TodayContent(
         }
 
         if (birthControl != null) {
-            DoseCard(birthControl, snapshot.today, onRecordDose)
+            DoseCard(birthControl, snapshot.today, onRecordDose, onUpdatePacks = onOpenSettings)
             if (birthControl.missed.isNotEmpty()) MissedDosesCard(birthControl.missed, onRecordDose)
         }
         if (state.goal == Goal.BIRTH_CONTROL && birthControl == null) SetUpBirthControlCard(onOpenSettings)
         if (state.medications.isNotEmpty()) MedicationsCard(state.medications, onMedicationTakenChange)
+        if (state.headsUp.isNotEmpty()) HeadsUpCard(state.headsUp, state.tagLabels)
         TodayLogCard(entry = state.todayEntry, onOpen = onOpenLog, tagLabels = state.tagLabels)
         snapshot.fertileWindow?.let { FertileWindowCard(it) }
         PhaseCard(snapshot = snapshot, goal = state.goal)

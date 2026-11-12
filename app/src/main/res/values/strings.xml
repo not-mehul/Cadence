@@ -19,4 +19,6 @@
     <string name="recovery_confirm_title">Start over?</string>
     <string name="recovery_confirm_body">This removes the unreadable data from this phone. It can\'t be undone.</string>
     <string name="recovery_cancel">Cancel</string>
+    <!-- Quick Settings tile; no app name, so it stays discreet. -->
+    <string name="tile_log_today">Log today</string>
 </resources>

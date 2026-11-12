@@ -3,6 +3,7 @@ package app.cadence.core.data.backup
 import app.cadence.core.domain.contraception.ContraceptiveMethod
 import app.cadence.core.domain.contraception.ContraceptiveSchedule
 import app.cadence.core.domain.contraception.DoseStatus
+import app.cadence.core.domain.contraception.PackSupply
 import app.cadence.core.domain.log.CustomTag
 import app.cadence.core.domain.log.DayEntry
 import app.cadence.core.domain.log.LogCategory
@@ -125,6 +126,7 @@ class BackupCodecTest {
                             breakDays = 7,
                             since = LocalDate.of(2026, 2, 10),
                             reminderEnabled = true,
+                            supply = PackSupply(3, LocalDate.of(2026, 3, 10)),
                             reminderTime = LocalTime.of(20, 45),
                         ),
                 ),

@@ -163,4 +163,21 @@
     <string name="settings_language">Язык</string>
     <string name="settings_language_system">Как на телефоне</string>
     <string name="settings_language_follows_phone">Используется язык телефона. Нажмите, чтобы открыть языковые настройки телефона.</string>
+    <string name="settings_bc_refill">Напоминание о запасе</string>
+    <string name="settings_bc_refill_detail">Считайте упаковки и получайте напоминание за 5 дней и за 1 день до того, как они закончатся</string>
+    <string name="settings_bc_packs">Осталось упаковок</string>
+    <string name="settings_bc_packs_hint">Сколько у вас упаковок, считая текущую? Обновите число, когда купите новые.</string>
+    <string name="settings_bc_packs_value">%1$s · закончатся %2$s</string>
+    <plurals name="settings_bc_packs_count">
+        <item quantity="one">%d упаковка</item>
+        <item quantity="few">%d упаковки</item>
+        <item quantity="many">%d упаковок</item>
+        <item quantity="other">%d упаковки</item>
+    </plurals>
+    <!-- Launcher shortcuts (not shown with the discreet icon). -->
+    <string name="shortcut_log">Отметить сегодня</string>
+    <string name="shortcut_period">Месячные начались</string>
+    <string name="shortcut_dose">Приём сделан</string>
+    <string name="shortcut_dose_long">Отметить сегодняшний приём</string>
+    <string name="shortcut_disabled">Отключено скрытным значком</string>
 </resources>

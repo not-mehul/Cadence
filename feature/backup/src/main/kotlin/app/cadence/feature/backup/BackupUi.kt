@@ -6,8 +6,12 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.DrawableRes
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.selection.selectable
+import androidx.compose.foundation.selection.selectableGroup
 import androidx.compose.foundation.selection.toggleable
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.AlertDialog
@@ -15,6 +19,7 @@ import androidx.compose.material3.LinearWavyProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -23,6 +28,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
@@ -64,10 +70,12 @@ fun BackupSettingsRows(
         rememberLauncherForActivityResult(
             ActivityResultContracts.CreateDocument("text/csv"),
         ) { uri -> uri?.let(viewModel::exportCsv) }
+    var askReportRange by rememberSaveable { mutableStateOf(false) }
+    var reportRange by rememberSaveable { mutableStateOf(ReportRange.DEFAULT) }
     val reportLauncher =
         rememberLauncherForActivityResult(
             ActivityResultContracts.CreateDocument("application/pdf"),
-        ) { uri -> uri?.let(viewModel::exportReport) }
+        ) { uri -> uri?.let { viewModel.exportReport(it, reportRange) } }
     val importLauncher = rememberImportLauncher(viewModel::startImport)
 
     // One job at a time: encrypting or restoring can take a few seconds, so the rows wait for it.
@@ -84,11 +92,22 @@ fun BackupSettingsRows(
             csvLauncher.launch(fileName(today, "csv"))
         }
         Row(R.string.backup_report, R.string.backup_report_detail, UiR.drawable.ms_description, idle) {
-            reportLauncher.launch(fileName(today, "pdf", "cadence-report"))
+            askReportRange = true
         }
         if (state.busy) Working()
     }
 
+    if (askReportRange) {
+        ReportRangeDialog(
+            initial = reportRange,
+            onContinue = { range ->
+                askReportRange = false
+                reportRange = range
+                reportLauncher.launch(fileName(today, "pdf", "cadence-report"))
+            },
+            onDismiss = { askReportRange = false },
+        )
+    }
     if (askPassword) {
         ExportPasswordDialog(
             onContinue = { password ->
@@ -407,3 +426,51 @@ private fun ModeOption(
         }
     }
 }
+
+/** How far back the clinician report should look, asked before choosing where to save it. */
+@Composable
+internal fun ReportRangeDialog(
+    initial: ReportRange,
+    onContinue: (ReportRange) -> Unit,
+    onDismiss: () -> Unit,
+) {
+    var chosen by rememberSaveable { mutableStateOf(initial) }
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text(stringResource(R.string.backup_report_range_title)) },
+        text = {
+            Column(Modifier.selectableGroup()) {
+                ReportRange.entries.forEach { range ->
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(CadenceTheme.spacing.md),
+                        modifier =
+                            Modifier
+                                .fillMaxWidth()
+                                .heightIn(min = CadenceTheme.spacing.minTouchTarget)
+                                .selectable(
+                                    selected = range == chosen,
+                                    role = Role.RadioButton,
+                                    onClick = { chosen = range },
+                                ),
+                    ) {
+                        RadioButton(selected = range == chosen, onClick = null)
+                        Text(stringResource(rangeLabel(range)), style = MaterialTheme.typography.bodyLarge)
+                    }
+                }
+            }
+        },
+        confirmButton = {
+            TextButton(onClick = { onContinue(chosen) }) { Text(stringResource(R.string.backup_continue)) }
+        },
+        dismissButton = { TextButton(onClick = onDismiss) { Text(stringResource(R.string.backup_cancel)) } },
+    )
+}
+
+private fun rangeLabel(range: ReportRange) =
+    when (range) {
+        ReportRange.MONTHS_3 -> R.string.backup_report_range_3
+        ReportRange.MONTHS_6 -> R.string.backup_report_range_6
+        ReportRange.MONTHS_12 -> R.string.backup_report_range_12
+        ReportRange.ALL -> R.string.backup_report_range_all
+    }

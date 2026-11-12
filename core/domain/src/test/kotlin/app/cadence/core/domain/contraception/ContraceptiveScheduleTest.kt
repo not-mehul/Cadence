@@ -11,6 +11,7 @@ import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.CsvSource
 import java.time.LocalDate
 import kotlin.test.assertEquals
+import kotlin.test.assertFailsWith
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
@@ -197,5 +198,26 @@ class MissedDosesTest {
         assertEquals(emptyList(), MissedDoses.find(pill, emptyMap(), d(2026, 3, 30)))
         val placebo = ContraceptiveSchedule(PILL, d(2026, 3, 2), 21, 7, placebo = true, since = d(2026, 3, 1))
         assertEquals(emptyList(), MissedDoses.find(placebo, emptyMap(), d(2026, 3, 30)))
+    }
+
+    @Test
+    fun `packs on hand run out a whole number of packs after the one in use began`() {
+        // Pill packs of 28 from 2 March; counted on 20 March with three packs, including this one.
+        val pill = ContraceptiveSchedule.typical(ContraceptiveMethod.PILL, LocalDate.of(2026, 3, 2))
+        assertEquals(null, pill.runsOutOn())
+        assertEquals(
+            LocalDate.of(2026, 5, 25),
+            pill.copy(supply = PackSupply(3, LocalDate.of(2026, 3, 20))).runsOutOn(),
+        )
+        assertFailsWith<IllegalArgumentException> { PackSupply(0, LocalDate.of(2026, 3, 20)) }
+        assertFailsWith<IllegalArgumentException> { PackSupply(25, LocalDate.of(2026, 3, 20)) }
+        assertEquals(1..24, PackSupply.PACKS_RANGE)
+
+        val counted = pill.copy(supply = PackSupply(3, LocalDate.of(2026, 3, 20)))
+        assertEquals(3, counted.packsLeftOn(LocalDate.of(2026, 3, 20)))
+        assertEquals(2, counted.packsLeftOn(LocalDate.of(2026, 3, 30)), "the next pack has begun")
+        assertEquals(1, counted.packsLeftOn(LocalDate.of(2026, 5, 24)))
+        assertEquals(0, counted.packsLeftOn(LocalDate.of(2026, 5, 25)), "run out")
+        assertEquals(0, pill.packsLeftOn(LocalDate.of(2026, 3, 20)), "not tracked")
     }
 }

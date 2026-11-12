@@ -71,9 +71,21 @@ object CsvExport {
         }
 
     private fun StringBuilder.appendRow(fields: List<String>) {
-        fields.joinTo(this, ",") { quote(it) }
+        fields.joinTo(this, ",") { quote(defuse(it)) }
         append("\r\n")
     }
+
+    /**
+     * Spreadsheet apps run a cell that starts with = + - @ (or a tab or carriage return) as a
+     * formula, so a note like "=HYPERLINK(...)" could do something when the file is opened.
+     * Such text gets a leading apostrophe, which spreadsheets show as plain text. Numbers are
+     * left alone.
+     */
+    internal fun defuse(field: String): String =
+        if (field.firstOrNull() in FORMULA_STARTS && !field.matches(NUMBER)) "'$field" else field
+
+    private val FORMULA_STARTS = setOf('=', '+', '-', '@', '\t', '\r')
+    private val NUMBER = Regex("""[+-]?\d+(\.\d+)?""")
 
     private fun quote(field: String): String =
         if (field.any {

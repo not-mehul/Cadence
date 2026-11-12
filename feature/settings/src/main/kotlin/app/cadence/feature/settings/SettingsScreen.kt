@@ -156,6 +156,7 @@ fun SettingsScreen(
                 onDeleteTag = viewModel::deleteTag,
                 onAppIcon = { icon ->
                     AppIcons.set(context, icon)
+                    QuickShortcuts.publish(context, QuickShortcuts.wanted(current), icon)
                     appIcon = icon
                 },
             ),

@@ -122,4 +122,20 @@
     <string name="today_greeting_evening">Good evening</string>
     <string name="today_pack_day_label">Pack day</string>
     <string name="today_fertile_title">Fertile window</string>
+    <plurals name="today_supply_runs_out">
+        <item quantity="one">Your packs run out in %d day</item>
+        <item quantity="other">Your packs run out in %d days</item>
+    </plurals>
+    <string name="today_supply_ran_out">Your counted packs have run out</string>
+    <string name="today_supply_update">Update</string>
+    <string name="today_heads_up_title">Heads-up</string>
+    <string name="today_heads_up_body">In your past cycles, you often logged these at this point.</string>
+    <string name="today_heads_up_now">Around now</string>
+    <string name="today_heads_up_tomorrow">Tomorrow</string>
+    <string name="today_heads_up_note">Based on your own logs, not a prediction about your health.</string>
+    <!-- Quick actions (shortcuts, Quick Settings tile, widget). -->
+    <string name="today_quick_dose_done">Marked as done for today</string>
+    <string name="today_quick_already_period">Today is already logged as a period day</string>
+    <string name="today_quick_no_dose">Nothing is due today</string>
+    <string name="today_quick_dose_already">Today\'s dose is already marked as done</string>
 </resources>

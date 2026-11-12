@@ -54,6 +54,8 @@ data class ContraceptiveSchedule(
     val since: LocalDate = packStart,
     val reminderEnabled: Boolean = false,
     val reminderTime: LocalTime = DEFAULT_REMINDER_TIME,
+    /** Packs on hand, for refill reminders; null when the user doesn't track them. */
+    val supply: PackSupply? = null,
 ) {
     init {
         require(activeDays in ACTIVE_DAYS_RANGE) { "activeDays must be in $ACTIVE_DAYS_RANGE, was $activeDays" }
@@ -72,6 +74,20 @@ data class ContraceptiveSchedule(
     /** False on continuous use, when no withdrawal bleed is scheduled. */
     val hasBreak: Boolean
         get() = breakDays > 0
+
+    /**
+     * The first day with no pack left: the counted packs run from the start of the pack in use on
+     * the day they were counted. Null when packs aren't tracked.
+     */
+    fun runsOutOn(): LocalDate? = supply?.let { s -> packStartFor(s.countedOn).plusDays(s.packs.toLong() * packLength) }
+
+    /** Packs left on [date], counting the one in use; 0 once they've run out or aren't tracked. */
+    fun packsLeftOn(date: LocalDate): Int {
+        val runsOut = runsOutOn() ?: return 0
+        if (!date.isBefore(runsOut)) return 0
+        val days = ChronoUnit.DAYS.between(packStartFor(date), runsOut)
+        return ((days + packLength - 1) / packLength).toInt()
+    }
 
     /** 1-based day of the pack [date] falls in. */
     fun dayOfPack(date: LocalDate): Int =
@@ -195,4 +211,24 @@ object MissedDoses {
             .map { today.minusDays(it) }
             .filterNot { it.isBefore(schedule.since) || it in doses }
             .mapNotNull { date -> schedule.actionOn(date)?.takeIf { it.required }?.let { PendingDose(date, it) } }
+}
+
+/**
+ * How many packs (of pills, patches or rings) the user has, counting the one in use, as of
+ * [countedOn]. Updated when they pick up more.
+ */
+data class PackSupply(
+    val packs: Int,
+    val countedOn: LocalDate,
+) {
+    init {
+        require(packs in PACKS_RANGE) { "packs must be in $PACKS_RANGE, was $packs" }
+    }
+
+    companion object {
+        val PACKS_RANGE = 1..24
+
+        /** Reminders come this many days before the last pack runs out, at the dose reminder time. */
+        val REMIND_DAYS_BEFORE = listOf(5L, 1L)
+    }
 }

@@ -4,4 +4,14 @@
     <color name="widget_background">#FFFFF0F2</color>
     <color name="widget_text">#FF221A1C</color>
     <color name="widget_text_secondary">#FF524346</color>
+    <!-- The large widget's ring: the phase colours of Today's ring. -->
+    <color name="widget_ring_track">#FFF6D5DB</color>
+    <color name="widget_ring_period">#FFEC5B7E</color>
+    <color name="widget_ring_follicular">#FFFFA726</color>
+    <color name="widget_ring_fertile">#FF1FB5A6</color>
+    <color name="widget_ring_luteal">#FF9C6ADE</color>
+    <color name="widget_ring_active">#FF9C6ADE</color>
+    <color name="widget_ring_progress">#FFC0607A</color>
+    <color name="widget_button">#FFFFD9E0</color>
+    <color name="widget_button_icon">#FF9A3B53</color>
 </resources>

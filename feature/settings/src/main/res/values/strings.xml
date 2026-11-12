@@ -156,4 +156,20 @@
     <string name="settings_language">Language</string>
     <string name="settings_language_system">Same as your phone</string>
     <string name="settings_language_follows_phone">Follows your phone\'s language. Tap to open the phone\'s language settings.</string>
+    <string name="settings_bc_refill">Refill reminder</string>
+    <string name="settings_bc_refill_detail">Count your packs, and get a reminder 5 days and 1 day before they run out</string>
+    <string name="settings_bc_packs">Packs left</string>
+    <string name="settings_bc_packs_hint">How many packs do you have, including the one you\'re using now? Update this when you pick up more.</string>
+    <!-- "3 packs · run out 25 May" -->
+    <string name="settings_bc_packs_value">%1$s · run out %2$s</string>
+    <plurals name="settings_bc_packs_count">
+        <item quantity="one">%d pack</item>
+        <item quantity="other">%d packs</item>
+    </plurals>
+    <!-- Launcher shortcuts (not shown with the discreet icon). -->
+    <string name="shortcut_log">Log today</string>
+    <string name="shortcut_period">Period started</string>
+    <string name="shortcut_dose">Dose done</string>
+    <string name="shortcut_dose_long">Mark today\'s dose done</string>
+    <string name="shortcut_disabled">Turned off with the discreet icon</string>
 </resources>

@@ -44,7 +44,7 @@ class TodayViewModelTest {
         TodayViewModel(
             periods,
             settings,
-            FakeDayEntryRepository(periods),
+            entries,
             FakeCycleAnnotationRepository(),
             FakeDateSource(today),
             contraception,
@@ -52,6 +52,7 @@ class TodayViewModelTest {
             tags,
         )
     }
+    private val entries = FakeDayEntryRepository(periods)
     private val contraception = FakeContraceptionRepository()
     private val medications = FakeMedicationRepository()
     private val tags = FakeCustomTagRepository()
@@ -168,6 +169,50 @@ class TodayViewModelTest {
         }
 
     @Test
+    fun `quick period started logs the period once, then says it's already logged`() =
+        runTest {
+            ready()
+            vm.quickPeriodStarted()
+            runCurrent()
+            assertEquals(TodayEvent.PeriodLogged(days(20, 23)), vm.events.first())
+
+            vm.quickPeriodStarted()
+            runCurrent()
+            assertEquals(TodayEvent.NothingToDo(QuickNote.ALREADY_ON_PERIOD), vm.events.first())
+            assertEquals(4, periods.flowByDay.value.size)
+        }
+
+    @Test
+    fun `quick dose done records today's dose, once, and only when one is due`() =
+        runTest {
+            vm.quickDoseTaken()
+            ready()
+            vm.quickDoseTaken()
+            runCurrent()
+            assertEquals(TodayEvent.NothingToDo(QuickNote.NO_DOSE_TODAY), vm.events.first())
+
+            // Pill day 19 of 21.
+            val pill = ContraceptiveSchedule.typical(ContraceptiveMethod.PILL, LocalDate.of(2026, 3, 2))
+            settings.update { it.copy(goal = Goal.BIRTH_CONTROL, contraception = pill) }
+            ready()
+            vm.quickDoseTaken()
+            runCurrent()
+            assertEquals(TodayEvent.DoseRecorded(today, null), vm.events.first())
+            assertEquals(DoseStatus.TAKEN, ready().birthControl!!.todayStatus)
+
+            vm.quickDoseTaken()
+            runCurrent()
+            assertEquals(TodayEvent.NothingToDo(QuickNote.DOSE_ALREADY_TAKEN), vm.events.first())
+
+            // In the break (no placebo pills), nothing is due.
+            settings.update { it.copy(contraception = pill.copy(packStart = LocalDate.of(2026, 2, 25))) }
+            ready()
+            vm.quickDoseTaken()
+            runCurrent()
+            assertEquals(TodayEvent.NothingToDo(QuickNote.NO_DOSE_TODAY), vm.events.first())
+        }
+
+    @Test
     fun `no schedule in tracking mode, even if one is saved`() =
         runTest {
             settings.update { it.copy(contraception = ContraceptiveSchedule.typical(ContraceptiveMethod.RING, today)) }
@@ -198,5 +243,43 @@ class TodayViewModelTest {
             runCurrent()
             assertEquals(true, ready().medications.single().taken)
             assertEquals(mapOf(1L to "Travel"), ready().tagLabels)
+        }
+
+    @Test
+    fun `a heads-up for what usually comes at this point in the cycle`() =
+        runTest {
+            // Cramps on the first day of each of four periods, 28 days apart (three completed cycles). The next period
+            // is expected on 21 March, the day after today, so cramps are a heads-up for tomorrow.
+            listOf(
+                LocalDate.of(2025, 11, 29),
+                LocalDate.of(2025, 12, 27),
+                LocalDate.of(2026, 1, 24),
+                LocalDate.of(2026, 2, 21),
+            ).forEach { start ->
+                periods.logPeriodDays((0L until 4L).map { start.plusDays(it) })
+                entries.save(
+                    app.cadence.core.domain.log.DayEntry(
+                        start,
+                        flow = app.cadence.core.domain.model.MenstrualFlow.MEDIUM,
+                        symptoms = mapOf("cramps" to app.cadence.core.domain.log.Severity.MILD),
+                    ),
+                )
+            }
+
+            val headsUp = ready().headsUp.single()
+            assertEquals("cramps", headsUp.pattern.itemId)
+            assertEquals(1, headsUp.inDays)
+
+            settings.settings.value =
+                settings.settings.value.copy(
+                    goal = app.cadence.core.domain.model.Goal.BIRTH_CONTROL,
+                    contraception =
+                        app.cadence.core.domain.contraception.ContraceptiveSchedule.typical(
+                            app.cadence.core.domain.contraception.ContraceptiveMethod.PILL,
+                            LocalDate.of(2026, 3, 2),
+                        ),
+                )
+            runCurrent()
+            assertEquals(emptyList(), assertIs<TodayUiState.Ready>(vm.uiState.value).headsUp, "not on a schedule")
         }
 }

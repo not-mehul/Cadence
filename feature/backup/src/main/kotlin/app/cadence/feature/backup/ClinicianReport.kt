@@ -11,6 +11,7 @@ import app.cadence.core.data.backup.BackupData
 import app.cadence.core.domain.contraception.ContraceptiveMethod
 import app.cadence.core.domain.contraception.ContraceptiveSchedule
 import app.cadence.core.domain.contraception.DoseStatus
+import app.cadence.core.domain.cycles.CalendarDays
 import app.cadence.core.domain.cycles.CycleHistory
 import app.cadence.core.domain.cycles.CycleInsights
 import app.cadence.core.domain.cycles.CyclePrediction
@@ -30,9 +31,26 @@ import java.time.format.DateTimeFormatter
 import java.time.format.FormatStyle
 import java.util.Locale
 
+/** How far back the clinician report looks. */
+enum class ReportRange(
+    /** Null: everything ever logged. */
+    val months: Long?,
+) {
+    MONTHS_3(3),
+    MONTHS_6(6),
+    MONTHS_12(12),
+    ALL(null),
+    ;
+
+    companion object {
+        val DEFAULT = MONTHS_6
+    }
+}
+
 /** What the clinician report shows; built purely from logged data so it can be tested. */
 internal data class ReportContent(
     val generatedOn: LocalDate,
+    /** The first day the report covers: the range's start, or the first day logged if later. */
     val firstLogged: LocalDate?,
     val goal: Goal,
     val stats: CycleStats,
@@ -45,7 +63,7 @@ internal data class ReportContent(
     val flags: List<HealthFlag>,
     /** The pill, patch or ring schedule being followed, if any. */
     val birthControl: ContraceptiveSchedule? = null,
-    /** Doses recorded as missed in the last [MISSED_DOSE_DAYS] days. */
+    /** Doses recorded as missed in the report's period. */
     val missedDoses: Int = 0,
     val medications: List<ReportMedication> = emptyList(),
     val patterns: List<SymptomPattern> = emptyList(),
@@ -55,7 +73,7 @@ internal data class ReportContent(
         val name: String,
         val use: MedicationUse,
         val active: Boolean,
-        /** Days taken in the last [SYMPTOM_MONTHS] months. */
+        /** Days taken in the report's period. */
         val daysTaken: Int,
     )
 
@@ -67,24 +85,40 @@ internal data class ReportContent(
     )
 
     companion object {
-        const val MAX_CYCLES = 12
+        /** Rows in the cycle table; "everything" can be years. */
+        const val MAX_CYCLES = 24
         const val MAX_SYMPTOMS = 8
-        const val SYMPTOM_MONTHS = 6L
-        const val MISSED_DOSE_DAYS = 90L
 
+        /**
+         * The report for [range] up to [today]. The range's start moves back to the start of a period
+         * it falls in, so the first cycle is never cut in half. The prediction looks forward, so it
+         * uses everything logged.
+         */
         fun build(
-            data: BackupData,
+            all: BackupData,
             today: LocalDate,
+            range: ReportRange = ReportRange.DEFAULT,
         ): ReportContent {
-            val flowByDay = data.entries.mapNotNull { e -> e.flow?.let { e.date to it } }.toMap()
+            val fullHistory = CycleHistory.from(all.flowByDay(), all.excludedCycleStarts)
+            val from =
+                range.months?.let { months ->
+                    val start = today.minusMonths(months)
+                    CalendarDays.periodContaining(fullHistory, start)?.start ?: start
+                }
+            val data = if (from == null) all else all.since(from)
+            val flowByDay = data.flowByDay()
             val history = CycleHistory.from(flowByDay, data.excludedCycleStarts)
             val periodLengths = history.periods.associate { it.start to it.length }
-            val since = today.minusMonths(SYMPTOM_MONTHS)
+            val since = from ?: LocalDate.MIN
             val periodPain =
                 data.entries.filter { e -> e.painLevel != null && history.isPeriodDay(e.date) }.map { it.painLevel!! }
             return ReportContent(
                 generatedOn = today,
-                firstLogged = data.entries.minOfOrNull { it.date },
+                firstLogged =
+                    all.entries.minOfOrNull { it.date }?.let { first ->
+                        from?.let { maxOf(it, first) }
+                            ?: first
+                    },
                 goal = data.settings.goal,
                 stats = CycleInsights.stats(history, today),
                 // On a pill, patch or ring schedule, bleeds follow the pack rather than the cycle history.
@@ -94,7 +128,7 @@ internal data class ReportContent(
                     ) {
                         null
                     } else {
-                        CyclePredictor.predict(history, data.settings.cycleDefaults, today)
+                        CyclePredictor.predict(fullHistory, data.settings.cycleDefaults, today)
                     },
                 cycles =
                     history.cycles
@@ -123,7 +157,7 @@ internal data class ReportContent(
                 birthControl = data.settings.activeSchedule,
                 missedDoses =
                     data.contraceptiveDoses.count { (date, status) ->
-                        status == DoseStatus.MISSED && date.isAfter(today.minusDays(MISSED_DOSE_DAYS)) &&
+                        status == DoseStatus.MISSED &&
                             !date.isAfter(today)
                     },
                 medications =
@@ -144,6 +178,17 @@ internal data class ReportContent(
         }
     }
 }
+
+private fun BackupData.flowByDay() = entries.mapNotNull { e -> e.flow?.let { e.date to it } }.toMap()
+
+/** Only what was logged from [from] on. */
+private fun BackupData.since(from: LocalDate) =
+    copy(
+        entries = entries.filter { !it.date.isBefore(from) },
+        excludedCycleStarts = excludedCycleStarts.filterTo(mutableSetOf()) { !it.isBefore(from) },
+        contraceptiveDoses = contraceptiveDoses.filterKeys { !it.isBefore(from) },
+        medicationDoses = medicationDoses.filterKeys { !it.isBefore(from) },
+    )
 
 /** Draws [ReportContent] as an A4 PDF with Android's built-in PdfDocument (no third-party library). */
 internal class ReportPdfWriter(

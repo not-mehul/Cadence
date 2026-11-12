@@ -1,6 +1,7 @@
 package app.cadence.core.ui.log
 
 import androidx.annotation.DrawableRes
+import app.cadence.core.domain.log.CustomTag
 import app.cadence.core.domain.log.LogCatalog
 import app.cadence.core.domain.log.LogCategory
 import app.cadence.core.domain.log.SexActivity
@@ -47,6 +48,12 @@ object LogIcons {
 
     @DrawableRes
     fun mood(id: String): Int = moods[id] ?: R.drawable.ms_mood
+
+    /** A symptom, mood or custom tag by its pattern item id (see [app.cadence.core.domain.log.DayEntry.patternItems]). */
+    @DrawableRes
+    fun item(id: String): Int =
+        symptoms[id] ?: moods[id]
+            ?: if (CustomTag.fromItemId(id) != null) R.drawable.ms_sell else R.drawable.ms_ecg_heart
 
     @DrawableRes
     fun category(category: LogCategory): Int =

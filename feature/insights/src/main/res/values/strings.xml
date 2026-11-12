@@ -73,4 +73,12 @@
         <item quantity="one">in %1$d of %2$d cycle</item>
         <item quantity="other">in %1$d of %2$d cycles</item>
     </plurals>
+    <string name="insights_heatmap_title">By cycle day</string>
+    <plurals name="insights_heatmap_body">
+        <item quantity="one">What you logged on each day of your last %d cycle.</item>
+        <item quantity="other">What you logged on each day of your last %d cycles.</item>
+    </plurals>
+    <string name="insights_heatmap_key">Darker means more of those cycles. The shaded start is your period.</string>
+    <!-- TalkBack, e.g. "Cramps: most often on cycle days 1–3, 21". -->
+    <string name="insights_heatmap_row">%1$s: most often on cycle days %2$s</string>
 </resources>

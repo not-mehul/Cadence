@@ -92,7 +92,7 @@
     <string name="report_col_period">Месячные</string>
     <string name="report_col_note">Примечание</string>
     <string name="report_excluded">Исключён пользователем</string>
-    <string name="report_symptoms">Самые частые симптомы (за 6 месяцев)</string>
+    <string name="report_symptoms">Самые частые симптомы</string>
     <plurals name="report_symptom_days">
         <item quantity="one">%1$d день</item>
         <item quantity="few">%1$d дня</item>
@@ -155,8 +155,8 @@
     <string name="report_bc_break">%1$s (упаковка: %2$d + %3$d, с перерывом)</string>
     <string name="report_bc_placebo">%1$s с таблетками-плацебо (упаковка: %2$d + %3$d)</string>
     <string name="report_bc_continuous">%1$s, непрерывно (упаковка: %2$d)</string>
-    <string name="report_missed_doses">Доз, отмеченных как пропущенные (за 90 дней)</string>
-    <string name="report_medications">Лекарства (за 6 месяцев)</string>
+    <string name="report_missed_doses">Доз, отмеченных как пропущенные</string>
+    <string name="report_medications">Лекарства</string>
     <string name="report_medication_daily">Каждый день</string>
     <string name="report_medication_as_needed">По необходимости</string>
     <string name="report_medication_stopped">(приём прекращён)</string>
@@ -181,4 +181,9 @@
         <item quantity="many">%1$d из %2$d циклов</item>
         <item quantity="other">%1$d из %2$d цикла</item>
     </plurals>
+    <string name="backup_report_range_title">За какой период составить отчёт?</string>
+    <string name="backup_report_range_3">Последние 3 месяца</string>
+    <string name="backup_report_range_6">Последние 6 месяцев</string>
+    <string name="backup_report_range_12">Последние 12 месяцев</string>
+    <string name="backup_report_range_all">Все записи</string>
 </resources>

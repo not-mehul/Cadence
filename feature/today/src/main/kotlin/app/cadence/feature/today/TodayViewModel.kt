@@ -14,11 +14,15 @@ import app.cadence.core.domain.contraception.ContraceptiveSchedule
 import app.cadence.core.domain.contraception.DoseStatus
 import app.cadence.core.domain.contraception.MissedDoses
 import app.cadence.core.domain.contraception.PendingDose
+import app.cadence.core.domain.cycles.CycleHistory
 import app.cadence.core.domain.cycles.CycleSnapshot
 import app.cadence.core.domain.cycles.PeriodEditor
 import app.cadence.core.domain.log.DayEntry
 import app.cadence.core.domain.medication.Medication
 import app.cadence.core.domain.model.Goal
+import app.cadence.core.domain.patterns.HeadsUp
+import app.cadence.core.domain.patterns.SymptomForecast
+import app.cadence.core.domain.patterns.SymptomPatterns
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.channels.Channel
@@ -49,6 +53,8 @@ sealed interface TodayUiState {
         val medications: List<MedicationToday> = emptyList(),
         /** Custom tag labels by id, for the summary card. */
         val tagLabels: Map<Long, String> = emptyMap(),
+        /** What the user tends to log around now or tomorrow, from their own patterns. */
+        val headsUp: List<HeadsUp> = emptyList(),
     ) : TodayUiState
 }
 
@@ -73,6 +79,23 @@ sealed interface TodayEvent {
     data class PeriodLogged(
         val days: List<LocalDate>,
     ) : TodayEvent
+
+    /** A quick action marked [date]'s dose taken; undo puts back [previous]. */
+    data class DoseRecorded(
+        val date: LocalDate,
+        val previous: DoseStatus?,
+    ) : TodayEvent
+
+    /** A quick action that had nothing to do, and why. */
+    data class NothingToDo(
+        val reason: QuickNote,
+    ) : TodayEvent
+}
+
+enum class QuickNote {
+    ALREADY_ON_PERIOD,
+    NO_DOSE_TODAY,
+    DOSE_ALREADY_TAKEN,
 }
 
 @HiltViewModel
@@ -95,8 +118,9 @@ class TodayViewModel
                 medications.medications,
                 medications.doses,
                 tags.tags,
-            ) { doses, meds, medDoses, t ->
-                Tracking(doses, meds, medDoses, t.associate { it.id to it.label })
+                entries.patternItemsByDay,
+            ) { doses, meds, medDoses, t, items ->
+                Tracking(doses, meds, medDoses, t.associate { it.id to it.label }, items)
             }
 
         @OptIn(ExperimentalCoroutinesApi::class)
@@ -110,8 +134,9 @@ class TodayViewModel
                         annotations.excludedStarts,
                         tracking,
                     ) { flowByDay, s, entry, excluded, t ->
+                        val snapshot = CycleSnapshot.compute(flowByDay, s, today, excluded)
                         TodayUiState.Ready(
-                            snapshot = CycleSnapshot.compute(flowByDay, s, today, excluded),
+                            snapshot = snapshot,
                             goal = s.goal,
                             typicalPeriodLength = s.cycleDefaults.periodLength,
                             todayEntry = entry,
@@ -121,6 +146,18 @@ class TodayViewModel
                                     .filter { it.active }
                                     .map { MedicationToday(it, it.id in t.medicationDoses[today].orEmpty()) },
                             tagLabels = t.tagLabels,
+                            headsUp =
+                                if (s.activeSchedule != null) {
+                                    emptyList()
+                                } else {
+                                    val history = CycleHistory.from(flowByDay, excluded)
+                                    SymptomForecast.upcoming(
+                                        SymptomPatterns.find(history, t.patternItems),
+                                        history,
+                                        snapshot.prediction,
+                                        today,
+                                    )
+                                },
                         )
                     }
                 }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(STOP_TIMEOUT_MS), TodayUiState.Loading)
@@ -134,6 +171,35 @@ class TodayViewModel
                 val length = state.snapshot.prediction?.periodLength ?: state.typicalPeriodLength
                 val added = periods.logPeriodDays(PeriodEditor.daysForStart(state.snapshot.today, length))
                 if (added.isNotEmpty()) eventChannel.send(TodayEvent.PeriodLogged(added))
+            }
+
+        /** "Period started" from a shortcut: as [startPeriod], but says so if today is already logged. */
+        fun quickPeriodStarted() =
+            withReady { state ->
+                if (state.snapshot.currentPeriod?.contains(state.snapshot.today) == true) {
+                    eventChannel.send(TodayEvent.NothingToDo(QuickNote.ALREADY_ON_PERIOD))
+                } else {
+                    startPeriod()
+                }
+            }
+
+        /** Today's pill, patch or ring done, from a shortcut; offers undo. */
+        fun quickDoseTaken() =
+            withReady { state ->
+                val today = state.snapshot.today
+                val bc = state.birthControl
+                val note =
+                    when {
+                        bc == null || state.snapshot.pack?.action == null -> QuickNote.NO_DOSE_TODAY
+                        bc.todayStatus == DoseStatus.TAKEN -> QuickNote.DOSE_ALREADY_TAKEN
+                        else -> null
+                    }
+                if (note != null) {
+                    eventChannel.send(TodayEvent.NothingToDo(note))
+                } else {
+                    contraception.record(today, DoseStatus.TAKEN)
+                    eventChannel.send(TodayEvent.DoseRecorded(today, bc?.todayStatus))
+                }
             }
 
         fun undoLogged(days: List<LocalDate>) {
@@ -176,6 +242,7 @@ class TodayViewModel
             val medications: List<Medication>,
             val medicationDoses: Map<LocalDate, Set<Long>>,
             val tagLabels: Map<Long, String>,
+            val patternItems: Map<LocalDate, Set<String>>,
         )
 
         companion object {

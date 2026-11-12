@@ -18,6 +18,7 @@ import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.fragment.app.FragmentActivity
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import app.cadence.core.domain.model.ThemePreference
+import app.cadence.core.ui.quick.QuickAction
 import app.cadence.core.ui.theme.CadenceTheme
 import dagger.hilt.android.AndroidEntryPoint
 
@@ -33,8 +34,11 @@ class MainActivity : FragmentActivity() {
         window.addFlags(WindowManager.LayoutParams.FLAG_SECURE)
         enableEdgeToEdge()
         super.onCreate(savedInstanceState)
+        // Only a fresh start: after recreation the action was already taken (or is still pending).
+        if (savedInstanceState == null) takeQuickAction(intent)
         setContent {
             val state by viewModel.uiState.collectAsStateWithLifecycle()
+            val quickAction by viewModel.quickAction.collectAsStateWithLifecycle()
             when (val s = state) {
                 // The splash screen covers loading.
                 MainUiState.Loading -> {}
@@ -56,12 +60,28 @@ class MainActivity : FragmentActivity() {
                         if (s.locked) {
                             LockScreen(onUnlock = viewModel::unlock)
                         } else {
-                            CadenceRoot(onboardingComplete = s.onboardingComplete)
+                            CadenceRoot(
+                                onboardingComplete = s.onboardingComplete,
+                                quickAction = quickAction,
+                                onConsumeQuickAction = viewModel::quickActionHandled,
+                            )
                         }
                     }
                 }
             }
         }
+    }
+
+    override fun onNewIntent(intent: Intent) {
+        super.onNewIntent(intent)
+        takeQuickAction(intent)
+    }
+
+    private fun takeQuickAction(intent: Intent?) {
+        val action = QuickAction.from(intent) ?: return
+        viewModel.onQuickAction(action)
+        // So it isn't taken again if the activity is restored from this intent later.
+        intent?.removeExtra(QuickAction.EXTRA)
     }
 
     /** Relaunches Cadence in a new process, so every singleton (the database above all) starts fresh. */

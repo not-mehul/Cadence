@@ -33,4 +33,11 @@
     <string name="reminder_dose_remove_ring">Пора извлечь кольцо: начинается неделя без кольца.</string>
     <string name="reminder_medication_title">Лекарство</string>
     <string name="reminder_medication_text">Пора принять: %1$s.</string>
+    <string name="reminder_refill_title">Пора пополнить запас</string>
+    <plurals name="reminder_refill_text">
+        <item quantity="one">Упаковки закончатся через %d день. Пора купить новые.</item>
+        <item quantity="few">Упаковки закончатся через %d дня. Пора купить новые.</item>
+        <item quantity="many">Упаковки закончатся через %d дней. Пора купить новые.</item>
+        <item quantity="other">Упаковки закончатся через %d дня. Пора купить новые.</item>
+    </plurals>
 </resources>

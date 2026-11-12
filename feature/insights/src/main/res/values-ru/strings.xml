@@ -79,4 +79,13 @@
         <item quantity="many">в %1$d из %2$d циклов</item>
         <item quantity="other">в %1$d из %2$d цикла</item>
     </plurals>
+    <string name="insights_heatmap_title">По дням цикла</string>
+    <plurals name="insights_heatmap_body">
+        <item quantity="one">Что вы отмечали в каждый день последнего %d цикла.</item>
+        <item quantity="few">Что вы отмечали в каждый день последних %d циклов.</item>
+        <item quantity="many">Что вы отмечали в каждый день последних %d циклов.</item>
+        <item quantity="other">Что вы отмечали в каждый день последних %d цикла.</item>
+    </plurals>
+    <string name="insights_heatmap_key">Чем темнее, тем в большем числе циклов. Затенённое начало — дни месячных.</string>
+    <string name="insights_heatmap_row">%1$s: чаще всего в дни цикла %2$s</string>
 </resources>

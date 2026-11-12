@@ -31,6 +31,8 @@ import androidx.room.TypeConverters
         AutoMigration(from = 5, to = 6),
         // v7 (Phase 6): birth control schedule and doses, medications, custom tags.
         AutoMigration(from = 6, to = 7),
+        // v8: packs on hand, for refill reminders.
+        AutoMigration(from = 7, to = 8),
     ],
 )
 @TypeConverters(Converters::class)
@@ -50,7 +52,7 @@ abstract class CadenceDatabase : RoomDatabase() {
     abstract fun customTagDao(): CustomTagDao
 
     companion object {
-        const val VERSION = 7
+        const val VERSION = 8
         const val FILE_NAME = "cadence.db"
     }
 }

@@ -30,4 +30,14 @@
     <string name="widget_break_day">Break, day %1$d of %2$d</string>
     <string name="widget_cycle_day">Cycle day %1$d</string>
     <string name="widget_pack_day">Pack day %1$d</string>
+
+    <!-- Large widget. -->
+    <string name="widget_large_label">Today, large</string>
+    <string name="widget_large_description">Today\'s ring with a button to log. Discreet unless you turn off discreet notifications.</string>
+    <string name="widget_preview_day" translatable="false">12</string>
+    <string name="widget_preview_caption">of 28</string>
+    <string name="widget_preview_large_primary">Period in 16 days</string>
+    <string name="widget_ring_day">day</string>
+    <string name="widget_ring_of">of %1$d</string>
+    <string name="widget_log_today">Log today</string>
 </resources>

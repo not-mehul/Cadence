@@ -25,6 +25,15 @@ for _ in $(seq 1 30); do
     found=1
     break
   fi
+  # A slow emulator can show "System UI isn't responding" over the app. That's not Cadence, so
+  # tap "Wait" and keep looking. (Cadence not responding still fails below.)
+  if grep -q "isn't responding" <<< "$ui" && ! grep -q "Cadence isn't responding" <<< "$ui"; then
+    bounds="$(grep -o 'text="Wait"[^>]*bounds="[^"]*"' <<< "$ui" | grep -o '\[[0-9]*,[0-9]*\]\[[0-9]*,[0-9]*\]' | head -1 || true)"
+    if [[ -n "$bounds" ]]; then
+      read -r x1 y1 x2 y2 <<< "$(tr -c '0-9' ' ' <<< "$bounds")"
+      adb shell input tap $(((x1 + x2) / 2)) $(((y1 + y2) / 2)) || true
+    fi
+  fi
   sleep 2
 done
 

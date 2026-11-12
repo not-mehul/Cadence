@@ -104,12 +104,30 @@ class DayLogViewModelTest {
         }
 
     @Test
+    fun `reopening a day after it changed elsewhere never writes back the old log`() =
+        runTest {
+            ready()
+            vm.close()
+            runCurrent()
+
+            // While the sheet is closed, "Period started" logs today (on Today or the calendar).
+            periods.logPeriodDays(listOf(today))
+            vm.load(today)
+            runCurrent()
+            assertEquals(MenstrualFlow.MEDIUM, assertIs<DayLogUiState.Ready>(vm.uiState.value).entry.flow)
+
+            vm.edit { it.toggleMood("calm") }
+            runCurrent()
+            assertEquals(MenstrualFlow.MEDIUM, periods.flowByDay.value[today], "the period day survives")
+        }
+
+    @Test
     fun `closing the sheet saves a pending note`() =
         runTest {
             ready()
 
             vm.editNote("Typed then closed")
-            vm.flush()
+            vm.close()
             runCurrent()
 
             assertEquals("Typed then closed", entries.entries.value[today]?.note)
@@ -121,12 +139,12 @@ class DayLogViewModelTest {
             ready()
 
             vm.editNote("   ")
-            vm.flush()
+            advanceTimeBy(500)
             runCurrent()
             assertNull(entries.entries.value[today])
 
             vm.editNote("x".repeat(DayEntry.MAX_NOTE_LENGTH + 10))
-            vm.flush()
+            advanceTimeBy(500)
             runCurrent()
             assertEquals(
                 DayEntry.MAX_NOTE_LENGTH,

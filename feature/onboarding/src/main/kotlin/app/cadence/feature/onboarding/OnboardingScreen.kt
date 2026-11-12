@@ -128,7 +128,7 @@ fun OnboardingContent(
                     modifier = Modifier.padding(horizontal = spacing.xs),
                 ) {
                     IconButton(onClick = actions.onBack) {
-                        Icon(painterResource(UiR.drawable.ic_arrow_back), stringResource(R.string.onboarding_back))
+                        Icon(painterResource(UiR.drawable.ms_arrow_back), stringResource(R.string.onboarding_back))
                     }
                     val progressLabel = stringResource(R.string.onboarding_progress, state.step.ordinal, steps.size - 1)
                     LinearProgressIndicator(
@@ -283,7 +283,7 @@ private fun WelcomeStep(modifier: Modifier = Modifier) {
         CadenceCard {
             CardHeader(
                 stringResource(R.string.onboarding_welcome_private_title),
-                icon = painterResource(UiR.drawable.ic_lock),
+                icon = painterResource(UiR.drawable.ms_lock),
                 accent = MaterialTheme.colorScheme.tertiary,
                 accentContainer = MaterialTheme.colorScheme.tertiaryContainer,
             )

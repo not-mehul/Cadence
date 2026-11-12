@@ -205,11 +205,11 @@ internal class ReportPdfWriter(
         }
         row(s(R.string.report_cycles_recorded), stats.cyclesCounted.toString())
         row(s(R.string.report_average_cycle), stats.averageCycleLength?.let { days(it) } ?: s(R.string.report_none))
-        if (stats.shortestCycle != null && stats.longestCycle != null) {
-            row(
-                s(R.string.report_cycle_range),
-                q(R.plurals.report_range, stats.longestCycle!!, stats.shortestCycle!!, stats.longestCycle!!),
-            )
+        val shortest = stats.shortestCycle
+        val longest = stats.longestCycle
+        // A range like "28-28 days" adds nothing, so it's left out when every cycle was the same length.
+        if (shortest != null && longest != null && shortest != longest) {
+            row(s(R.string.report_cycle_range), q(R.plurals.report_range, longest, shortest, longest))
         }
         row(s(R.string.report_average_period), stats.averagePeriodLength?.let { days(it) } ?: s(R.string.report_none))
         c.prediction?.let { row(s(R.string.report_next_period), dateFormat.format(it.expectedNextStart)) }

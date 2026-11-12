@@ -95,7 +95,7 @@ private fun EmptyState(hasPeriod: Boolean) {
     CadenceCard {
         CardTitle(
             stringResource(if (hasPeriod) R.string.insights_first_cycle_title else R.string.insights_empty_title),
-            UiR.drawable.ic_pattern,
+            UiR.drawable.ms_auto_awesome,
         )
         Text(
             stringResource(if (hasPeriod) R.string.insights_first_cycle_body else R.string.insights_empty_body),
@@ -134,11 +134,10 @@ private fun SummaryTiles(state: InsightsUiState.Ready) {
                 icon = UiR.drawable.ms_event_repeat,
                 label = stringResource(R.string.insights_average_cycle),
                 value = stats.averageCycleLength?.let { days(it.roundToInt()) } ?: none,
+                // "28 days to 28 days" says nothing: show the range only when cycles differ.
                 detail =
-                    if (stats.shortestCycle != null && stats.longestCycle != null) {
-                        stringResource(R.string.insights_range, days(stats.shortestCycle!!), days(stats.longestCycle!!))
-                    } else {
-                        null
+                    rangeOf(stats.shortestCycle, stats.longestCycle)?.let { (shortest, longest) ->
+                        stringResource(R.string.insights_range, days(shortest), days(longest))
                     },
                 modifier = Modifier.weight(1f),
             )
@@ -219,7 +218,7 @@ private fun ChartCard(cycles: List<CycleRow>) {
     val description =
         stringResource(R.string.insights_chart_description, cycles.joinToString(", ") { it.lengthDays.toString() })
     CadenceCard {
-        CardTitle(stringResource(R.string.insights_chart_title), UiR.drawable.ic_chart)
+        CardTitle(stringResource(R.string.insights_chart_title), UiR.drawable.ms_bar_chart)
         CycleLengthChart(
             cycles = cycles,
             selectedIndex = selected,
@@ -246,7 +245,7 @@ private fun ChartCard(cycles: List<CycleRow>) {
 @Composable
 private fun FlagsCard(flags: List<HealthFlag>) {
     CadenceCard {
-        CardTitle(stringResource(R.string.insights_flags_title), UiR.drawable.ic_notice)
+        CardTitle(stringResource(R.string.insights_flags_title), UiR.drawable.ms_info)
         Column(verticalArrangement = Arrangement.spacedBy(CadenceTheme.spacing.md)) {
             flags.forEach { flag ->
                 val (title, body) = flagCopy(flag)
@@ -304,7 +303,7 @@ private fun HistoryCard(
 ) {
     val dateFormat = rememberDateFormatter(DateSkeletons.DAY_MONTH_SHORT)
     CadenceCard {
-        CardTitle(stringResource(R.string.insights_history_title), UiR.drawable.ic_history)
+        CardTitle(stringResource(R.string.insights_history_title), UiR.drawable.ms_history)
         state.currentCycle?.let { current ->
             Text(stringResource(R.string.insights_current_cycle), style = MaterialTheme.typography.bodyLarge)
             Text(
@@ -370,7 +369,7 @@ private fun PatternsCard(
     tagLabels: Map<Long, String>,
 ) {
     CadenceCard {
-        CardTitle(stringResource(R.string.insights_patterns_title), UiR.drawable.ic_pattern)
+        CardTitle(stringResource(R.string.insights_patterns_title), UiR.drawable.ms_auto_awesome)
         if (patterns.isEmpty()) {
             Text(stringResource(R.string.insights_patterns_empty), style = MaterialTheme.typography.bodyMedium)
             return@CadenceCard
@@ -413,3 +412,9 @@ private fun patternTiming(pattern: SymptomPattern): String {
         PatternTiming.AROUND_CYCLE_DAY -> stringResource(R.string.insights_pattern_cycle_day, day)
     }
 }
+
+/** Shortest and longest, when both are known and differ. */
+internal fun rangeOf(
+    shortest: Int?,
+    longest: Int?,
+): Pair<Int, Int>? = if (shortest != null && longest != null && shortest != longest) shortest to longest else null

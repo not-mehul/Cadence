@@ -144,8 +144,18 @@ class DayLogViewModel
                 }
         }
 
+        /**
+         * The sheet closed: saves an unsaved note and forgets the day, so opening it again reads it
+         * afresh. Without this, a day changed elsewhere in between ("Period started", the calendar)
+         * would come back stale, and the next tap would write the old log over the new one.
+         */
+        fun close() {
+            flush()
+            draft.value = null
+        }
+
         /** Saves an unsaved note immediately. */
-        fun flush() {
+        private fun flush() {
             val pending = pendingNoteSave ?: return
             if (pending.isActive) {
                 pending.cancel()

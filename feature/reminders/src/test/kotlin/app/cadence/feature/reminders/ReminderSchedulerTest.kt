@@ -131,6 +131,19 @@ class ReminderSchedulerTest {
         }
 
     @Test
+    fun `deleting a medication cancels its alarm`() =
+        runTest {
+            val iron = medications.save(Medication(0, "Iron", MedicationUse.DAILY, LocalTime.of(8, 0)))
+            scheduler.reschedule()
+            assertEquals(1, alarms.scheduledAlarms.size)
+
+            medications.delete(iron)
+            scheduler.reschedule()
+
+            assertEquals(0, alarms.scheduledAlarms.size)
+        }
+
+    @Test
     fun `birth control reminders follow the schedule and skip recorded doses`() =
         runTest {
             val pill =

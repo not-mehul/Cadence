@@ -72,11 +72,6 @@ object LogIcons {
             SexActivity.UNPROTECTED -> R.drawable.ms_favorite
         }
 
-    /** Ids with an icon, for tests: every catalog entry must have one. */
-    internal val knownSymptoms: Set<String> get() = symptoms.keys
-
-    internal val knownMoods: Set<String> get() = moods.keys
-
     init {
         check(LogCatalog.symptoms.all { it in symptoms } && LogCatalog.moods.all { it in moods }) {
             "Every built-in symptom and mood needs an icon"

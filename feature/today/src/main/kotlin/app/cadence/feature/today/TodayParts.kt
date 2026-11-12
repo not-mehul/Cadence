@@ -250,7 +250,7 @@ internal fun heroStyle(
 
         snapshot.status is CycleStatus.Late || snapshot.status is CycleStatus.Due -> {
             PhaseStyles.neutral(
-                UiR.drawable.ic_clock,
+                UiR.drawable.ms_schedule,
             )
         }
 
@@ -338,7 +338,7 @@ internal fun TodayLogCard(
     CadenceCard(modifier) {
         CardHeader(
             stringResource(R.string.today_log_title),
-            icon = painterResource(UiR.drawable.ic_log),
+            icon = painterResource(UiR.drawable.ms_edit_note),
             accent = MaterialTheme.colorScheme.tertiary,
             accentContainer = MaterialTheme.colorScheme.tertiaryContainer,
         ) {

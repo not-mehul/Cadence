@@ -7,9 +7,11 @@ import androidx.annotation.DrawableRes
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.selection.toggleable
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.LinearWavyProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
@@ -24,7 +26,10 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.LiveRegionMode
 import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.liveRegion
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
@@ -65,19 +70,23 @@ fun BackupSettingsRows(
         ) { uri -> uri?.let(viewModel::exportReport) }
     val importLauncher = rememberImportLauncher(viewModel::startImport)
 
+    // One job at a time: encrypting or restoring can take a few seconds, so the rows wait for it.
+    val idle = !state.busy
     Column(modifier) {
-        Row(R.string.backup_export, R.string.backup_export_detail, UiR.drawable.ms_backup) { askPassword = true }
+        Row(R.string.backup_export, R.string.backup_export_detail, UiR.drawable.ms_backup, idle) { askPassword = true }
         Row(
             R.string.backup_import,
             R.string.backup_import_detail,
             UiR.drawable.ms_settings_backup_restore,
+            idle,
         ) { importLauncher() }
-        Row(R.string.backup_csv, R.string.backup_csv_detail, UiR.drawable.ms_table_view) {
+        Row(R.string.backup_csv, R.string.backup_csv_detail, UiR.drawable.ms_table_view, idle) {
             csvLauncher.launch(fileName(today, "csv"))
         }
-        Row(R.string.backup_report, R.string.backup_report_detail, UiR.drawable.ms_description) {
+        Row(R.string.backup_report, R.string.backup_report_detail, UiR.drawable.ms_description, idle) {
             reportLauncher.launch(fileName(today, "pdf", "cadence-report"))
         }
+        if (state.busy) Working()
     }
 
     if (askPassword) {
@@ -127,14 +136,36 @@ private fun Row(
     title: Int,
     detail: Int,
     @DrawableRes icon: Int,
+    enabled: Boolean,
     onClick: () -> Unit,
 ) {
     CadenceListItem(
         headline = { Text(stringResource(title)) },
         supporting = { Text(stringResource(detail)) },
         icon = icon,
-        modifier = Modifier.toggleable(value = false, role = Role.Button, onValueChange = { onClick() }),
+        modifier =
+            Modifier.toggleable(value = false, enabled = enabled, role = Role.Button, onValueChange = { onClick() }),
     )
+}
+
+/** "Please wait…" under the rows while a backup, restore or export runs. Announced politely. */
+@Composable
+private fun Working() {
+    val spacing = CadenceTheme.spacing
+    Column(
+        Modifier
+            .fillMaxWidth()
+            .padding(horizontal = spacing.screenGutter, vertical = spacing.sm)
+            .semantics { liveRegion = LiveRegionMode.Polite },
+        verticalArrangement = Arrangement.spacedBy(spacing.sm),
+    ) {
+        Text(
+            stringResource(R.string.backup_working),
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
+        LinearWavyProgressIndicator(Modifier.fillMaxWidth())
+    }
 }
 
 /** What the import and result dialogs can do. */

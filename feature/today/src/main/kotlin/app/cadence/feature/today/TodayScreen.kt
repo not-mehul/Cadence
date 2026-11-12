@@ -319,13 +319,12 @@ private fun TodayHeader(
     style: PhaseStyle,
     cheerful: Boolean,
 ) {
+    // Read on every composition, so the greeting keeps up when the app stays open for hours.
     val greeting =
-        remember {
-            when (LocalTime.now().hour) {
-                in MORNING_HOURS -> R.string.today_greeting_morning
-                in AFTERNOON_HOURS -> R.string.today_greeting_afternoon
-                else -> R.string.today_greeting_evening
-            }
+        when (LocalTime.now().hour) {
+            in MORNING_HOURS -> R.string.today_greeting_morning
+            in AFTERNOON_HOURS -> R.string.today_greeting_afternoon
+            else -> R.string.today_greeting_evening
         }
     Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
         Column(Modifier.weight(1f)) {
@@ -378,12 +377,12 @@ private fun PhaseCard(
 
             snapshot.status is CycleStatus.Late || snapshot.status is CycleStatus.Due -> {
                 PhaseStyles.neutral(
-                    UiR.drawable.ic_clock,
+                    UiR.drawable.ms_schedule,
                 )
             }
 
             else -> {
-                PhaseStyles.neutral(UiR.drawable.ic_pattern)
+                PhaseStyles.neutral(UiR.drawable.ms_auto_awesome)
             }
         }
     CadenceCard {

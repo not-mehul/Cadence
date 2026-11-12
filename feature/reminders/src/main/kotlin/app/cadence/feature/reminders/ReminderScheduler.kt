@@ -4,6 +4,7 @@ import android.app.AlarmManager
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
+import androidx.core.app.NotificationManagerCompat
 import app.cadence.core.data.time.LocalNow
 import app.cadence.core.domain.reminders.PlannedReminder
 import app.cadence.core.domain.reminders.ReminderKind
@@ -27,14 +28,21 @@ class ReminderScheduler
     ) {
         private val alarmManager = context.getSystemService(AlarmManager::class.java)
 
+        /** Medications seen at the last reschedule, so a deleted one's alarm can still be found and cancelled. */
+        private var knownMedicationIds: Set<Long> = emptySet()
+
         /** Re-plans every reminder from current data. Returns what was scheduled. */
         suspend fun reschedule(): List<PlannedReminder> {
             val snapshot = plans.at(now.now())
             val planned = snapshot.planned.associateBy { ReminderKey(it.kind, it.medicationId) }
-            // Every alarm that could exist: one per kind, plus one per medication (stopped ones included).
+            // Every alarm that could exist: one per kind, plus one per medication (stopped ones included,
+            // and ones deleted since the last reschedule).
+            val medicationIds = snapshot.medications.map { it.id }.toSet()
             val keys =
                 ReminderKind.entries.filter { it != ReminderKind.MEDICATION }.map { ReminderKey(it, null) } +
-                    snapshot.medications.map { ReminderKey(ReminderKind.MEDICATION, it.id) }
+                    (medicationIds + knownMedicationIds).map { ReminderKey(ReminderKind.MEDICATION, it) }
+            val deleted = knownMedicationIds - medicationIds
+            knownMedicationIds = medicationIds
             keys.forEach { key ->
                 val reminder = planned[key]
                 if (reminder == null) {
@@ -42,6 +50,8 @@ class ReminderScheduler
                         alarmManager.cancel(it)
                         it.cancel()
                     }
+                    // A deleted medication's reminder shouldn't linger in the shade either.
+                    if (key.medicationId in deleted) NotificationManagerCompat.from(context).cancel(key.requestCode)
                 } else {
                     val triggerAt =
                         reminder.at

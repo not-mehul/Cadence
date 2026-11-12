@@ -136,7 +136,7 @@ Cadence has **exactly two modes**.
 | Accessibility: TalkBack labels, font scaling up to 200%, 48dp touch targets, WCAG AA contrast | P1 | |
 | Educational cards per phase | P2 | Short, factual, sourced. |
 | Localization (dates, first day of week, translations) | P2 | |
-| Home-screen widget (cycle day / next period) | P3 | Built with Jetpack Glance. |
+| Home-screen widget (cycle day / next period) | P3 | A plain `AppWidgetProvider` (see Phase 7). |
 | Health Connect sync (menstruation periods and flow) | P3 | Opt-in. Health Connect is on-device storage, so this stays within the device-only rule. |
 | ~~Partner sharing~~ | **Not offered** | Would need a server. |
 
@@ -151,7 +151,7 @@ Cadence has **exactly two modes**.
 
 **Recommendation: a native Android app in Kotlin with Jetpack Compose, local-first, no backend.**
 
-Since the app only targets Android, a cross-platform framework adds nothing and costs us direct access to the platform. Going native gives first-class access to the Android Keystore, BiometricPrompt, notification scheduling, Glance widgets and Health Connect, all without bridging layers.
+Since the app only targets Android, a cross-platform framework adds nothing and costs us direct access to the platform. Going native gives first-class access to the Android Keystore, BiometricPrompt, notification scheduling, home-screen widgets and Health Connect, all without bridging layers.
 
 | Concern | Choice | Why |
 |---|---|---|
@@ -390,7 +390,7 @@ The first seven phases left the app correct but plain: stock Material components
 - **Today leads with a hero card** in the current phase's tint, with faint concentric ripples behind the ring. It holds a phase chip, the ring, the headline and the prediction. The screen opens with a greeting and the date. The ring's marker glides to today's position.
 - **Cards** are white with a hairline border and an icon header (log, fertile window, phase, birth control, medications, patterns, history). The fertile window has its own card with its "not contraception" caveat, instead of sharing the hero.
 - **Settings** is grouped into cards: Your cycle, Daily logging, Medications, Reminders, Appearance, Privacy, Health Connect, Your data, About.
-- **An emblem** (the four phase arcs around a drop) appears on the welcome screen, the lock screen and Today before anything is logged.
+- **The buddy** (see §6.3) appears on the welcome screen, the lock screen and Today before anything is logged.
 - **Calendar** sits in a card with a serif month title, and day cells are at least 48dp wide on a 360dp phone.
 
 ### 6.3 Material 3 Expressive refresh (as built)
@@ -521,7 +521,7 @@ Each phase ends with a **working, shippable app**. Phases are sized for one deve
 - Accessibility audit (TalkBack, Switch Access, font scaling up to 200%, contrast, Accessibility Scanner) and fixes.
 - Localization: string resources for everything, per-app language (Android 13+), RTL layout check, locale-based first day of week and units.
 - Educational phase cards.
-- Home-screen widget built with Jetpack Glance, discreet by default.
+- Home-screen widget, discreet by default.
 - Health Connect read and write, opt-in (`MenstruationPeriodRecord`, `MenstruationFlowRecord`).
 - Optional discreet launcher icon (`activity-alias`).
 - Baseline Profiles for fast startup; R8 minification and shrinking.
@@ -581,7 +581,7 @@ Each phase ends with a **working, shippable app**. Phases are sized for one deve
 | 4 | Reminders | Discreet local notifications |
 | 5 | Privacy & portability | App lock, export/import, clinician PDF |
 | 6 | Birth control & patterns | Contraceptive schedules, medications, symptom patterns |
-| 7 | Polish & release | a11y, i18n, Glance widget, Health Connect, signed sideload APK on GitHub Releases |
+| 7 | Polish & release | a11y, i18n, home-screen widget, Health Connect, signed sideload APK on GitHub Releases |
 
 ---
 

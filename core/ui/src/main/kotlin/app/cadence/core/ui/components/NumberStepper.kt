@@ -61,7 +61,7 @@ fun NumberStepper(
             enabled = value > range.first,
         ) {
             Icon(
-                painterResource(R.drawable.ic_remove),
+                painterResource(R.drawable.ms_remove),
                 contentDescription = stringResource(R.string.stepper_decrease, label),
             )
         }
@@ -79,7 +79,7 @@ fun NumberStepper(
             enabled = value < range.last,
         ) {
             Icon(
-                painterResource(R.drawable.ic_add),
+                painterResource(R.drawable.ms_add),
                 contentDescription = stringResource(R.string.stepper_increase, label),
             )
         }

@@ -78,9 +78,9 @@ object PhaseStyles {
     fun pack(inBreak: Boolean): PhaseStyle {
         val c = CadenceTheme.cycleColors
         return if (inBreak) {
-            PhaseStyle(c.menstrualPhase, c.menstrualTint, R.drawable.ic_pill, MaterialShapes.Pill)
+            PhaseStyle(c.menstrualPhase, c.menstrualTint, R.drawable.ms_pill, MaterialShapes.Pill)
         } else {
-            PhaseStyle(c.follicularPhase, c.follicularTint, R.drawable.ic_pill, MaterialShapes.Pill)
+            PhaseStyle(c.follicularPhase, c.follicularTint, R.drawable.ms_pill, MaterialShapes.Pill)
         }
     }
 }

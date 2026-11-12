@@ -266,7 +266,7 @@ private fun MonthHeader(
         modifier = Modifier.fillMaxWidth().padding(horizontal = CadenceTheme.spacing.sm),
     ) {
         FilledTonalIconButton(onClick = onPrevious, colors = colors, shapes = IconButtonDefaults.shapes()) {
-            Icon(painterResource(UiR.drawable.ic_chevron_left), stringResource(R.string.calendar_previous_month))
+            Icon(painterResource(UiR.drawable.ms_chevron_left), stringResource(R.string.calendar_previous_month))
         }
         val formatter = rememberDateFormatter(DateSkeletons.MONTH_YEAR)
         // The title slides the way the months move.
@@ -289,7 +289,7 @@ private fun MonthHeader(
             )
         }
         FilledTonalIconButton(onClick = onNext, colors = colors, shapes = IconButtonDefaults.shapes()) {
-            Icon(painterResource(UiR.drawable.ic_chevron_right), stringResource(R.string.calendar_next_month))
+            Icon(painterResource(UiR.drawable.ms_chevron_right), stringResource(R.string.calendar_next_month))
         }
     }
 }

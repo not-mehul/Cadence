@@ -119,7 +119,7 @@ internal fun DoseCard(
     val action = birthControl.schedule.actionOn(today)
     val dateFormat = rememberDateFormatter(DateSkeletons.WEEKDAY_DAY_MONTH)
     CadenceCard(modifier) {
-        CardTitle(stringResource(R.string.today_dose_title), UiR.drawable.ic_pill)
+        CardTitle(stringResource(R.string.today_dose_title), UiR.drawable.ms_pill)
         when {
             action == null -> {
                 Text(stringResource(R.string.today_dose_nothing), style = MaterialTheme.typography.bodyMedium)
@@ -179,7 +179,10 @@ internal fun MissedDosesCard(
 ) {
     val dateFormat = rememberDateFormatter(DateSkeletons.WEEKDAY_DAY_MONTH)
     CadenceCard(modifier) {
-        CardTitle(pluralStringResource(R.plurals.today_missed_title, missed.size, missed.size), UiR.drawable.ic_clock)
+        CardTitle(
+            pluralStringResource(R.plurals.today_missed_title, missed.size, missed.size),
+            UiR.drawable.ms_schedule,
+        )
         missed.forEach { dose ->
             Column(Modifier.padding(top = CadenceTheme.spacing.sm)) {
                 Text(
@@ -222,7 +225,7 @@ internal fun MedicationsCard(
     modifier: Modifier = Modifier,
 ) {
     CadenceCard(modifier) {
-        CardTitle(stringResource(R.string.today_medications_title), UiR.drawable.ic_pill)
+        CardTitle(stringResource(R.string.today_medications_title), UiR.drawable.ms_pill)
         medications.forEach { (medication, taken) ->
             Row(
                 verticalAlignment = Alignment.CenterVertically,
@@ -259,7 +262,7 @@ internal fun SetUpBirthControlCard(
     modifier: Modifier = Modifier,
 ) {
     CadenceCard(modifier) {
-        CardTitle(stringResource(R.string.today_bc_setup_title), UiR.drawable.ic_pill)
+        CardTitle(stringResource(R.string.today_bc_setup_title), UiR.drawable.ms_pill)
         Text(stringResource(R.string.today_bc_setup_body), style = MaterialTheme.typography.bodyMedium)
         TextButton(onClick = onOpenSettings, shapes = ButtonDefaults.shapes()) {
             ButtonIcon(UiR.drawable.ms_settings)

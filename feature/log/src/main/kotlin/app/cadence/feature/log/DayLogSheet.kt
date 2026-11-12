@@ -79,7 +79,7 @@ fun DayLogSheet(
     LaunchedEffect(date) { viewModel.load(date) }
     val state by viewModel.uiState.collectAsStateWithLifecycle()
     val close = {
-        viewModel.flush()
+        viewModel.close()
         onDismiss()
     }
     ModalBottomSheet(

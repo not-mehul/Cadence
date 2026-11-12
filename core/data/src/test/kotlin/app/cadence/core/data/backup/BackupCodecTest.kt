@@ -147,7 +147,7 @@ class BackupCodecTest {
     }
 
     @Test
-    fun `version 1 backups from Phase 5 still restore`() {
+    fun `version 1 backups still restore`() {
         val v1 =
             """
             {

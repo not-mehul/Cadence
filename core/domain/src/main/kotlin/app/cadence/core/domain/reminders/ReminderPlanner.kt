@@ -23,7 +23,7 @@ enum class ReminderKind {
     /** Daily prompt to log symptoms and mood. */
     DAILY_LOG,
 
-    /** Today's pill, patch or ring (Phase 6). */
+    /** Today's pill, patch or ring. */
     CONTRACEPTIVE,
 
     /** A daily medication; one per medication, told apart by [PlannedReminder.medicationId]. */

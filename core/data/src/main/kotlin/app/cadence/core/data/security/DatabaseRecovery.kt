@@ -12,7 +12,7 @@ import javax.inject.Inject
 
 /**
  * When the database can't be opened, usually because the Keystore key was lost in a
- * device reset (docs/PLAN.md §8), the data is unrecoverable on this phone. This starts over
+ * device reset, the data is unrecoverable on this phone. This starts over
  * with an empty database; the user can then restore from a backup file.
  */
 class DatabaseRecovery

@@ -19,17 +19,17 @@ import androidx.room.TypeConverters
     version = CadenceDatabase.VERSION,
     exportSchema = true,
     autoMigrations = [
-        // v2 (Phase 1): adds the settings table.
+        // v2: adds the settings table.
         AutoMigration(from = 1, to = 2),
-        // v3 (Phase 2): daily log fields, symptoms and moods, hidden log categories.
+        // v3: daily log fields, symptoms and moods, hidden log categories.
         AutoMigration(from = 2, to = 3),
-        // v4 (Phase 3): cycles excluded from predictions.
+        // v4: cycles excluded from predictions.
         AutoMigration(from = 3, to = 4),
-        // v5 (Phase 4): reminder settings.
+        // v5: reminder settings.
         AutoMigration(from = 4, to = 5),
-        // v6 (Phase 5): app lock and screenshot blocking.
+        // v6: app lock and screenshot blocking.
         AutoMigration(from = 5, to = 6),
-        // v7 (Phase 6): birth control schedule and doses, medications, custom tags.
+        // v7: birth control schedule and doses, medications, custom tags.
         AutoMigration(from = 6, to = 7),
         // v8: packs on hand, for refill reminders.
         AutoMigration(from = 7, to = 8),

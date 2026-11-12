@@ -162,7 +162,7 @@ data class CycleSnapshot(
         }
 
         /**
-         * Birth control with a pill, patch or ring schedule (docs/PLAN.md Phase 6): the pack, not
+         * Birth control with a pill, patch or ring schedule: the pack, not
          * cycle history, says when a bleed is expected, so there's no history-based prediction,
          * no "late", and no ovulation estimate.
          */

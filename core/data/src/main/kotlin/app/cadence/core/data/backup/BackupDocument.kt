@@ -3,7 +3,7 @@ package app.cadence.core.data.backup
 import kotlinx.serialization.Serializable
 
 /**
- * The backup file format (docs/PLAN.md Phase 5). Plain values only, so the file is readable
+ * The backup file format. Plain values only, so the file is readable
  * and stable across app versions. Bump [VERSION] for incompatible changes and keep reading
  * older versions.
  */
@@ -17,7 +17,7 @@ data class BackupDocument(
     val days: List<BackupDay>,
     /** ISO dates: first days of cycles excluded from predictions. */
     val excludedCycleStarts: List<String> = emptyList(),
-    // Version 2 (Phase 6). Version 1 files simply have none of these.
+    // Version 2. Version 1 files simply have none of these.
     val contraceptiveDoses: List<BackupDose> = emptyList(),
     val medications: List<BackupMedication> = emptyList(),
     val medicationDoses: List<BackupMedicationDose> = emptyList(),

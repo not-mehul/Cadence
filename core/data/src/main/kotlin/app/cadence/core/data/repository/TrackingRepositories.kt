@@ -23,7 +23,7 @@ import java.time.LocalDate
 import java.time.LocalTime
 import javax.inject.Inject
 
-/** What was recorded for the pill, patch or ring each day (Phase 6). */
+/** What was recorded for the pill, patch or ring each day. */
 interface ContraceptionRepository {
     val doses: Flow<Map<LocalDate, DoseStatus>>
 
@@ -34,7 +34,7 @@ interface ContraceptionRepository {
     )
 }
 
-/** Medications besides birth control, and the days they were taken (Phase 6). */
+/** Medications besides birth control, and the days they were taken. */
 interface MedicationRepository {
     /** Alphabetical. */
     val medications: Flow<List<Medication>>
@@ -55,7 +55,7 @@ interface MedicationRepository {
     )
 }
 
-/** The user's own tags (Phase 6). Which days they're on is part of [app.cadence.core.domain.log.DayEntry]. */
+/** The user's own tags. Which days they're on is part of [app.cadence.core.domain.log.DayEntry]. */
 interface CustomTagRepository {
     /** Alphabetical. */
     val tags: Flow<List<CustomTag>>

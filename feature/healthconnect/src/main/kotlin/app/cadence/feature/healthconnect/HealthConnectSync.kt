@@ -29,7 +29,7 @@ enum class HealthConnectAvailability { UNAVAILABLE, NEEDS_UPDATE, AVAILABLE }
 private const val TAG = "CadenceHealthConnect"
 
 /**
- * Opt-in Health Connect support (docs/PLAN.md Phase 7). While Cadence holds the permissions,
+ * Opt-in Health Connect support. While Cadence holds the permissions,
  * it mirrors its period days there; the user can also copy in periods other apps logged.
  * Turning it off revokes the permissions, so "on" simply means "permitted".
  */

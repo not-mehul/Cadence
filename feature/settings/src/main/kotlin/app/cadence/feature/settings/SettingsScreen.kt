@@ -695,7 +695,7 @@ private fun lockTimeoutLabel(minutes: Int) =
         else -> R.string.settings_lock_5_minutes
     }
 
-/** What Cadence does to protect data, in plain language (docs/PLAN.md Phase 5). */
+/** What Cadence does to protect data, in plain language. */
 @Composable
 private fun PrivacyExplainerDialog(onDismiss: () -> Unit) {
     val points =

@@ -10,7 +10,7 @@ import java.time.LocalDate
 
 /**
  * One row per calendar day the user logged something. This is the source of truth;
- * periods and cycles are derived from it (docs/PLAN.md §4). Symptoms and moods are in
+ * periods and cycles are derived from it. Symptoms and moods are in
  * [DayTagEntity].
  */
 @Entity(tableName = "day_log")

@@ -6,7 +6,7 @@ import androidx.compose.ui.graphics.Color
 
 /**
  * Semantic colours for cycle states. These carry meaning, so they're fixed and never
- * replaced by dynamic colour (docs/PLAN.md §6.1). Every use must also have a
+ * replaced by dynamic colour. Every use must also have a
  * non-colour cue such as a label, icon or pattern.
  */
 @Immutable

@@ -64,8 +64,7 @@ fun canPostNotifications(context: Context): Boolean {
 
 /**
  * Builds and posts reminder notifications. The lock screen always shows the neutral
- * public version; with [discreet] on, the notification itself is neutral too
- * (docs/PLAN.md §2.6).
+ * public version; with [discreet] on, the notification itself is neutral too.
  */
 object ReminderNotifier {
     /** [medicationName] is shown in a detailed (not discreet) medication reminder. */

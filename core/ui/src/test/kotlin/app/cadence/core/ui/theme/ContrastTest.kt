@@ -9,7 +9,7 @@ import kotlin.math.pow
 import kotlin.test.assertTrue
 
 /**
- * Checks the fixed Cadence palette against WCAG 2.1 AA (docs/PLAN.md §6.1):
+ * Checks the fixed Cadence palette against WCAG 2.1 AA:
  * 4.5:1 for text on its background, 3:1 for non-text UI such as the cycle ring,
  * calendar markers and outlines.
  */

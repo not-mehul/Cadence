@@ -16,7 +16,7 @@ import javax.inject.Singleton
 /**
  * Arms one alarm per reminder (one per kind, and one per medication) for its next
  * occurrence, and cancels the rest. Uses inexact, Doze-friendly alarms, so no exact-alarm
- * permission is needed; a reminder a few minutes late is fine (docs/PLAN.md Phase 4).
+ * permission is needed; a reminder a few minutes late is fine.
  */
 @Singleton
 class ReminderScheduler

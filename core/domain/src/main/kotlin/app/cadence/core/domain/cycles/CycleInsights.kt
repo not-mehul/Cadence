@@ -6,7 +6,7 @@ import app.cadence.core.domain.model.Period
 import java.time.LocalDate
 import java.time.temporal.ChronoUnit
 
-/** Summary statistics over recent cycles (docs/PLAN.md §2.5). */
+/** Summary statistics over recent cycles. */
 data class CycleStats(
     /** Completed, included, plausible cycles the cycle figures are based on (up to six). */
     val cyclesCounted: Int,
@@ -22,7 +22,7 @@ data class CycleStats(
 
 /**
  * Patterns worth mentioning to a clinician, based on FIGO's normal ranges for menstrual
- * bleeding (docs/PLAN.md §5.6). Informational only: never a diagnosis.
+ * bleeding. Informational only: never a diagnosis.
  */
 sealed interface HealthFlag {
     data class ShortCycles(

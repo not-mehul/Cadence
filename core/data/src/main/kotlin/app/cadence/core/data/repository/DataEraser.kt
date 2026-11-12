@@ -1,6 +1,6 @@
 package app.cadence.core.data.repository
 
-/** "Delete all data" (docs/PLAN.md §2.7). */
+/** "Delete all data". */
 fun interface DataEraser {
     suspend fun eraseAll()
 }

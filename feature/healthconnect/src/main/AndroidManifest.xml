@@ -2,7 +2,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
 
     <!--
-      Health Connect (opt-in, docs/PLAN.md Phase 7): menstruation flow and periods share one
+      Health Connect (opt-in): menstruation flow and periods share one
       read and one write permission. Nothing is asked for until the user turns sharing on.
     -->
     <uses-permission android:name="android.permission.health.READ_MENSTRUATION" />

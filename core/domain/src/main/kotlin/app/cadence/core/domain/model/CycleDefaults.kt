@@ -24,7 +24,7 @@ data class CycleDefaults(
         const val DEFAULT_CYCLE_LENGTH = 28
         const val DEFAULT_PERIOD_LENGTH = 5
 
-        /** Cycles outside this range are treated as logging gaps, not real cycles (docs/PLAN.md §5.1). */
+        /** Cycles outside this range are treated as logging gaps, not real cycles. */
         val CYCLE_LENGTH_RANGE = 15..60
         val PERIOD_LENGTH_RANGE = 1..15
     }

@@ -8,7 +8,7 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 /**
- * Whether the app is locked (docs/PLAN.md §2.7). Starts locked, so content is never shown
+ * Whether the app is locked. Starts locked, so content is never shown
  * before the user has unlocked; whether that matters depends on [SecuritySettings.lockEnabled].
  * The app calls [onBackground] and [onForeground] from the process lifecycle.
  */

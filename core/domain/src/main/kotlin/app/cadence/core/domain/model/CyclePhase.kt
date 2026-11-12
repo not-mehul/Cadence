@@ -1,6 +1,6 @@
 package app.cadence.core.domain.model
 
-/** Phases of the menstrual cycle (docs/PLAN.md §5.4). */
+/** Phases of the menstrual cycle. */
 enum class CyclePhase {
     MENSTRUAL,
     FOLLICULAR,

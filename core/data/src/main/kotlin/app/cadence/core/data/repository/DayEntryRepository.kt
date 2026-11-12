@@ -4,7 +4,7 @@ import app.cadence.core.domain.log.DayEntry
 import kotlinx.coroutines.flow.Flow
 import java.time.LocalDate
 
-/** The full daily log (Phase 2). Flow-only period edits go through [PeriodRepository]. */
+/** The full daily log. Flow-only period edits go through [PeriodRepository]. */
 interface DayEntryRepository {
     fun observe(date: LocalDate): Flow<DayEntry>
 

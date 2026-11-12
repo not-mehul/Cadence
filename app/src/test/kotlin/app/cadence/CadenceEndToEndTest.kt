@@ -20,7 +20,7 @@ import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 
 /**
- * The Phase 1 journey through the real app (view models, repositories, Room), with an
+ * The core journey through the real app (view models, repositories, Room), with an
  * in-memory database and today pinned to 20 March 2026: onboard, log a period, undo,
  * log symptoms and mood, see it all on the calendar, then erase everything.
  */

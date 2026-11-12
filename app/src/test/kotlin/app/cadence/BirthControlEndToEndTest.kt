@@ -33,7 +33,7 @@ import javax.inject.Inject
 import kotlin.test.assertEquals
 
 /**
- * Phase 6 through the real app: a pill schedule drives Today, doses and medications are
+ * Birth control through the real app: a pill schedule drives Today, doses and medications are
  * checked off, and switching to cycle tracking and back loses nothing. Today is 20 March 2026.
  */
 @HiltAndroidTest

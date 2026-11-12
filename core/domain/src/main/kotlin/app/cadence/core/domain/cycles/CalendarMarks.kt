@@ -56,7 +56,7 @@ object CalendarMarks {
 
     /**
      * On a pill, patch or ring schedule, the bleeds Cadence expects are the pack breaks
-     * from [today] on (docs/PLAN.md Phase 6); there are no fertile-window estimates.
+     * from [today] on; there are no fertile-window estimates.
      */
     fun forSchedule(
         month: YearMonth,

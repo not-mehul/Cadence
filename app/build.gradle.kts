@@ -9,7 +9,7 @@ plugins {
 // Local and CI builds without one are the development version.
 val cadenceVersion: String = providers.gradleProperty("cadence.version").getOrElse("0.7.0")
 
-// Release signing (docs/PLAN.md Phase 7). The keystore lives outside the repository; CI gets it from secrets.
+// Release signing. The keystore lives outside the repository; CI gets it from secrets.
 val keystoreFile: String? = providers.environmentVariable("CADENCE_KEYSTORE_FILE").orNull
 
 // For checking a minified build on a device without the release key (CI smoke test): sign with the debug key.
@@ -115,7 +115,7 @@ dependencies {
     kspTest(libs.hilt.compiler)
     debugImplementation(libs.androidx.compose.ui.test.manifest)
 
-    // Accessibility checks on every screen; they need a real device (docs/PLAN.md Phase 7).
+    // Accessibility checks on every screen; they need a real device.
     androidTestImplementation(libs.androidx.test.ext.junit)
     androidTestImplementation(libs.androidx.test.runner)
     androidTestImplementation(libs.androidx.compose.ui.test.junit4)

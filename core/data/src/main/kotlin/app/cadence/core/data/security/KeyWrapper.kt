@@ -15,8 +15,7 @@ class WrappedKey(
 
 /**
  * The database key can't be recovered, for example after the Keystore was cleared by
- * a device reset. Phase 5 surfaces this to the user with a restore-from-export path
- * (docs/PLAN.md §8).
+ * a device reset. The app then offers to start over, and a backup file can restore the data.
  */
 class KeyUnavailableException(
     message: String,

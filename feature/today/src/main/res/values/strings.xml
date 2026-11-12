@@ -73,7 +73,7 @@
     <string name="phase_welcome">How Cadence works</string>
     <string name="phase_welcome_body">Each time you log a period, Cadence learns your rhythm. After two cycles, predictions are based on your own history.</string>
 
-    <!-- Phase 6: birth control and medications -->
+    <!-- Birth control and medications -->
     <plurals name="today_headline_break_in">
         <item quantity="one">Break starts tomorrow</item>
         <item quantity="other">Break in %d days</item>
@@ -104,7 +104,7 @@
     <string name="today_bc_setup_title">Using a pill, patch or ring?</string>
     <string name="today_bc_setup_body">Add it in Settings to check off doses, get reminders, and see when your break-week bleed is likely.</string>
     <string name="today_bc_setup_action">Set up in Settings</string>
-    <!-- Phase 7: educational cards. Conservative, well-established facts only, with their source. -->
+    <!-- Educational cards. Conservative, well-established facts only, with their source. -->
     <string name="phase_learn_more">Learn more</string>
     <string name="phase_show_less">Show less</string>
     <string name="phase_menstrual_more">A period usually lasts 2 to 7 days, and most people lose only a few tablespoons of blood. Bleeding for more than 7 days, or needing a new pad or tampon every hour or two, is worth mentioning to a doctor.</string>

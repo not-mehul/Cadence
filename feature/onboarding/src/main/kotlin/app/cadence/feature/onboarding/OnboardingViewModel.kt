@@ -39,7 +39,7 @@ data class OnboardingState(
 }
 
 /**
- * Collects the few answers predictions need (docs/PLAN.md §6). Every question can be
+ * Collects the few answers predictions need. Every question can be
  * skipped; defaults are used instead.
  */
 @HiltViewModel

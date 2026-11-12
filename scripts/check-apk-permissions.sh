@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Fails if an APK requests any permission outside the allowlist.
-# Cadence is device-only: it must never request INTERNET or any network permission
-# (docs/PLAN.md §2.7). Usage: scripts/check-apk-permissions.sh path/to/app.apk
+# Cadence is device-only: it must never request INTERNET or any network permission.
+# Usage: scripts/check-apk-permissions.sh path/to/app.apk
 set -euo pipefail
 
 apk="${1:?usage: $0 <apk>}"
@@ -15,14 +15,14 @@ package="$("$aapt2" dump packagename "$apk")"
 allowed=(
   # androidx.core's app-private, signature-level permission for non-exported receivers.
   "$package.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION"
-  # Reminders (Phase 4): showing local notifications, and re-arming alarms after a reboot.
+  # Reminders: showing local notifications, and re-arming alarms after a reboot.
   "android.permission.POST_NOTIFICATIONS"
   "android.permission.RECEIVE_BOOT_COMPLETED"
-  # App lock (Phase 5): androidx.biometric asks for these to show the system's fingerprint,
+  # App lock: androidx.biometric asks for these to show the system's fingerprint,
   # face or screen-lock prompt (USE_FINGERPRINT on Android 8.x). Neither gives access to any data.
   "android.permission.USE_BIOMETRIC"
   "android.permission.USE_FINGERPRINT"
-  # Health Connect (Phase 7): opt-in, asked for only when the user turns sharing on. Runtime
+  # Health Connect: opt-in, asked for only when the user turns sharing on. Runtime
   # permissions granted in Health Connect; they cover period and flow records and nothing else.
   "android.permission.health.READ_MENSTRUATION"
   "android.permission.health.WRITE_MENSTRUATION"

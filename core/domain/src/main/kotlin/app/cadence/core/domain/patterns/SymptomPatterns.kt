@@ -21,7 +21,7 @@ enum class PatternTiming {
 
 /**
  * Something the user tends to log at the same point in their cycle, such as "headaches
- * in the days before your period" (docs/PLAN.md §2.5). An observation, not a diagnosis.
+ * in the days before your period". An observation, not a diagnosis.
  */
 data class SymptomPattern(
     /** A symptom or mood id, or a custom tag's item id. */

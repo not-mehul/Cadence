@@ -29,7 +29,7 @@ data class LargeWidget(
 )
 
 /**
- * What the home-screen widget says (docs/PLAN.md Phase 7). Anyone can see a home screen, so:
+ * What the home-screen widget says. Anyone can see a home screen, so:
  * with app lock on it shows nothing at all; with discreet notifications on (the default) it
  * shows only the day number and the date, never the word "period".
  */

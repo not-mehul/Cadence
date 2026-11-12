@@ -159,7 +159,7 @@ internal fun phaseCopy(
 }
 
 /**
- * A little more about a phase, and where it comes from (docs/PLAN.md §2.10: short, factual,
+ * A little more about a phase, and where it comes from (short, factual and
  * sourced). Keyed by the card's title; null when there's nothing more to say.
  */
 internal fun phaseDetails(title: Int): Pair<Int, Int>? =

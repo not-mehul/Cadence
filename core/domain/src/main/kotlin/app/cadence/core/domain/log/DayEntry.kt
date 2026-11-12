@@ -8,7 +8,7 @@ enum class Severity { MILD, MODERATE, SEVERE }
 enum class SexActivity { NONE, PROTECTED, UNPROTECTED }
 
 /**
- * Everything logged for one calendar day (docs/PLAN.md §2.3). Every field is optional;
+ * Everything logged for one calendar day. Every field is optional;
  * an entry with nothing set means the day has no log.
  */
 data class DayEntry(

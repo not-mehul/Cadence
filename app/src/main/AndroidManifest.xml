@@ -3,7 +3,7 @@
     xmlns:tools="http://schemas.android.com/tools">
 
     <!--
-      Device only (docs/PLAN.md §9): Cadence must never be able to reach the network.
+      Device only: Cadence must never be able to reach the network.
       These remove the permissions even if a library manifest tries to add them.
       CI also checks the built APK.
     -->
@@ -41,7 +41,7 @@
 
         <!--
           Launcher entries: Cadence's own icon, or a discreet one ("Planner", a plain notepad).
-          Exactly one is enabled; Settings → App icon switches them (docs/PLAN.md Phase 7).
+          Exactly one is enabled; Settings → App icon switches them.
           The names are used by feature:settings (AppIcons), so keep them in sync.
         -->
         <activity-alias

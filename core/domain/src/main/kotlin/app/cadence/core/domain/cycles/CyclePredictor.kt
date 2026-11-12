@@ -16,7 +16,7 @@ enum class PredictionBasis {
     TYPICAL,
 }
 
-/** How much to trust a prediction (docs/PLAN.md §5.1). */
+/** How much to trust a prediction. */
 enum class Confidence { HIGH, MEDIUM, LOW }
 
 /** The estimated fertile window before one predicted period, and its estimated ovulation day. */
@@ -51,7 +51,7 @@ data class CyclePrediction(
     val latestNextStart: LocalDate
         get() = expectedNextStart.plusDays(rangeDays.toLong())
 
-    /** Past the end of the likely range, not just past the single expected day (docs/PLAN.md §5.5). */
+    /** Past the end of the likely range, not just past the single expected day. */
     val isLate: Boolean
         get() = daysLate > rangeDays
 
@@ -63,7 +63,7 @@ data class CyclePrediction(
         }
 
     /**
-     * Estimated fertile windows before each of the next [count] predicted periods (docs/PLAN.md §5.3):
+     * Estimated fertile windows before each of the next [count] predicted periods:
      * ovulation is [lutealPhaseLength] days before a period; the window is the 5 days before
      * ovulation, ovulation, and the day after. Once the expected day has passed, the current
      * cycle's ovulation can't be placed, so its window is left out.
@@ -93,7 +93,7 @@ data class CyclePrediction(
 }
 
 /**
- * Predicts the next period from the user's own history (docs/PLAN.md §5): a recency-weighted
+ * Predicts the next period from the user's own history: a recency-weighted
  * average of the last six plausible, non-excluded cycles, with a confidence range from how
  * much those cycles vary. Falls back to the user's typical lengths until two cycles exist.
  */

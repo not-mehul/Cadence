@@ -1,6 +1,6 @@
 package app.cadence.core.domain.security
 
-/** App lock and screen privacy (docs/PLAN.md §2.7). */
+/** App lock and screen privacy. */
 data class SecuritySettings(
     /** Ask for fingerprint, face or the phone's screen lock to open Cadence. */
     val lockEnabled: Boolean = false,

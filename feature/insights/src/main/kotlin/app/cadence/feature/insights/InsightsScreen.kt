@@ -363,7 +363,7 @@ private fun CycleHistoryRow(
     }
 }
 
-/** Symptom patterns by cycle timing (docs/PLAN.md §2.5). */
+/** Symptom patterns by cycle timing. */
 @Composable
 private fun PatternsCard(
     patterns: List<SymptomPattern>,

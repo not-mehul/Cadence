@@ -2,7 +2,7 @@ package app.cadence.core.domain.reminders
 
 import java.time.LocalTime
 
-/** Which reminders are on and when (docs/PLAN.md §2.6). All are off until the user turns them on. */
+/** Which reminders are on and when. All are off until the user turns them on. */
 data class ReminderSettings(
     val periodEnabled: Boolean = false,
     /** Remind this many days before the expected start. */

@@ -124,7 +124,7 @@ class MigrationTest {
     }
 
     @Test
-    fun `v6 to v7 adds birth control settings with no schedule, and empty Phase 6 tables`() {
+    fun `v6 to v7 adds birth control settings with no schedule, and empty tracking tables`() {
         helper.createDatabase(TEST_DB, 6).use { db ->
             db.execSQL(
                 "INSERT INTO settings (id, goal, cycle_length, period_length, luteal_phase_length, theme, " +

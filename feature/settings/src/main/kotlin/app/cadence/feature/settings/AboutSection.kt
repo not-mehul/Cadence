@@ -24,7 +24,7 @@ import app.cadence.core.ui.theme.CadenceTheme
 import java.security.MessageDigest
 
 /**
- * Version, signing certificate and where updates come from (docs/PLAN.md Phase 7). Cadence
+ * Version, signing certificate and where updates come from. Cadence
  * has no internet access, so it can't check for updates itself.
  */
 @Composable
@@ -34,6 +34,7 @@ internal fun AboutSection(modifier: Modifier = Modifier) {
     val gutter = CadenceTheme.spacing.screenGutter
     SettingsSection(stringResource(R.string.settings_section_about), modifier) {
         Note(stringResource(R.string.settings_version, info.version))
+        Note(stringResource(R.string.settings_credit))
         Note(stringResource(R.string.settings_updates))
         val releasesUrl = stringResource(R.string.settings_releases_url)
         TextButton(onClick = {

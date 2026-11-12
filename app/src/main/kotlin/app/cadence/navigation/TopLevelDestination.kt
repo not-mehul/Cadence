@@ -20,7 +20,7 @@ data object InsightsRoute
 @Serializable
 data object SettingsRoute
 
-/** The four tabs (docs/PLAN.md §6). */
+/** The four tabs. */
 enum class TopLevelDestination(
     val route: Any,
     /** Whether a destination in the back stack belongs to this tab. */

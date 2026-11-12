@@ -10,7 +10,7 @@ enum class MenstrualFlow {
 
     /**
      * Whether this flow counts as a period day. Spotting is logged but never starts
-     * or lengthens a period (docs/PLAN.md §4).
+     * or lengthens a period.
      */
     val countsAsPeriod: Boolean
         get() = this != SPOTTING

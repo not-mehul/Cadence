@@ -58,7 +58,7 @@
         <item quantity="other">%d-day</item>
     </plurals>
 
-    <!-- Phase 6: symptom patterns -->
+    <!-- Symptom patterns -->
     <string name="insights_patterns_title">Patterns</string>
     <string name="insights_patterns_empty">Log symptoms, moods or tags across three or more cycles and any patterns will show up here.</string>
     <string name="insights_patterns_note">Things you tend to log at the same point in your cycle. They\'re observations from your own logs, not a diagnosis.</string>

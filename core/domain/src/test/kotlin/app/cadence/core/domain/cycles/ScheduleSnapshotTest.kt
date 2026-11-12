@@ -18,7 +18,7 @@ import kotlin.test.assertNotNull
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
-/** Birth control mode with a pill, patch or ring schedule (docs/PLAN.md Phase 6). */
+/** Birth control mode with a pill, patch or ring schedule. */
 class ScheduleSnapshotTest {
     // Packs from 2 March 2026: active 2–22 March, break 23–29 March.
     private val pill = ContraceptiveSchedule.typical(ContraceptiveMethod.PILL, d(2026, 3, 2))

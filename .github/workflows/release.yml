@@ -1,7 +1,7 @@
 name: Release
 
 # Pushing a tag like v1.2.3 builds a signed, minified APK and publishes it to GitHub Releases
-# with its SHA-256 checksum and the signing certificate's fingerprint (docs/PLAN.md Phase 7).
+# with its SHA-256 checksum and the signing certificate's fingerprint.
 # Needs these repository secrets (see README "Making a release"):
 #   CADENCE_KEYSTORE_BASE64, CADENCE_KEYSTORE_PASSWORD, CADENCE_KEY_ALIAS, CADENCE_KEY_PASSWORD
 on:

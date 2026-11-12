@@ -11,7 +11,7 @@ import androidx.compose.runtime.ReadOnlyComposable
 /**
  * The Cadence theme: Material 3 Expressive, with springy motion and soft, rounded shapes.
  * Colours are fixed (no Material You dynamic colour) so cycle colours always mean the
- * same thing (docs/PLAN.md §9, decision 4).
+ * same thing.
  */
 @Composable
 fun CadenceTheme(

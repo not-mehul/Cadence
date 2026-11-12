@@ -96,7 +96,7 @@ class RoomBackupRepositoryTest {
             backups.restore(BackupCodec.decode(file, "pw".toCharArray()), ImportMode.REPLACE)
 
             assertEquals(before, backups.snapshot())
-            // Everything Phase 6 adds made the trip.
+            // Birth control, medications and tags made the trip too.
             assertEquals(schedule, before.settings.contraception)
             assertEquals(2, before.customTags.size)
             assertEquals(2, before.medications.size)

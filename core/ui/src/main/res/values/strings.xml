@@ -74,7 +74,7 @@
     <!-- Scale -->
     <string name="scale_value">%1$s, %2$d of %3$d</string>
 
-    <!-- Birth control (Phase 6) -->
+    <!-- Birth control -->
     <string name="bc_method_pill">Pill</string>
     <string name="bc_method_patch">Patch</string>
     <string name="bc_method_ring">Ring</string>

@@ -53,7 +53,7 @@ import java.time.LocalDate
 
 /**
  * Accessibility Test Framework checks (touch target size, labels, text contrast, duplicate
- * clickables...) on every main screen, in both themes (docs/PLAN.md Phase 7). These need a
+ * clickables...) on every main screen, in both themes. These need a
  * real device: under Robolectric the checks silently pass.
  */
 @RunWith(AndroidJUnit4::class)

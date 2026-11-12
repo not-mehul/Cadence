@@ -16,7 +16,7 @@ import kotlinx.coroutines.flow.Flow
 import java.time.Instant
 import java.time.LocalDate
 
-// Phase 6 (schema v7): birth control doses, medications, and custom tags.
+// Schema v7: birth control doses, medications, and custom tags.
 
 /** What the user recorded for the day's pill, patch or ring. */
 @Entity(tableName = "contraceptive_dose")

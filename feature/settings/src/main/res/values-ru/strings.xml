@@ -97,6 +97,7 @@
     <string name="settings_updates">Cadence не может проверять обновления: у приложения нет доступа в интернет. Новые версии публикуются на GitHub. Чтобы обновиться, установите новый APK поверх текущего — ваши данные сохранятся.</string>
     <string name="settings_updates_open">Открыть страницу с версиями</string>
     <string name="settings_certificate">Сертификат подписи (SHA-256). В описании каждой версии указан тот же отпечаток, поэтому вы можете проверить подлинность APK:</string>
+    <string name="settings_credit">Создатель — Mehul Sen. Открытый код под лицензией MIT.</string>
     <string name="settings_disclaimer">Cadence не является медицинским изделием, и его нельзя использовать как средство контрацепции. Прогнозы приблизительны. По любым вопросам о здоровье обращайтесь к врачу.</string>
 
     <string name="settings_save">Сохранить</string>

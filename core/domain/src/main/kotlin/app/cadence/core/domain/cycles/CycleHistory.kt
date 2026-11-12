@@ -7,7 +7,7 @@ import java.time.LocalDate
 import java.time.temporal.ChronoUnit
 
 /**
- * Periods and cycles derived from per-day flow logs (docs/PLAN.md §4).
+ * Periods and cycles derived from per-day flow logs.
  *
  * - Consecutive days with light, medium or heavy flow form one period.
  * - A single day without flow between two flow days is bridged (some people skip a day mid-period).

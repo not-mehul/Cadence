@@ -51,7 +51,7 @@ import java.time.format.DateTimeFormatter
 import java.time.format.FormatStyle
 import app.cadence.core.ui.R as UiR
 
-/** Phase 6 data Settings shows besides [app.cadence.core.domain.model.UserSettings]. */
+/** Tracking data Settings shows besides [app.cadence.core.domain.model.UserSettings]. */
 data class TrackingSettingsState(
     val today: LocalDate,
     val medications: List<Medication> = emptyList(),

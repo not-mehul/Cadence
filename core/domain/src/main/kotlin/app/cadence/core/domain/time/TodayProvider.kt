@@ -5,7 +5,7 @@ import java.time.LocalDate
 
 /**
  * The single source of "today" for all cycle logic. A day is a calendar date in the
- * user's current timezone, never an instant (docs/PLAN.md §3), and tests substitute a
+ * user's current timezone, never an instant, and tests substitute a
  * fixed clock.
  */
 fun interface TodayProvider {

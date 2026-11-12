@@ -5,7 +5,7 @@ import java.time.LocalDate
 import java.time.LocalTime
 import java.time.temporal.ChronoUnit
 
-/** The scheduled hormonal methods Cadence can follow (docs/PLAN.md Phase 6). */
+/** The scheduled hormonal methods Cadence can follow. */
 enum class ContraceptiveMethod { PILL, PATCH, RING }
 
 /** What the schedule asks for on a given day. */

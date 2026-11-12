@@ -3,7 +3,7 @@ package app.cadence.core.ui.theme
 import androidx.compose.ui.graphics.Color
 
 /**
- * Raw Cadence palette (docs/PLAN.md §6.1). Use [CadenceTheme]'s colour scheme or
+ * Raw Cadence palette. Use [CadenceTheme]'s colour scheme or
  * [CycleColors] in UI code rather than these values directly.
  */
 internal object Palette {

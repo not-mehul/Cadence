@@ -92,12 +92,13 @@
     <string name="settings_updates_open">Open the releases page</string>
     <string name="settings_releases_url" translatable="false">https://github.com/not-mehul/Cadence/releases</string>
     <string name="settings_certificate">Signing certificate (SHA-256). Releases list the same fingerprint, so you can check an APK is genuine:</string>
+    <string name="settings_credit">Made by Mehul Sen. Open source under the MIT licence.</string>
     <string name="settings_disclaimer">Cadence is not a medical device and must not be used as contraception. Predictions are estimates. Talk to a clinician about any health concerns.</string>
 
     <string name="settings_save">Save</string>
     <string name="settings_cancel">Cancel</string>
 
-    <!-- Phase 6: birth control, medications, custom tags -->
+    <!-- Birth control, medications, custom tags -->
     <string name="settings_bc">Your birth control</string>
     <string name="settings_bc_none">No pill, patch or ring. Tap to set one up.</string>
     <string name="settings_bc_reminder">Birth control reminder</string>

@@ -35,7 +35,7 @@ import java.time.LocalDate
 
 /**
  * Every main screen lays out right-to-left and at 200% text size on a small phone, with its
- * key content still reachable (docs/PLAN.md Phase 7). Screenshots of these were checked by eye.
+ * key content still reachable. Screenshots of these were checked by eye.
  */
 @RunWith(RobolectricTestRunner::class)
 @Config(application = android.app.Application::class)

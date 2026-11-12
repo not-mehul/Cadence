@@ -1,4 +1,4 @@
-# R8 rules for release builds (docs/PLAN.md Phase 7). Most libraries ship their own
+# R8 rules for release builds. Most libraries ship their own
 # consumer rules (Room, Hilt, Compose, kotlinx.serialization, navigation); these cover the rest.
 
 # SQLCipher calls back into these classes from native code by name.

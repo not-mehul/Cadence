@@ -48,10 +48,10 @@ enum class LogCategory {
     SEX,
     NOTES,
 
-    /** The user's own tags (Phase 6). */
+    /** The user's own tags. */
     TAGS,
 
-    /** Medications besides birth control (Phase 6). */
+    /** Medications besides birth control. */
     MEDICATIONS,
     ;
 

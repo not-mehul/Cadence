@@ -10,7 +10,7 @@ enum class MedicationUse {
     AS_NEEDED,
 }
 
-/** A medication the user tracks besides their birth control (docs/PLAN.md Phase 6). */
+/** A medication the user tracks besides their birth control. */
 data class Medication(
     val id: Long,
     val name: String,

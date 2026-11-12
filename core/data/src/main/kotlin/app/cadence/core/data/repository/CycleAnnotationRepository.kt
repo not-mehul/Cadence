@@ -13,7 +13,7 @@ import kotlinx.coroutines.withContext
 import java.time.LocalDate
 import javax.inject.Inject
 
-/** Cycles the user excluded from predictions and statistics (docs/PLAN.md §5.1). */
+/** Cycles the user excluded from predictions and statistics. */
 interface CycleAnnotationRepository {
     /** First days of excluded cycles. */
     val excludedStarts: Flow<Set<LocalDate>>

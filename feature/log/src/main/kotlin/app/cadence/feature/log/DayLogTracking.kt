@@ -33,7 +33,7 @@ import app.cadence.core.ui.contraception.ContraceptionLabels
 import app.cadence.core.ui.theme.CadenceTheme
 import app.cadence.core.ui.R as UiR
 
-/** What the Phase 6 parts of the log can do. */
+/** What the birth control, medication and tag parts of the log can do. */
 class DayLogTrackingActions(
     val onDose: (DoseStatus?) -> Unit = {},
     val onMedicationTaken: (Long, Boolean) -> Unit = { _, _ -> },

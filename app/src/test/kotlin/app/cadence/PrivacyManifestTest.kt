@@ -9,7 +9,7 @@ import org.robolectric.RobolectricTestRunner
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 
-/** Device-only guarantees from docs/PLAN.md §2.7, checked against the merged manifest. */
+/** Device-only guarantees, checked against the merged manifest. */
 @RunWith(RobolectricTestRunner::class)
 class PrivacyManifestTest {
     private val context = ApplicationProvider.getApplicationContext<android.content.Context>()

@@ -50,7 +50,7 @@ data class BackupData(
 
 /**
  * Turns [BackupData] into backup file bytes and back, optionally password-encrypted with
- * AES-256-GCM using a PBKDF2-HMAC-SHA256 key (docs/PLAN.md Phase 5).
+ * AES-256-GCM using a PBKDF2-HMAC-SHA256 key.
  */
 object BackupCodec {
     const val ENCRYPTED_FORMAT = "cadence-backup-encrypted"

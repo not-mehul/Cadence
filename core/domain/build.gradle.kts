@@ -8,7 +8,7 @@ plugins {
 kover {
     reports {
         verify {
-            // All cycle maths lives here; it must stay fully covered (docs/PLAN.md §5.7).
+            // All cycle maths lives here; it must stay fully covered.
             rule("Domain logic is fully covered") {
                 minBound(100, CoverageUnit.LINE)
                 minBound(100, CoverageUnit.BRANCH)

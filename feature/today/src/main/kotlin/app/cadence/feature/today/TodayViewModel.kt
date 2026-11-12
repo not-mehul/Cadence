@@ -47,7 +47,7 @@ sealed interface TodayUiState {
         val typicalPeriodLength: Int,
         /** Everything logged today, for the summary card. */
         val todayEntry: DayEntry = DayEntry(snapshot.today),
-        /** Birth control (Phase 6): what's due, and what was recorded. */
+        /** Birth control: what's due, and what was recorded. */
         val birthControl: BirthControlToday? = null,
         /** Active medications and whether each was taken today. */
         val medications: List<MedicationToday> = emptyList(),
@@ -111,7 +111,7 @@ class TodayViewModel
         private val medications: MedicationRepository,
         tags: CustomTagRepository,
     ) : ViewModel() {
-        /** Phase 6 data, bundled so it fits in one combine. */
+        /** Doses, medications, tags and patterns, bundled so they fit in one combine. */
         private val tracking =
             combine(
                 contraception.doses,
@@ -165,7 +165,7 @@ class TodayViewModel
         private val eventChannel = Channel<TodayEvent>(Channel.BUFFERED)
         val events: Flow<TodayEvent> = eventChannel.receiveAsFlow()
 
-        /** Logs today plus the expected remaining days (docs/PLAN.md §6). */
+        /** Logs today plus the expected remaining days. */
         fun startPeriod() =
             withReady { state ->
                 val length = state.snapshot.prediction?.periodLength ?: state.typicalPeriodLength

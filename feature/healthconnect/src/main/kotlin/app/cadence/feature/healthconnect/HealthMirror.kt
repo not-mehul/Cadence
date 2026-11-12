@@ -14,7 +14,7 @@ data class MirrorPlan(
 )
 
 /**
- * The pure part of the Health Connect mirror (docs/PLAN.md Phase 7). Every record Cadence
+ * The pure part of the Health Connect mirror. Every record Cadence
  * writes has a client record id derived from its date, so writing again updates it in place,
  * and a record whose day was cleared in Cadence can be found and deleted.
  */

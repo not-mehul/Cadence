@@ -18,7 +18,7 @@ data class Spacing(
     val xxxl: Dp = 48.dp,
     /** Horizontal padding for screen content. */
     val screenGutter: Dp = 16.dp,
-    /** Minimum touch target (docs/PLAN.md §2.10). */
+    /** Minimum touch target. */
     val minTouchTarget: Dp = 48.dp,
 )
 

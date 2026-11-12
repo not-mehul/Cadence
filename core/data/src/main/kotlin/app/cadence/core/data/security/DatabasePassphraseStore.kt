@@ -13,7 +13,7 @@ import java.security.SecureRandom
  * Creates the database key on first launch and stores it wrapped by [KeyWrapper].
  *
  * The stored file lives in `noBackupFilesDir` and is useless without the device's
- * Keystore, so it never leaves the phone (docs/PLAN.md §2.7).
+ * Keystore, so it never leaves the phone.
  */
 class DatabasePassphraseStore(
     private val file: File,

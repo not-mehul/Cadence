@@ -2,7 +2,7 @@ package app.cadence.core.domain.model
 
 /**
  * The two modes Cadence supports. Trying to conceive, pregnancy and perimenopause
- * modes are out of scope by decision (docs/PLAN.md §9).
+ * modes are out of scope by decision.
  */
 enum class Goal {
     /** Default: track periods and see cycle predictions, including estimated ovulation. */
